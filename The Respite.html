@@ -1100,6 +1100,10 @@ const { useState, useEffect, useRef, useMemo, createContext, useContext } = Reac
 const AppContext = createContext(null);
 const useApp = () => useContext(AppContext);
 
+// SheetContext — true when the current viewer owns the sheet (or is the Director)
+const SheetContext = createContext(true);
+const useCanEdit = () => useContext(SheetContext);
+
 // ----- Avatar -----
 function Avatar({ player, size = "md" }) {
   if (!player) return null;
@@ -1113,8 +1117,17 @@ function Avatar({ player, size = "md" }) {
 
 // ----- Editable text field (inline) -----
 function Editable({ value, onChange, multiline = false, placeholder = "", className = "", style = {} }) {
+  const canEdit = useCanEdit();
   const [v, setV] = useState(value);
   useEffect(() => { setV(value); }, [value]);
+
+  if (!canEdit) {
+    return (
+      <span className={className} style={{ display: "inline-block", ...style }}>
+        {value || <span className="dim italic">{placeholder}</span>}
+      </span>
+    );
+  }
 
   const commit = () => { if (v !== value) onChange(v); };
   const Tag = multiline ? "textarea" : "input";
@@ -1155,13 +1168,15 @@ function NumberStepper({ value, max, onChange, label, sub }) {
 
 // ----- Pip track (for resources, recoveries) -----
 function PipTrack({ current, max, onChange, color = "ember" }) {
+  const canEdit = useCanEdit();
   return (
     <div className="pip-track">
       {Array.from({ length: max }).map((_, i) => (
         <div
           key={i}
           className={`pip ${i < current ? "filled" : ""}`}
-          onClick={() => onChange(i + 1 === current ? i : i + 1)}
+          onClick={canEdit ? () => onChange(i + 1 === current ? i : i + 1) : undefined}
+          style={canEdit ? {} : { cursor: "default" }}
         />
       ))}
     </div>
@@ -1170,6 +1185,7 @@ function PipTrack({ current, max, onChange, color = "ember" }) {
 
 // ----- Stamina bar -----
 function StaminaBar({ current, max, temp = 0, winded, dying = 0, onTempChange }) {
+  const canEdit = useCanEdit();
   const windedAt = typeof winded === "number" ? winded : Math.floor(max / 2);
   const pct = Math.max(0, Math.min(100, (current / max) * 100));
   const tempPct = Math.max(0, Math.min(100, (temp / max) * 100));
@@ -1210,7 +1226,7 @@ function StaminaBar({ current, max, temp = 0, winded, dying = 0, onTempChange })
       <div className="dim mono" style={{ fontSize: 10, display: "flex", justifyContent: "space-between" }}>
         <span>Dying ≤ {dying}</span>
         <span style={{ color: "var(--gold-soft)" }}>Winded ≤ {windedAt}</span>
-        {onTempChange ? (
+        {(onTempChange && canEdit) ? (
           <span style={{ display: "flex", alignItems: "center", gap: 4, color: "var(--moss)" }}>
             <button onClick={() => onTempChange(Math.max(0, temp - 1))} style={{ background: "none", border: "none", color: "var(--moss)", cursor: "pointer", padding: "0 4px", fontSize: 11 }}>−</button>
             Temp {temp}
@@ -1326,7 +1342,7 @@ function useCountdown(targetIso) {
 }
 
 Object.assign(window, {
-  AppContext, useApp,
+  AppContext, useApp, SheetContext, useCanEdit,
   Avatar, Editable, NumberStepper, PipTrack, StaminaBar,
   SectionH, Card, Placeholder, PortraitPlaceholder, Pill,
   fmtDate, fmtTime, fmtRelative, useCountdown,
@@ -2183,9 +2199,21 @@ function CharactersTab() {
         })}
       </div>
 
-      {sheetLayout === "stacked"
-        ? <SheetStacked character={c} updateCharacter={updateCharacter} player={player}/>
-        : <SheetSpread character={c} updateCharacter={updateCharacter} player={player}/>}
+      {(() => {
+        const canEdit = app.meId === player.id || app.meId === "gm";
+        return (
+          <SheetContext.Provider value={canEdit}>
+            {!canEdit && (
+              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 14, padding: "8px 14px", background: "oklch(0.30 0.05 280 / 0.15)", border: "1px solid oklch(0.40 0.06 280)", borderRadius: 6 }}>
+                <span style={{ color: "oklch(0.78 0.05 280)", fontSize: 13 }}>👁 Viewing {c.name}'s sheet — switch to <strong>{window.PLAYERS.find(p => p.id === player.id)?.name}'s profile</strong> to edit.</span>
+              </div>
+            )}
+            {sheetLayout === "stacked"
+              ? <SheetStacked character={c} updateCharacter={updateCharacter} player={player}/>
+              : <SheetSpread character={c} updateCharacter={updateCharacter} player={player}/>}
+          </SheetContext.Provider>
+        );
+      })()}
     </div>
   );
 }
@@ -2408,6 +2436,7 @@ function SheetStacked({ character: c, updateCharacter, player }) {
 // ----- XP + Victories trackers -----
 
 function XPBar({ c, set, compact = false }) {
+  const canEdit = useCanEdit();
   const xp = c.xp || { current: 0, next: 24 };
   const pct = Math.max(0, Math.min(100, (xp.current / xp.next) * 100));
   const adjust = (delta) => {
@@ -2420,7 +2449,7 @@ function XPBar({ c, set, compact = false }) {
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 6 }}>
         <span className="eyebrow">Experience</span>
         <div style={{ display: "flex", gap: 6, alignItems: "baseline" }}>
-          {!compact && (
+          {!compact && canEdit && (
             <>
               <button className="btn ghost sm" style={{ padding: "1px 7px", borderRadius: 3, fontSize: 11 }} onClick={() => adjust(-1)}>−</button>
               <button className="btn ghost sm" style={{ padding: "1px 7px", borderRadius: 3, fontSize: 11 }} onClick={() => adjust(+1)}>+</button>
@@ -2447,6 +2476,7 @@ function XPBar({ c, set, compact = false }) {
 }
 
 function VictoriesTrack({ c, set, compact = false }) {
+  const canEdit = useCanEdit();
   const v = c.victories ?? 0;
   const max = 30;
   const milestones = [15, 30];
@@ -2458,7 +2488,7 @@ function VictoriesTrack({ c, set, compact = false }) {
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 6 }}>
         <span className="eyebrow">Victories</span>
         <div style={{ display: "flex", gap: 6, alignItems: "baseline" }}>
-          {!compact && (
+          {!compact && canEdit && (
             <>
               <button className="btn ghost sm" style={{ padding: "1px 7px", borderRadius: 3, fontSize: 11 }} onClick={() => adjust(-1)}>−</button>
               <button className="btn ghost sm" style={{ padding: "1px 7px", borderRadius: 3, fontSize: 11 }} onClick={() => adjust(+1)}>+</button>
@@ -2476,13 +2506,13 @@ function VictoriesTrack({ c, set, compact = false }) {
           return (
             <button
               key={i}
-              onClick={() => setTo(i + 1 === v ? i : i + 1)}
-              title={`Set victories to ${i + 1 === v ? i : i + 1}${isMilestone ? " · milestone" : ""}`}
+              onClick={canEdit ? () => setTo(i + 1 === v ? i : i + 1) : undefined}
+              title={canEdit ? `Set victories to ${i + 1 === v ? i : i + 1}${isMilestone ? " · milestone" : ""}` : undefined}
               style={{
                 aspectRatio: "1 / 1",
                 border: `1px solid ${filled ? (isMilestone ? "var(--gold)" : "var(--ember-deep)") : (isMilestone ? "var(--gold-soft)" : "var(--line-strong)")}`,
                 background: filled ? (isMilestone ? "var(--gold)" : "var(--ember)") : "var(--bg-2)",
-                cursor: "pointer",
+                cursor: canEdit ? "pointer" : "default",
                 borderRadius: 2,
                 padding: 0,
                 transform: "rotate(45deg) scale(0.85)",
@@ -2504,6 +2534,7 @@ function VictoriesTrack({ c, set, compact = false }) {
 }
 
 function SurgesTile({ c, set }) {
+  const canEdit = useCanEdit();
   const s = c.surges ?? 0;
   const adjust = (delta) => set("surges", Math.max(0, s + delta));
   return (
@@ -2513,10 +2544,12 @@ function SurgesTile({ c, set }) {
         <span className="serif" style={{ fontSize: 28, fontWeight: 600, color: "var(--ember)", lineHeight: 1, textShadow: s > 0 ? "0 0 12px oklch(0.70 0.17 45 / 0.5)" : "none", fontVariantNumeric: "tabular-nums" }}>
           {s}
         </span>
-        <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
-          <button className="btn ghost sm" style={{ padding: "1px 8px", borderRadius: 3, fontSize: 11, lineHeight: 1 }} onClick={() => adjust(+1)}>+</button>
-          <button className="btn ghost sm" style={{ padding: "1px 8px", borderRadius: 3, fontSize: 11, lineHeight: 1 }} onClick={() => adjust(-1)}>−</button>
-        </div>
+        {canEdit && (
+          <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+            <button className="btn ghost sm" style={{ padding: "1px 8px", borderRadius: 3, fontSize: 11, lineHeight: 1 }} onClick={() => adjust(+1)}>+</button>
+            <button className="btn ghost sm" style={{ padding: "1px 8px", borderRadius: 3, fontSize: 11, lineHeight: 1 }} onClick={() => adjust(-1)}>−</button>
+          </div>
+        )}
       </div>
       <div className="dim mono" style={{ fontSize: 10, marginTop: 4 }}>+1 tier of damage</div>
     </div>
@@ -2594,6 +2627,7 @@ function PotencyStrip({ potency }) {
 
 // ----- Counter tiles (wealth, renown, hero tokens) -----
 function CounterTile({ label, value, icon, tone = "ember", onChange, compact = false }) {
+  const canEdit = useCanEdit();
   const color = tone === "gold" ? "var(--gold)" : "var(--ember)";
   return (
     <div className="card" style={{ padding: compact ? "8px 10px" : "12px 14px", background: "var(--bg-0)" }}>
@@ -2602,22 +2636,25 @@ function CounterTile({ label, value, icon, tone = "ember", onChange, compact = f
         <span className="serif" style={{ fontSize: compact ? 20 : 26, fontWeight: 600, color, lineHeight: 1, fontVariantNumeric: "tabular-nums" }}>
           <span style={{ fontSize: compact ? 12 : 14, marginRight: 4, opacity: 0.7 }}>{icon}</span>{value}
         </span>
-        <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
-          <button className="btn ghost sm" style={{ padding: "1px 7px", borderRadius: 3, fontSize: 11, lineHeight: 1 }} onClick={() => onChange(value + 1)}>+</button>
-          <button className="btn ghost sm" style={{ padding: "1px 7px", borderRadius: 3, fontSize: 11, lineHeight: 1 }} onClick={() => onChange(value - 1)}>−</button>
-        </div>
+        {canEdit && (
+          <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+            <button className="btn ghost sm" style={{ padding: "1px 7px", borderRadius: 3, fontSize: 11, lineHeight: 1 }} onClick={() => onChange(value + 1)}>+</button>
+            <button className="btn ghost sm" style={{ padding: "1px 7px", borderRadius: 3, fontSize: 11, lineHeight: 1 }} onClick={() => onChange(value - 1)}>−</button>
+          </div>
+        )}
       </div>
     </div>
   );
 }
 
 function TurnTakenTile({ taken, onToggle, compact = false }) {
+  const canEdit = useCanEdit();
   return (
-    <button onClick={onToggle} className="card" style={{
+    <button onClick={canEdit ? onToggle : undefined} className="card" style={{
       padding: compact ? "8px 10px" : "12px 14px",
       background: taken ? "oklch(0.30 0.05 140 / 0.30)" : "var(--bg-0)",
       border: taken ? "1px solid var(--moss)" : "1px solid var(--line)",
-      cursor: "pointer", textAlign: "left", width: "100%",
+      cursor: canEdit ? "pointer" : "default", textAlign: "left", width: "100%",
       transition: "all 0.15s",
     }}>
       <div className="eyebrow" style={{ marginBottom: compact ? 2 : 6 }}>Turn</div>
@@ -2640,6 +2677,7 @@ function TurnTakenTile({ taken, onToggle, compact = false }) {
 
 // ----- Skills & Perks panel -----
 function SkillsPerksPanel({ c, set }) {
+  const canEdit = useCanEdit();
   const skills = c.skills || [];
   const perks = c.perks || [];
   const groups = ["Crafting", "Exploration", "Interpersonal", "Intrigue", "Lore"];
@@ -2666,11 +2704,11 @@ function SkillsPerksPanel({ c, set }) {
                     <div className="dim mono" style={{ fontSize: 10, letterSpacing: "0.06em", textTransform: "uppercase", marginBottom: 4 }}>{g}</div>
                     {list.map(s => (
                       <div key={s._i} style={{ display: "grid", gridTemplateColumns: "auto 1fr auto", gap: 10, alignItems: "center", padding: "6px 8px", borderBottom: "1px solid var(--line)" }}>
-                        <button onClick={() => toggleEdge(s._i)} title="Edge" style={{
+                        <button onClick={canEdit ? () => toggleEdge(s._i) : undefined} title={canEdit ? "Edge" : undefined} style={{
                           width: 18, height: 18, padding: 0,
                           border: `1.5px solid ${s.edge ? "var(--ember)" : "var(--line-strong)"}`,
                           background: s.edge ? "var(--ember)" : "transparent",
-                          borderRadius: 3, cursor: "pointer",
+                          borderRadius: 3, cursor: canEdit ? "pointer" : "default",
                           color: "var(--bg-0)", fontSize: 11, fontWeight: 700, lineHeight: 1,
                           boxShadow: s.edge ? "0 0 6px var(--ember-glow)" : "none",
                         }}>{s.edge ? "✓" : ""}</button>
@@ -2706,6 +2744,7 @@ function SkillsPerksPanel({ c, set }) {
 
 // ----- Downtime projects -----
 function ProjectsPanel({ c, set }) {
+  const canEdit = useCanEdit();
   const projects = c.projects || [];
   const adjust = (i, delta) => {
     const next = [...projects];
@@ -2715,7 +2754,7 @@ function ProjectsPanel({ c, set }) {
   return (
     <div>
       <SectionH eyebrow="Between sessions" title="Downtime Projects" action={
-        <button className="btn ghost sm">+ Project</button>
+        canEdit ? <button className="btn ghost sm">+ Project</button> : null
       }/>
       {projects.length === 0 ? (
         <div className="muted italic serif" style={{ fontSize: 14, padding: "20px 0", textAlign: "center" }}>Nothing in the workshop.</div>
@@ -2730,8 +2769,8 @@ function ProjectsPanel({ c, set }) {
                   <div className="serif" style={{ fontSize: 15, color: "var(--ink-0)", fontWeight: 600 }}>{p.name}</div>
                   <div style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
                     {p.characteristic && <span className="dim mono" style={{ fontSize: 10 }}>{p.characteristic}</span>}
-                    <button className="btn ghost sm" style={{ padding: "1px 7px", borderRadius: 3, fontSize: 11 }} onClick={() => adjust(i, -1)}>−</button>
-                    <button className="btn ghost sm" style={{ padding: "1px 7px", borderRadius: 3, fontSize: 11 }} onClick={() => adjust(i, +1)}>+</button>
+                    {canEdit && <button className="btn ghost sm" style={{ padding: "1px 7px", borderRadius: 3, fontSize: 11 }} onClick={() => adjust(i, -1)}>−</button>}
+                    {canEdit && <button className="btn ghost sm" style={{ padding: "1px 7px", borderRadius: 3, fontSize: 11 }} onClick={() => adjust(i, +1)}>+</button>}
                     <span className="serif" style={{ fontSize: 15, color: done ? "var(--moss)" : "var(--ink-0)", fontWeight: 600, fontVariantNumeric: "tabular-nums" }}>
                       {p.progress}<span className="dim" style={{ fontSize: 12 }}> / {p.goal}</span>
                     </span>
@@ -2770,10 +2809,11 @@ function FeaturesPanel({ c, set }) {
 }
 
 function InventoryPanel({ c, set }) {
+  const canEdit = useCanEdit();
   return (
     <div>
       <SectionH eyebrow="On their person" title="Inventory & Treasures" action={
-        <button className="btn ghost sm">+ Item</button>
+        canEdit ? <button className="btn ghost sm">+ Item</button> : null
       }/>
       <div style={{ borderTop: "1px solid var(--line)" }}>
         {c.inventory.map((it, i) => (
