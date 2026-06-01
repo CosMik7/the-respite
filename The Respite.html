@@ -3351,9 +3351,12 @@ function OriginPanel({ c, set }) {
   const career = c.careerData || {};
   const setCulture = (patch) => set("culture", { ...culture, ...patch });
   const setCareer = (patch) => set("careerData", { ...career, ...patch });
-  const complications = culture.complications || [];
-  const addComplication = () => setCulture({ complications: [...complications, "New complication"] });
-  const setComplication = (i, v) => setCulture({ complications: complications.map((x, j) => j === i ? v : x) });
+  // Complications are objects { name, benefit, drawback }. Older data may store a plain
+  // string — normalize those into the benefit slot so nothing is lost.
+  const normComp = (x) => (typeof x === "string" ? { name: "", benefit: x, drawback: "" } : (x || {}));
+  const complications = (culture.complications || []).map(normComp);
+  const addComplication = () => setCulture({ complications: [...complications, { name: "Complication", benefit: "", drawback: "" }] });
+  const setComplication = (i, patch) => setCulture({ complications: complications.map((x, j) => j === i ? { ...x, ...patch } : x) });
   const removeComplication = (i) => setCulture({ complications: complications.filter((_, j) => j !== i) });
   return (
     <div>
@@ -3426,20 +3429,35 @@ function OriginPanel({ c, set }) {
         {complications.length === 0 ? (
           <div className="muted italic serif" style={{ fontSize: 13, padding: "8px 0" }}>No known complications.</div>
         ) : (
-          <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
             {complications.map((comp, i) => (
               <div key={i} style={{
-                display: "flex", gap: 10, alignItems: "center",
-                padding: "8px 12px",
+                padding: "10px 12px",
                 background: "oklch(0.30 0.06 25 / 0.15)",
                 border: "1px solid oklch(0.40 0.08 25)",
-                borderRadius: 4,
+                borderRadius: 6,
               }}>
-                <span style={{ color: "var(--blood)", fontFamily: "var(--font-display)", fontSize: 14, lineHeight: 1.4, flexShrink: 0 }}>※</span>
-                <span className="serif italic" style={{ fontSize: 13, color: "var(--ink-1)", lineHeight: 1.55, flex: 1 }}>
-                  <Editable value={comp} onChange={v => setComplication(i, v)} placeholder="A complication…"/>
-                </span>
-                <RemoveBtn onClick={() => removeComplication(i)}/>
+                <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 8 }}>
+                  <span style={{ color: "var(--blood)", fontFamily: "var(--font-display)", fontSize: 14, lineHeight: 1.4, flexShrink: 0 }}>※</span>
+                  <span className="serif" style={{ fontSize: 14, color: "var(--ink-0)", fontWeight: 600, flex: 1 }}>
+                    <Editable value={comp.name} onChange={v => setComplication(i, { name: v })} placeholder="Complication name"/>
+                  </span>
+                  <RemoveBtn onClick={() => removeComplication(i)}/>
+                </div>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+                  <div style={{ padding: "8px 10px", background: "oklch(0.30 0.05 140 / 0.18)", border: "1px solid oklch(0.40 0.06 140)", borderRadius: 4 }}>
+                    <div className="dim mono" style={{ fontSize: 10, letterSpacing: "0.06em", textTransform: "uppercase", marginBottom: 4, color: "var(--moss)" }}>Benefit</div>
+                    <div className="serif italic" style={{ fontSize: 13, color: "var(--ink-1)", lineHeight: 1.5 }}>
+                      <Editable multiline value={comp.benefit} onChange={v => setComplication(i, { benefit: v })} placeholder="What they gain…"/>
+                    </div>
+                  </div>
+                  <div style={{ padding: "8px 10px", background: "oklch(0.30 0.08 25 / 0.18)", border: "1px solid oklch(0.42 0.10 25)", borderRadius: 4 }}>
+                    <div className="dim mono" style={{ fontSize: 10, letterSpacing: "0.06em", textTransform: "uppercase", marginBottom: 4, color: "var(--blood)" }}>Drawback</div>
+                    <div className="serif italic" style={{ fontSize: 13, color: "var(--ink-1)", lineHeight: 1.5 }}>
+                      <Editable multiline value={comp.drawback} onChange={v => setComplication(i, { drawback: v })} placeholder="What it costs them…"/>
+                    </div>
+                  </div>
+                </div>
               </div>
             ))}
           </div>
