@@ -915,7 +915,9 @@ const _DEMO_CHARACTERS_UNUSED = {
   },
 };
 
-const SESSIONS = [
+const SESSIONS = [];
+
+const _DEMO_SESSIONS_UNUSED = [
   {
     id: "s14",
     number: 14,
@@ -1066,7 +1068,7 @@ const _DEMO_NOTES_UNUSED = [
   },
 ];
 
-const COUNTDOWN_TARGET = SESSIONS.find(s => s.upcoming).date;
+const COUNTDOWN_TARGET = SESSIONS.find(s => s.upcoming)?.date || null;
 
 Object.assign(window, {
   PLAYERS, CHARACTERS, SESSIONS, MEDIA, NOTES, COUNTDOWN_TARGET,
@@ -1772,16 +1774,18 @@ function Hub() {
   const app = useApp();
   const { setTab, setSelectedPlayer, sessions, players, characters, notes } = app;
   const upcoming = sessions.find(s => s.upcoming);
-  const cd = useCountdown(upcoming.date);
+  const lastSession = sessions.find(s => s.past);
+  const cd = useCountdown(upcoming?.date);
   const recentNotes = [...notes].sort((a,b) => new Date(b.posted) - new Date(a.posted)).slice(0, 3);
 
   const meId = app.meId;
-  const myRsvp = upcoming.rsvps[meId];
+  const myRsvp = upcoming?.rsvps[meId];
 
   return (
     <div className="page">
       {/* Hero — countdown + welcome */}
       <div style={{ display: "grid", gridTemplateColumns: "1.4fr 1fr", gap: 24, marginBottom: 36 }}>
+        {upcoming ? (
         <Card rail style={{ padding: "32px 36px", background: "linear-gradient(135deg, var(--bg-1) 0%, var(--bg-2) 100%)" }} pad={false}>
           <div style={{ padding: "32px 36px" }}>
             <div className="flourish" style={{ marginBottom: 16, justifyContent: "flex-start", maxWidth: 360 }}>By the hearth · Session {upcoming.number}</div>
@@ -1830,13 +1834,22 @@ function Hub() {
             </div>
           </div>
         </Card>
+        ) : (
+        <Card rail style={{ padding: "32px 36px", background: "linear-gradient(135deg, var(--bg-1) 0%, var(--bg-2) 100%)" }} pad={false}>
+          <div style={{ padding: "48px 36px", textAlign: "center" }}>
+            <div className="flourish" style={{ marginBottom: 16, justifyContent: "center" }}>By the hearth</div>
+            <div className="serif italic" style={{ color: "var(--ink-2)", fontSize: 17 }}>No sessions scheduled yet.</div>
+            <div className="dim" style={{ fontSize: 13, marginTop: 8 }}>The next gathering will appear here once it's on the calendar.</div>
+          </div>
+        </Card>
+        )}
 
         <Card>
           <div className="flourish" style={{ marginBottom: 14, justifyContent: "flex-start" }}>The Party</div>
           <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
             {players.filter(p => p.role === "Player").map(p => {
               const c = characters[p.id];
-              const rsvp = upcoming.rsvps[p.id];
+              const rsvp = upcoming?.rsvps[p.id];
               return (
                 <div
                   key={p.id}
@@ -1921,15 +1934,16 @@ function Hub() {
           </div>
         </Card>
 
+        {lastSession ? (
         <Card>
-          <SectionH eyebrow="Last session" title={`#${sessions.find(s => s.past).number} — ${sessions.find(s => s.past).title}`} action={null}/>
+          <SectionH eyebrow="Last session" title={`#${lastSession.number} — ${lastSession.title}`} action={null}/>
           <div className="serif italic" style={{ color: "var(--ink-1)", fontSize: 15, lineHeight: 1.55, marginBottom: 16 }}>
-            "{sessions.find(s => s.past).recap}"
+            "{lastSession.recap}"
           </div>
           <div className="dim" style={{ fontSize: 11, letterSpacing: "0.05em", textTransform: "uppercase", marginBottom: 8 }}>Attendance</div>
           <div style={{ display: "flex", gap: 6 }}>
             {players.map(p => {
-              const r = sessions.find(s => s.past).rsvps[p.id];
+              const r = lastSession.rsvps[p.id];
               return (
                 <div key={p.id} style={{ position: "relative", opacity: r === "yes" ? 1 : 0.35 }}>
                   <Avatar player={p}/>
@@ -1938,6 +1952,12 @@ function Hub() {
             })}
           </div>
         </Card>
+        ) : (
+        <Card>
+          <SectionH eyebrow="The Chronicle" title="No sessions yet" action={null}/>
+          <div className="serif italic" style={{ color: "var(--ink-2)", fontSize: 15 }}>Once a session is logged, the last one shows here.</div>
+        </Card>
+        )}
       </div>
     </div>
   );
@@ -1956,11 +1976,12 @@ function EventsTab() {
   const upcoming = sessions.filter(s => s.upcoming).sort((a,b) => new Date(a.date) - new Date(b.date));
   const past = sessions.filter(s => s.past).sort((a,b) => new Date(b.date) - new Date(a.date));
   const next = upcoming[0];
-  const cd = useCountdown(next.date);
+  const cd = useCountdown(next?.date);
 
   return (
     <div className="page">
       {/* Hero countdown */}
+      {next && (
       <Card pad={false} style={{ marginBottom: 32, padding: "32px 36px", background: "linear-gradient(135deg, var(--bg-1) 0%, var(--bg-2) 100%)" }} rail>
         <div style={{ padding: "32px 36px", display: "grid", gridTemplateColumns: "1fr auto", gap: 32, alignItems: "center" }}>
           <div>
@@ -1985,6 +2006,7 @@ function EventsTab() {
           </div>
         </div>
       </Card>
+      )}
 
       {/* Upcoming */}
       <SectionH eyebrow="Upcoming" title="On the road ahead" action={
