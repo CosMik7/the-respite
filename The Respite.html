@@ -3152,25 +3152,42 @@ function FeaturesPanel({ c, set }) {
 }
 
 function InventoryPanel({ c, set }) {
+  const canEdit = useCanEdit();
   const inventory = c.inventory || [];
   const setItem = (i, patch) => set("inventory", inventory.map((it, j) => j === i ? { ...it, ...patch } : it));
-  const addItem = () => set("inventory", [...inventory, { name: "New item", note: "" }]);
+  const addItem = () => set("inventory", [...inventory, { name: "New item", note: "", qty: 1 }]);
   const removeItem = (i) => set("inventory", inventory.filter((_, j) => j !== i));
+  const setQty = (i, v) => setItem(i, { qty: Math.max(1, v) });
+  const cols = "1fr 1.5fr 96px auto";
   return (
     <div>
       <SectionH eyebrow="On their person" title="Inventory & Treasures" action={<AddBtn label="+ Item" onClick={addItem}/>}/>
       <div style={{ borderTop: "1px solid var(--line)" }}>
-        {inventory.map((it, i) => (
-          <div key={i} style={{ display: "grid", gridTemplateColumns: "1fr 1.5fr auto", gap: 16, padding: "10px 4px", borderBottom: "1px solid var(--line)", alignItems: "center" }}>
-            <div className="serif" style={{ fontSize: 15, color: "var(--ink-0)" }}>
-              <Editable value={it.name} onChange={v => setItem(i, { name: v })} placeholder="Item"/>
+        <div style={{ display: "grid", gridTemplateColumns: cols, gap: 16, padding: "6px 4px", borderBottom: "1px solid var(--line)", alignItems: "center" }}>
+          <div className="eyebrow">Item</div>
+          <div className="eyebrow">Notes</div>
+          <div className="eyebrow" style={{ textAlign: "center" }}>Qty</div>
+          <div/>
+        </div>
+        {inventory.map((it, i) => {
+          const qty = it.qty ?? 1;
+          return (
+            <div key={i} style={{ display: "grid", gridTemplateColumns: cols, gap: 16, padding: "10px 4px", borderBottom: "1px solid var(--line)", alignItems: "center" }}>
+              <div className="serif" style={{ fontSize: 15, color: "var(--ink-0)" }}>
+                <Editable value={it.name} onChange={v => setItem(i, { name: v })} placeholder="Item"/>
+              </div>
+              <div className="muted italic serif" style={{ fontSize: 13 }}>
+                <Editable value={it.note} onChange={v => setItem(i, { note: v })} placeholder="—"/>
+              </div>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}>
+                {canEdit && <button className="btn ghost sm" style={{ padding: "0 6px", borderRadius: 4 }} onClick={() => setQty(i, qty - 1)}>−</button>}
+                <span className="serif" style={{ fontSize: 15, color: "var(--ink-0)", fontVariantNumeric: "tabular-nums", minWidth: 18, textAlign: "center" }}>×{qty}</span>
+                {canEdit && <button className="btn ghost sm" style={{ padding: "0 6px", borderRadius: 4 }} onClick={() => setQty(i, qty + 1)}>+</button>}
+              </div>
+              <RemoveBtn onClick={() => removeItem(i)}/>
             </div>
-            <div className="muted italic serif" style={{ fontSize: 13 }}>
-              <Editable value={it.note} onChange={v => setItem(i, { note: v })} placeholder="—"/>
-            </div>
-            <RemoveBtn onClick={() => removeItem(i)}/>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
