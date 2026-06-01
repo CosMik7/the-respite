@@ -1152,6 +1152,77 @@ function NumberStepper({ value, max, onChange, label, sub }) {
   );
 }
 
+// ----- Signed stat tile editor (characteristics; allows negatives) -----
+function StatStepper({ value, onChange, label, min = -10, max = 12, signed = true, bg = "var(--bg-0)" }) {
+  const canEdit = useCanEdit();
+  const display = signed ? (value >= 0 ? `+${value}` : `${value}`) : `${value}`;
+  if (!canEdit) {
+    return (
+      <div className="stat-tile" style={{ background: bg }}>
+        <div className="label">{label}</div>
+        <div className="value" style={{ fontVariantNumeric: "tabular-nums" }}>{display}</div>
+      </div>
+    );
+  }
+  return (
+    <div className="stat-tile" style={{ background: bg }}>
+      <div className="label">{label}</div>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 4 }}>
+        <button className="btn ghost sm" style={{ padding: "0 6px", borderRadius: 4 }}
+          onClick={() => onChange(Math.max(min, value - 1))}>−</button>
+        <div className="value" style={{ fontVariantNumeric: "tabular-nums", minWidth: 26 }}>{display}</div>
+        <button className="btn ghost sm" style={{ padding: "0 6px", borderRadius: 4 }}
+          onClick={() => onChange(Math.min(max, value + 1))}>+</button>
+      </div>
+    </div>
+  );
+}
+
+// ----- Inline editable pill (definitional fields: ancestry, class, etc.) -----
+function EditPill({ tone, value, onChange, prefix = "", suffix = "", placeholder = "", number = false, width = 78 }) {
+  const canEdit = useCanEdit();
+  const [v, setV] = useState(value);
+  useEffect(() => { setV(value); }, [value]);
+  if (!canEdit) return <Pill tone={tone}>{prefix}{value}{suffix}</Pill>;
+  const commit = () => {
+    const out = number ? (parseInt(v, 10) || 0) : v;
+    if (out !== value) onChange(out);
+  };
+  return (
+    <span className="pill" style={{ display: "inline-flex", alignItems: "center", gap: 3, padding: "2px 8px" }}>
+      {prefix && <span className="dim" style={{ fontSize: 11 }}>{prefix}</span>}
+      <input
+        value={v}
+        placeholder={placeholder}
+        onChange={e => setV(e.target.value)}
+        onBlur={commit}
+        onKeyDown={e => {
+          if (e.key === "Enter") e.target.blur();
+          if (e.key === "Escape") { setV(value); e.target.blur(); }
+        }}
+        style={{ width: number ? 30 : width, background: "transparent", border: "none", borderBottom: "1px dashed var(--line)", color: "inherit", font: "inherit", padding: "0 2px", textAlign: number ? "center" : "left" }}
+      />
+      {suffix && <span className="dim" style={{ fontSize: 11 }}>{suffix}</span>}
+    </span>
+  );
+}
+
+// ----- Tiny inline +/- control (max/current adjusters; editor-only) -----
+function MaxControl({ value, onChange, label = "Max", min = 0, style = {} }) {
+  const canEdit = useCanEdit();
+  if (!canEdit) return null;
+  return (
+    <div className="dim mono" style={{ fontSize: 10, display: "flex", alignItems: "center", gap: 4, ...style }}>
+      <span style={{ letterSpacing: "0.04em" }}>{label}</span>
+      <button className="btn ghost sm" style={{ padding: "0 5px", borderRadius: 3 }}
+        onClick={() => onChange(Math.max(min, value - 1))}>−</button>
+      <span style={{ color: "var(--ink-1)", minWidth: 14, textAlign: "center" }}>{value}</span>
+      <button className="btn ghost sm" style={{ padding: "0 5px", borderRadius: 3 }}
+        onClick={() => onChange(value + 1)}>+</button>
+    </div>
+  );
+}
+
 // ----- Pip track (for resources, recoveries) -----
 function PipTrack({ current, max, onChange, color = "ember" }) {
   const canEdit = useCanEdit();
@@ -2269,18 +2340,22 @@ function SheetSpread({ character: c, updateCharacter, player }) {
           <div style={{ padding: "22px 26px" }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 16, marginBottom: 8 }}>
               <div>
-                <div className="eyebrow" style={{ marginBottom: 4 }}>{c.titles[0]}</div>
+                <div className="eyebrow" style={{ marginBottom: 4 }}>
+                  <Editable value={c.titles[0] || ""} onChange={v => set("titles", [v])} placeholder="Title / epithet"/>
+                </div>
                 <h1 className="serif" style={{ fontSize: 36, margin: 0, color: "var(--ink-0)", letterSpacing: "0.005em", lineHeight: 1 }}>
                   <Editable value={c.name} onChange={v => set("name", v)}/>
                 </h1>
-                <div className="muted serif italic" style={{ fontSize: 14, marginTop: 6 }}>{c.pronouns} · played by {player.name}</div>
+                <div className="muted serif italic" style={{ fontSize: 14, marginTop: 6 }}>
+                  <Editable value={c.pronouns} onChange={v => set("pronouns", v)} placeholder="pronouns"/> · played by {player.name}
+                </div>
               </div>
               <div style={{ display: "flex", gap: 8, flexWrap: "wrap", justifyContent: "flex-end" }}>
-                <Pill tone="ember">Level {c.level}</Pill>
-                <Pill tone="race">{c.ancestry}</Pill>
-                <Pill>{c.cls}</Pill>
-                <Pill tone="gold">{c.career}</Pill>
-                <Pill tone="gold">{c.kit} kit</Pill>
+                <EditPill tone="ember" prefix="Level " value={c.level} onChange={v => set("level", v)} number/>
+                <EditPill tone="race" value={c.ancestry} onChange={v => set("ancestry", v)} placeholder="Ancestry"/>
+                <EditPill value={c.cls} onChange={v => set("cls", v)} placeholder="Class"/>
+                <EditPill tone="gold" value={c.career} onChange={v => set("career", v)} placeholder="Career"/>
+                <EditPill tone="gold" suffix=" kit" value={c.kit} onChange={v => set("kit", v)} placeholder="Kit"/>
               </div>
             </div>
 
@@ -2289,10 +2364,8 @@ function SheetSpread({ character: c, updateCharacter, player }) {
             {/* Characteristics */}
             <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 10, marginBottom: 18 }}>
               {Object.entries(c.characteristics).map(([k, v]) => (
-                <div key={k} className="stat-tile" style={{ background: "var(--bg-0)" }}>
-                  <div className="label">{k}</div>
-                  <div className="value" style={{ fontVariantNumeric: "tabular-nums" }}>{v >= 0 ? `+${v}` : v}</div>
-                </div>
+                <StatStepper key={k} label={k} value={v}
+                  onChange={nv => set("characteristics", { ...c.characteristics, [k]: nv })}/>
               ))}
             </div>
 
@@ -2306,6 +2379,12 @@ function SheetSpread({ character: c, updateCharacter, player }) {
                   dying={-Math.floor(c.stamina.max / 2)}
                   onTempChange={v => set("tempStamina", v)}
                 />
+                <div style={{ display: "flex", gap: 14, marginTop: 6 }}>
+                  <MaxControl label="Cur" value={c.stamina.current} min={-999}
+                    onChange={v => set("stamina", { ...c.stamina, current: v })}/>
+                  <MaxControl label="Max" value={c.stamina.max} min={1}
+                    onChange={v => set("stamina", { ...c.stamina, max: v })}/>
+                </div>
               </div>
               <div className="card" style={{ padding: "10px 14px", background: "var(--bg-0)" }}>
                 <div className="eyebrow" style={{ marginBottom: 6 }}>Recoveries</div>
@@ -2314,11 +2393,21 @@ function SheetSpread({ character: c, updateCharacter, player }) {
                   <span className="dim">/ {c.stamina.recoveries.max}</span>
                 </div>
                 <div className="dim mono" style={{ fontSize: 10, marginTop: 4 }}>{c.stamina.recoveries.value} stamina each</div>
+                <MaxControl label="Cur" value={c.stamina.recoveries.current} style={{ marginTop: 4 }}
+                  onChange={v => set("stamina", { ...c.stamina, recoveries: { ...c.stamina.recoveries, current: v } })}/>
+                <MaxControl label="Max" value={c.stamina.recoveries.max} style={{ marginTop: 2 }}
+                  onChange={v => set("stamina", { ...c.stamina, recoveries: { ...c.stamina.recoveries, max: v } })}/>
+                <MaxControl label="Each" value={c.stamina.recoveries.value} style={{ marginTop: 2 }}
+                  onChange={v => set("stamina", { ...c.stamina, recoveries: { ...c.stamina.recoveries, value: v } })}/>
               </div>
               <div className="card" style={{ padding: "10px 14px", background: "var(--bg-0)" }}>
-                <div className="eyebrow" style={{ marginBottom: 6 }}>{c.resource.name}</div>
+                <div className="eyebrow" style={{ marginBottom: 6 }}>
+                  <Editable value={c.resource.name} onChange={v => set("resource.name", v)} placeholder="Resource"/>
+                </div>
                 <PipTrack current={c.resource.current} max={c.resource.max}
                   onChange={v => set("resource.current", v)}/>
+                <MaxControl label="Max" value={c.resource.max} style={{ marginTop: 6 }}
+                  onChange={v => set("resource.max", v)}/>
               </div>
               <SurgesTile c={c} set={set}/>
             </div>
@@ -2377,22 +2466,28 @@ function SheetSpread({ character: c, updateCharacter, player }) {
 // Layout B: stacked (single column, all sections visible)
 function SheetStacked({ character: c, updateCharacter, player }) {
   const set = (path, value) => updateCharacter(player.id, path, value);
+  const canEdit = useCanEdit();
   return (
     <div style={{ display: "grid", gridTemplateColumns: "300px 1fr", gap: 24 }}>
       <div style={{ position: "sticky", top: 92, alignSelf: "start", display: "flex", flexDirection: "column", gap: 16 }}>
         <Card pad={false}>
           <div style={{ padding: 14 }}><PortraitPlaceholder tint={c.portraitTint} label={c.portrait} ratio="3 / 4"/></div>
           <div style={{ padding: "0 18px 18px" }}>
-            <div className="eyebrow" style={{ marginBottom: 4 }}>{c.titles[0]}</div>
+            <div className="eyebrow" style={{ marginBottom: 4 }}>
+              <Editable value={c.titles[0] || ""} onChange={v => set("titles", [v])} placeholder="Title / epithet"/>
+            </div>
             <h1 className="serif" style={{ fontSize: 26, margin: "0 0 4px", color: "var(--ink-0)", lineHeight: 1.1 }}>
               <Editable value={c.name} onChange={v => set("name", v)}/>
             </h1>
-            <div className="dim" style={{ fontSize: 12, marginBottom: 10 }}>{c.pronouns} · {player.name}</div>
+            <div className="dim" style={{ fontSize: 12, marginBottom: 10 }}>
+              <Editable value={c.pronouns} onChange={v => set("pronouns", v)} placeholder="pronouns"/> · {player.name}
+            </div>
             <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-              <Pill tone="ember">L{c.level}</Pill>
-              <Pill tone="race">{c.ancestry}</Pill>
-              <Pill>{c.cls}</Pill>
-              <Pill tone="gold">{c.career}</Pill>
+              <EditPill tone="ember" prefix="L" value={c.level} onChange={v => set("level", v)} number/>
+              <EditPill tone="race" value={c.ancestry} onChange={v => set("ancestry", v)} placeholder="Ancestry"/>
+              <EditPill value={c.cls} onChange={v => set("cls", v)} placeholder="Class"/>
+              <EditPill tone="gold" value={c.career} onChange={v => set("career", v)} placeholder="Career"/>
+              <EditPill tone="gold" suffix=" kit" value={c.kit} onChange={v => set("kit", v)} placeholder="Kit"/>
             </div>
           </div>
         </Card>
@@ -2411,8 +2506,12 @@ function SheetStacked({ character: c, updateCharacter, player }) {
               <div className="serif" style={{ fontSize: 18, color: "var(--ink-0)" }}>{c.stamina.recoveries.current}/{c.stamina.recoveries.max}</div>
             </div>
             <div>
-              <div className="eyebrow" style={{ marginBottom: 4 }}>{c.resource.name}</div>
+              <div className="eyebrow" style={{ marginBottom: 4 }}>
+                <Editable value={c.resource.name} onChange={v => set("resource.name", v)} placeholder="Resource"/>
+              </div>
               <PipTrack current={c.resource.current} max={c.resource.max} onChange={v => set("resource.current", v)}/>
+              <MaxControl label="Max" value={c.resource.max} style={{ marginTop: 4 }}
+                onChange={v => set("resource.max", v)}/>
             </div>
             <div>
               <div className="eyebrow" style={{ marginBottom: 4 }}>Surges</div>
@@ -2437,6 +2536,14 @@ function SheetStacked({ character: c, updateCharacter, player }) {
               <div key={k} style={{ textAlign: "center" }}>
                 <div className="dim" style={{ fontSize: 9, letterSpacing: "0.04em", textTransform: "uppercase" }}>{k.slice(0,3)}</div>
                 <div className="serif" style={{ fontSize: 20, fontWeight: 600, color: "var(--ink-0)" }}>{v >= 0 ? `+${v}` : v}</div>
+                {canEdit && (
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 2, marginTop: 2 }}>
+                    <button className="btn ghost sm" style={{ padding: "0 4px", borderRadius: 3, fontSize: 11 }}
+                      onClick={() => set("characteristics", { ...c.characteristics, [k]: Math.max(-10, v - 1) })}>−</button>
+                    <button className="btn ghost sm" style={{ padding: "0 4px", borderRadius: 3, fontSize: 11 }}
+                      onClick={() => set("characteristics", { ...c.characteristics, [k]: Math.min(12, v + 1) })}>+</button>
+                  </div>
+                )}
               </div>
             ))}
           </div>
