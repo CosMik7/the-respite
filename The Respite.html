@@ -2519,6 +2519,7 @@ function SheetSpread({ character: c, updateCharacter, player }) {
     { id: "abilities", label: "Abilities" },
     { id: "features", label: "Features & Kit" },
     { id: "skills", label: "Skills & Perks" },
+    { id: "titles", label: "Titles" },
     { id: "origin", label: "Culture & Career" },
     { id: "projects", label: "Downtime" },
     { id: "inventory", label: "Inventory" },
@@ -2653,6 +2654,7 @@ function SheetSpread({ character: c, updateCharacter, player }) {
       {section === "abilities" && <AbilitiesPanel c={c} set={set}/>}
       {section === "features" && <FeaturesPanel c={c} set={set}/>}
       {section === "skills" && <SkillsPerksPanel c={c} set={set}/>}
+      {section === "titles" && <TitlesPanel c={c} set={set}/>}
       {section === "origin" && <OriginPanel c={c} set={set}/>}
       {section === "projects" && <ProjectsPanel c={c} set={set}/>}
       {section === "inventory" && <InventoryPanel c={c} set={set}/>}
@@ -2756,6 +2758,7 @@ function SheetStacked({ character: c, updateCharacter, player }) {
         <Card><AbilitiesPanel c={c} set={set}/></Card>
         <Card><FeaturesPanel c={c} set={set}/></Card>
         <Card><SkillsPerksPanel c={c} set={set}/></Card>
+        <Card><TitlesPanel c={c} set={set}/></Card>
         <Card><OriginPanel c={c} set={set}/></Card>
         <Card><ProjectsPanel c={c} set={set}/></Card>
         <Card><InventoryPanel c={c} set={set}/></Card>
@@ -3210,6 +3213,39 @@ function ProjectsPanel({ c, set }) {
               </div>
             );
           })}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function TitlesPanel({ c, set }) {
+  // Earned titles and what they grant. Stored separately from c.titles (the
+  // character's displayed epithet) under c.titleList = [{ name, effect }].
+  const titles = c.titleList || [];
+  const setTitle = (i, patch) => set("titleList", titles.map((t, j) => j === i ? { ...t, ...patch } : t));
+  const addTitle = () => set("titleList", [...titles, { name: "New Title", effect: "" }]);
+  const removeTitle = (i) => set("titleList", titles.filter((_, j) => j !== i));
+  return (
+    <div>
+      <SectionH eyebrow="Earned & Bestowed" title="Titles" action={<AddBtn label="+ Title" onClick={addTitle}/>}/>
+      {titles.length === 0 ? (
+        <div className="muted italic serif" style={{ fontSize: 14, padding: "20px 0", textAlign: "center" }}>No titles earned yet.</div>
+      ) : (
+        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+          {titles.map((t, i) => (
+            <div key={i} style={{ padding: "12px 14px", border: "1px solid var(--line)", borderLeft: "2px solid var(--gold)", background: "var(--bg-2)", borderRadius: "0 6px 6px 0" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", gap: 8, marginBottom: 4 }}>
+                <div className="serif" style={{ fontSize: 16, fontWeight: 600, color: "var(--ink-0)", flex: 1 }}>
+                  <Editable value={t.name} onChange={v => setTitle(i, { name: v })} placeholder="Title name"/>
+                </div>
+                <RemoveBtn onClick={() => removeTitle(i)}/>
+              </div>
+              <div style={{ fontSize: 13, color: "var(--ink-1)", lineHeight: 1.55 }}>
+                <Editable multiline value={t.effect} onChange={v => setTitle(i, { effect: v })} placeholder="What this title grants…"/>
+              </div>
+            </div>
+          ))}
         </div>
       )}
     </div>
@@ -4446,6 +4482,7 @@ function blankCharacter({ ownerId, name, pronouns, cls, avatar, playerName, hand
     cls: cls || "",
     kit: "",
     kitData: { armor: "", weapon: "", stamina: "", speed: "", stability: "", melee: "", ranged: "", disengage: "", benefit: "" },
+    titleList: [],
     level: 1,
     xp: { current: 0, next: 15 },
     victories: 0,
