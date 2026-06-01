@@ -2222,7 +2222,9 @@ function CharactersTab() {
       </div>
 
       {(() => {
-        const canEdit = app.meId === player.id || app.meId === "gm";
+        // The account that created the sheet (its ownerId / claimed slot) can edit,
+        // and the Director can edit everyone's.
+        const canEdit = app.meId === player.id || app.meId === c?.ownerId || app.meId === "gm";
         return (
           <SheetContext.Provider value={canEdit}>
             {!canEdit && (
