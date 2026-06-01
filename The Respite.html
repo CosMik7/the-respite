@@ -585,49 +585,11 @@ const PLAYERS = [
     pronouns: "he/him",
     joined: "2024-11-02",
   },
-  {
-    id: "p1",
-    name: "Mira",
-    handle: "@mira",
-    role: "Player",
-    avatar: "moss",
-    initials: "M",
-    pronouns: "she/her",
-    joined: "2024-11-02",
-  },
-  {
-    id: "p2",
-    name: "Caspian",
-    handle: "@cas",
-    role: "Player",
-    avatar: "arcane",
-    initials: "C",
-    pronouns: "he/him",
-    joined: "2024-11-02",
-  },
-  {
-    id: "p3",
-    name: "Wren",
-    handle: "@wren",
-    role: "Player",
-    avatar: "gold",
-    initials: "W",
-    pronouns: "they/them",
-    joined: "2024-11-15",
-  },
-  {
-    id: "p4",
-    name: "Tova",
-    handle: "@tova",
-    role: "Player",
-    avatar: "blood",
-    initials: "T",
-    pronouns: "she/her",
-    joined: "2024-12-08",
-  },
 ];
 
-const CHARACTERS = {
+const CHARACTERS = {};
+
+const _DEMO_CHARACTERS_UNUSED = {
   p1: {
     ownerId: "p1",
     name: "Sable Vex",
@@ -1016,7 +978,9 @@ const SESSIONS = [
   },
 ];
 
-const MEDIA = [
+const MEDIA = [];
+
+const _DEMO_MEDIA_UNUSED = [
   { id: "m1", kind: "image", title: "Greysend, before", folder: "Maps", uploader: "gm", date: "2026-04-04", tags: ["map", "village"], placeholder: "village map · greysend" },
   { id: "m2", kind: "image", title: "The Underway, level 1", folder: "Maps", uploader: "gm", date: "2026-03-12", tags: ["map", "dungeon"], placeholder: "dungeon map · underway L1" },
   { id: "m3", kind: "image", title: "Sable Vex (commission)", folder: "Character art", uploader: "p1", date: "2026-02-19", tags: ["portrait", "sable"], placeholder: "portrait · sable vex" },
@@ -1898,7 +1862,7 @@ function Hub() {
       <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 16, marginBottom: 36 }}>
         {[
           { tab: "events", eyebrow: "Schedule", title: "Events", body: `${sessions.filter(s => s.upcoming).length} upcoming · ${sessions.filter(s => s.past).length} logged` },
-          { tab: "characters", eyebrow: "Heroes", title: "Sheets", body: `${Object.keys(characters).length} characters · L${Object.values(characters)[0].level}` },
+          { tab: "characters", eyebrow: "Heroes", title: "Sheets", body: Object.keys(characters).length ? `${Object.keys(characters).length} characters · L${Object.values(characters)[0].level}` : "No characters yet" },
           { tab: "media", eyebrow: "Vault", title: "Media", body: `${app.media.length} items in ${new Set(app.media.map(m => m.folder)).size} folders` },
           { tab: "notes", eyebrow: "Memoria", title: "Notes", body: `${notes.length} entries · ${recentNotes.length ? fmtRelative(recentNotes[0].posted) : ""}` },
         ].map(t => (
@@ -2174,7 +2138,23 @@ function CharactersTab() {
   const { players, characters, selectedPlayer, setSelectedPlayer, updateCharacter, sheetLayout } = app;
   const playerList = players.filter(p => p.role === "Player");
   const player = playerList.find(p => p.id === selectedPlayer) || playerList[0];
-  const c = characters[player.id];
+  const c = player ? characters[player.id] : null;
+
+  if (!player || !c) {
+    return (
+      <div className="page">
+        <div className="card" style={{ padding: 40, textAlign: "center", background: "var(--bg-1)", maxWidth: 520, margin: "40px auto" }}>
+          <div className="display" style={{ fontSize: 30, color: "var(--ember)", marginBottom: 10 }}>No characters yet</div>
+          <div className="serif italic" style={{ color: "var(--ink-2)", fontSize: 15, marginBottom: 6 }}>
+            The party table is empty.
+          </div>
+          <div className="dim" style={{ fontSize: 13 }}>
+            Players create their own adventurer when they first sign in. Once someone joins, their sheet appears here.
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="page">
@@ -4129,7 +4109,7 @@ function App() {
   const [authState, setAuthState] = useState("booting");
   const [authUserId, setAuthUserId] = useState(null);
   const [meId, setMeId] = useState(null);
-  const [selectedPlayer, setSelectedPlayer] = useState("p1");
+  const [selectedPlayer, setSelectedPlayer] = useState(null);
 
   const [players, setPlayers] = useState(window.PLAYERS);
   const [sessions, setSessions] = useState(window.SESSIONS);
@@ -4225,7 +4205,7 @@ function App() {
       return;
     }
     setMeId(profile.player_id);
-    setSelectedPlayer(profile.player_id === "gm" ? "p1" : profile.player_id);
+    setSelectedPlayer(profile.player_id === "gm" ? null : profile.player_id);
     setAuthState("loading");
     await loadAllData();
     setAuthState("ready");
@@ -4352,7 +4332,7 @@ function App() {
   if (authState === "unauthenticated") return <LoginScreen/>;
   if (authState === "claiming")        return <ClaimProfile userId={authUserId} onClaimed={async (pid) => {
     setMeId(pid);
-    setSelectedPlayer(pid === "gm" ? "p1" : pid);
+    setSelectedPlayer(pid === "gm" ? null : pid);
     setAuthState("loading");
     await loadAllData();
     setAuthState("ready");
