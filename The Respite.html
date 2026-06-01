@@ -2006,7 +2006,13 @@ function Hub() {
       <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 16, marginBottom: 36 }}>
         {[
           { tab: "events", eyebrow: "Schedule", title: "Events", body: `${sessions.filter(s => s.upcoming).length} upcoming · ${sessions.filter(s => s.past).length} logged` },
-          { tab: "characters", eyebrow: "Heroes", title: "Sheets", body: Object.keys(characters).length ? `${Object.keys(characters).length} characters · L${Object.values(characters)[0].level}` : "No characters yet" },
+          { tab: "characters", eyebrow: "Heroes", title: "Sheets", body: (() => {
+              const chars = players.filter(p => p.role === "Player" && characters[p.id]);
+              const n = chars.length;
+              if (n === 0) return "No characters yet";
+              if (n === 1) return `1 character · L${chars[0] ? characters[chars[0].id].level : ""}`;
+              return `${n} characters`;
+            })() },
           { tab: "media", eyebrow: "Vault", title: "Media", body: `${app.media.length} items in ${new Set(app.media.map(m => m.folder)).size} folders` },
           { tab: "notes", eyebrow: "Memoria", title: "Notes", body: `${notes.length} entries · ${recentNotes.length ? fmtRelative(recentNotes[0].posted) : ""}` },
         ].map(t => (
