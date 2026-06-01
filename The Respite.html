@@ -2701,6 +2701,9 @@ function SheetStacked({ character: c, updateCharacter, player }) {
             <div>
               <div className="eyebrow" style={{ marginBottom: 4 }}>Surges</div>
               <div className="serif" style={{ fontSize: 18, color: "var(--ember)", fontWeight: 600 }}>{c.surges ?? 0}</div>
+              <div className="dim mono" style={{ fontSize: 9, marginTop: 2 }}>
+                +{(() => { const v = Object.values(c.characteristics || {}); return v.length ? Math.max(...v) : 0; })()} dmg/surge
+              </div>
             </div>
           </div>
           <div className="rule"></div>
@@ -2858,6 +2861,9 @@ function SurgesTile({ c, set }) {
   const canEdit = useCanEdit();
   const s = c.surges ?? 0;
   const adjust = (delta) => set("surges", Math.max(0, s + delta));
+  // A surge adds bonus damage equal to your highest characteristic.
+  const stats = Object.values(c.characteristics || {});
+  const highest = stats.length ? Math.max(...stats) : 0;
   return (
     <div className="card" style={{ padding: "10px 14px", background: "var(--bg-0)" }}>
       <div className="eyebrow" style={{ marginBottom: 6 }}>Surges</div>
@@ -2872,7 +2878,7 @@ function SurgesTile({ c, set }) {
           </div>
         )}
       </div>
-      <div className="dim mono" style={{ fontSize: 10, marginTop: 4 }}>+1 tier of damage</div>
+      <div className="dim mono" style={{ fontSize: 10, marginTop: 4 }}>+{highest} damage per surge</div>
     </div>
   );
 }
