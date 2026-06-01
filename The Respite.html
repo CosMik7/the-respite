@@ -4610,6 +4610,8 @@ function ClaimProfile({ userId, onClaimed }) {
     onClaimed(playerId);
   };
 
+  const signOut = () => window._db.auth.signOut();
+
   const available = (window.BASE_PLAYERS || window.PLAYERS).filter(p => !claimed.includes(p.id));
 
   return (
@@ -4738,6 +4740,15 @@ function ClaimProfile({ userId, onClaimed }) {
         {mode === "pick" && claimError && (
           <div style={{ marginTop: 16, padding: "8px 12px", borderRadius: 4, fontSize: 13, background: "oklch(0.25 0.08 25 / 0.3)", border: "1px solid oklch(0.40 0.10 25)", color: "var(--blood)" }}>
             {claimError}
+          </div>
+        )}
+
+        {!fetching && (
+          <div style={{ textAlign: "center", marginTop: 28 }}>
+            <button type="button" onClick={signOut} disabled={loading}
+              style={{ background: "none", border: "none", padding: 0, cursor: "pointer", color: "var(--ink-3)", fontSize: 12, fontFamily: "var(--font-sans)", textDecoration: "underline" }}>
+              Sign out
+            </button>
           </div>
         )}
       </div>
