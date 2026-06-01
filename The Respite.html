@@ -577,11 +577,11 @@ window._db = window.supabase.createClient(
 const PLAYERS = [
   {
     id: "gm",
-    name: "Aldric",
-    handle: "@aldric",
+    name: "Mr. The Ghoul",
+    handle: "@ghoul",
     role: "Director",
     avatar: "ember",
-    initials: "A",
+    initials: "G",
     pronouns: "he/him",
     joined: "2024-11-02",
   },
@@ -911,7 +911,7 @@ const SESSIONS = [
     number: 14,
     title: "The Hollow Beneath Greysend",
     date: "2026-06-14T19:00:00",
-    location: "Aldric's place + Discord",
+    location: "Mr. The Ghoul's place + Discord",
     mode: "hybrid",
     rsvps: { gm: "yes", p1: "yes", p2: "yes", p3: "maybe", p4: "yes" },
     summary: "Confront whatever has been pulling lights down the well. The Cinderwake ledger fragment points here.",
@@ -922,7 +922,7 @@ const SESSIONS = [
     number: 15,
     title: "Wakeknight's Court",
     date: "2026-06-28T19:00:00",
-    location: "Discord only — Aldric out of town",
+    location: "Discord only — Mr. The Ghoul out of town",
     mode: "remote",
     rsvps: { gm: "yes", p1: "yes", p2: "yes", p3: "yes", p4: "no" },
     summary: "An audience with the masked judge. Bring a gift, or a confession.",
@@ -933,7 +933,7 @@ const SESSIONS = [
     number: 13,
     title: "The Eighth Hour Bell",
     date: "2026-04-25T19:00:00",
-    location: "Aldric's place",
+    location: "Mr. The Ghoul's place",
     mode: "in-person",
     rsvps: { gm: "yes", p1: "yes", p2: "yes", p3: "yes", p4: "yes" },
     summary: "Sable heard the bell from her own chest. Vael bottled the sound. The ferryman is owed a name.",
@@ -945,7 +945,7 @@ const SESSIONS = [
     number: 12,
     title: "Greysend Burns",
     date: "2026-04-11T19:00:00",
-    location: "Aldric's place",
+    location: "Mr. The Ghoul's place",
     mode: "in-person",
     rsvps: { gm: "yes", p1: "yes", p2: "yes", p3: "yes", p4: "yes" },
     summary: "Iskra's old cohort came for the village. We were not enough.",
@@ -969,7 +969,7 @@ const SESSIONS = [
     number: 10,
     title: "The Underway",
     date: "2026-03-14T19:00:00",
-    location: "Aldric's place",
+    location: "Mr. The Ghoul's place",
     mode: "in-person",
     rsvps: { gm: "yes", p1: "yes", p2: "yes", p3: "yes", p4: "yes" },
     summary: "First descent. Sable nearly didn't come back up.",
@@ -995,7 +995,9 @@ const _DEMO_MEDIA_UNUSED = [
   { id: "m12", kind: "link", title: "Tactical map tool", folder: "References", uploader: "gm", date: "2026-02-22", tags: ["link", "tool"], url: "owlbear.rodeo" },
 ];
 
-const NOTES = [
+const NOTES = [];
+
+const _DEMO_NOTES_UNUSED = [
   {
     id: "n1",
     authorId: "gm",
@@ -4028,7 +4030,7 @@ function ClaimProfile({ userId, onClaimed }) {
             {available.length === 0 ? (
               <div className="card" style={{ padding: 24, textAlign: "center", background: "var(--bg-1)" }}>
                 <div className="serif" style={{ fontSize: 16, color: "var(--ink-0)", marginBottom: 8 }}>All premade slots are taken.</div>
-                <div className="dim" style={{ fontSize: 13 }}>Create your own character below, or ask Aldric to free a slot.</div>
+                <div className="dim" style={{ fontSize: 13 }}>Create your own character below, or ask Mr. The Ghoul to free a slot.</div>
               </div>
             ) : available.map(player => {
               const char = window.CHARACTERS[player.id];
