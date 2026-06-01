@@ -562,6 +562,13 @@ textarea.editable, input.editable {
 <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
 <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
 <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script>
+window._db = window.supabase.createClient(
+  "https://eljjkferekevmefqcftn.supabase.co",
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVsamprZmVyZWtldm1lZnFjZnRuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAzMDQwOTAsImV4cCI6MjA5NTg4MDA5MH0.zvia_pyFsMJ0cTEyOwmKS5NKOVAV2kmwtGPhMKAClmE"
+);
+</script>
 
 <script>
 // Mock data for The Respite — a Drawsteel TTRPG companion
@@ -1094,7 +1101,7 @@ Object.assign(window, {
 <script type="text/babel" data-presets="react">
 // Shared UI primitives for The Respite
 
-const { useState, useEffect, useRef, useMemo, createContext, useContext } = React;
+const { useState, useEffect, useRef, useMemo, createContext, useContext, useCallback } = React;
 
 // ----- App-wide context -----
 const AppContext = createContext(null);
@@ -2205,7 +2212,7 @@ function CharactersTab() {
           <SheetContext.Provider value={canEdit}>
             {!canEdit && (
               <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 14, padding: "8px 14px", background: "oklch(0.30 0.05 280 / 0.15)", border: "1px solid oklch(0.40 0.06 280)", borderRadius: 6 }}>
-                <span style={{ color: "oklch(0.78 0.05 280)", fontSize: 13 }}>👁 Viewing {c.name}'s sheet — switch to <strong>{window.PLAYERS.find(p => p.id === player.id)?.name}'s profile</strong> to edit.</span>
+                <span style={{ color: "oklch(0.78 0.05 280)", fontSize: 13 }}>👁 Viewing {c.name}'s sheet — only <strong>{window.PLAYERS.find(p => p.id === player.id)?.name}</strong> can edit this.</span>
               </div>
             )}
             {sheetLayout === "stacked"
@@ -3069,10 +3076,12 @@ window.DicePanel = DicePanel;
 
 function MediaTab() {
   const app = useApp();
-  const { media, players } = app;
+  const { media, players, uploadMedia } = app;
   const [folder, setFolder] = useState("All");
   const [search, setSearch] = useState("");
   const [view, setView] = useState("grid");
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef(null);
 
   const folders = ["All", ...Array.from(new Set(media.map(m => m.folder)))];
   const filtered = media.filter(m => {
@@ -3082,13 +3091,29 @@ function MediaTab() {
     return true;
   });
 
+  const handleFileSelect = async (e) => {
+    const files = Array.from(e.target.files);
+    if (!files.length) return;
+    setUploading(true);
+    const targetFolder = folder !== "All" ? folder : "Uploads";
+    for (const file of files) {
+      await uploadMedia(file, targetFolder);
+    }
+    setUploading(false);
+    e.target.value = "";
+  };
+
   return (
     <div className="page">
+      <input type="file" ref={fileInputRef} onChange={handleFileSelect}
+        accept="image/*,.pdf,.doc,.docx,.md,.txt" multiple style={{ display: "none" }}/>
       <SectionH eyebrow="The Vault" title="Media & references" action={
         <div style={{ display: "flex", gap: 8 }}>
           <button className={`btn ghost sm ${view === "grid" ? "ember" : ""}`} onClick={() => setView("grid")}>Grid</button>
           <button className={`btn ghost sm ${view === "list" ? "ember" : ""}`} onClick={() => setView("list")}>List</button>
-          <button className="btn sm">+ Upload</button>
+          <button className="btn sm" onClick={() => fileInputRef.current?.click()} disabled={uploading}>
+            {uploading ? "Uploading…" : "+ Upload"}
+          </button>
         </div>
       }/>
 
@@ -3162,7 +3187,11 @@ function MediaCard({ m, players }) {
     <div className="card" style={{ padding: 0, overflow: "hidden", cursor: "pointer", transition: "all 0.15s" }}
       onMouseEnter={e => { e.currentTarget.style.borderColor = "var(--ember-soft)"; }}
       onMouseLeave={e => { e.currentTarget.style.borderColor = "var(--line)"; }}>
-      {m.kind === "image" && <PortraitPlaceholder tint="ember" label={m.placeholder} ratio="4 / 3" style={{ borderRadius: 0, border: 0, borderBottom: "1px solid var(--line)" }}/>}
+      {m.kind === "image" && (
+        m.storage_path
+          ? <img src={m.url} alt={m.title} style={{ width: "100%", aspectRatio: "4/3", objectFit: "cover", display: "block", borderBottom: "1px solid var(--line)" }}/>
+          : <PortraitPlaceholder tint="ember" label={m.placeholder} ratio="4 / 3" style={{ borderRadius: 0, border: 0, borderBottom: "1px solid var(--line)" }}/>
+      )}
       {m.kind === "doc" && (
         <div style={{ aspectRatio: "4 / 3", background: "var(--bg-2)", borderBottom: "1px solid var(--line)", display: "grid", placeItems: "center", position: "relative" }}>
           <div className="serif" style={{ fontSize: 64, color: "var(--ember)", opacity: 0.5, fontFamily: "var(--font-display)" }}>{m.ext?.toUpperCase()}</div>
@@ -3669,6 +3698,177 @@ window.DiceTab = DiceTab;
 </script>
 
 <script type="text/babel" data-presets="react">
+// Auth screens: loading, sign-in, first-login profile claim
+
+function AppLoading({ message = "Loading…" }) {
+  return (
+    <div style={{
+      minHeight: "100vh", display: "flex", flexDirection: "column",
+      alignItems: "center", justifyContent: "center",
+      background: "var(--bg-0)", gap: 20, padding: 20,
+    }}>
+      <div className="display" style={{ fontSize: 44, color: "var(--ember)", lineHeight: 1 }}>The Respite</div>
+      <div className="serif italic" style={{ color: "var(--ink-2)", fontSize: 14 }}>{message}</div>
+    </div>
+  );
+}
+
+function LoginScreen() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const inputStyle = {
+    padding: "9px 12px", background: "var(--bg-2)",
+    border: "1px solid var(--line)", borderRadius: 5,
+    color: "var(--ink-0)", fontSize: 14, outline: "none",
+    fontFamily: "var(--font-sans)", width: "100%",
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError("");
+    const { error: err } = await window._db.auth.signInWithPassword({ email: email.trim(), password });
+    setLoading(false);
+    if (err) setError(err.message);
+    // success: onAuthStateChange in App() handles navigation
+  };
+
+  return (
+    <div style={{
+      minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center",
+      background: "var(--bg-0)", padding: 20,
+    }}>
+      <div style={{ width: "100%", maxWidth: 380 }}>
+        <div style={{ textAlign: "center", marginBottom: 40 }}>
+          <div className="display" style={{ fontSize: 54, color: "var(--ember)", lineHeight: 1, marginBottom: 8 }}>The Respite</div>
+          <div className="serif italic" style={{ color: "var(--ink-2)", fontSize: 15 }}>A Drawsteel companion</div>
+        </div>
+        <div className="card" style={{ padding: "28px 32px", background: "var(--bg-1)" }}>
+          <div className="flourish" style={{ marginBottom: 24, justifyContent: "center" }}>Sign in</div>
+          <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+              <label className="eyebrow" style={{ fontSize: 10 }}>Email</label>
+              <input type="email" value={email} onChange={e => setEmail(e.target.value)}
+                placeholder="your@email.com" required style={inputStyle}/>
+            </div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+              <label className="eyebrow" style={{ fontSize: 10 }}>Password</label>
+              <input type="password" value={password} onChange={e => setPassword(e.target.value)}
+                placeholder="••••••••" required style={inputStyle}/>
+            </div>
+            {error && (
+              <div style={{
+                padding: "8px 12px", borderRadius: 4, fontSize: 13,
+                background: "oklch(0.25 0.08 25 / 0.3)", border: "1px solid oklch(0.40 0.10 25)",
+                color: "var(--blood)",
+              }}>{error}</div>
+            )}
+            <button type="submit" disabled={loading} className="btn"
+              style={{ padding: "11px 0", fontSize: 14, marginTop: 4, justifyContent: "center", width: "100%" }}>
+              {loading ? "Signing in…" : "Sign in →"}
+            </button>
+          </form>
+        </div>
+        <div className="dim mono" style={{ textAlign: "center", fontSize: 10, marginTop: 20, letterSpacing: "0.06em" }}>
+          THE RESPITE · PRIVATE · FOR THE PARTY OF FIVE
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ClaimProfile({ userId, onClaimed }) {
+  const [claimed, setClaimed] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [fetching, setFetching] = useState(true);
+  const [claimError, setClaimError] = useState("");
+
+  useEffect(() => {
+    window._db.from("player_profiles").select("player_id").then(({ data }) => {
+      if (data) setClaimed(data.map(p => p.player_id));
+      setFetching(false);
+    });
+  }, []);
+
+  const claim = async (player) => {
+    setLoading(true);
+    setClaimError("");
+    const { error } = await window._db.from("player_profiles").insert({
+      id: userId, player_id: player.id, name: player.name,
+    });
+    if (!error) {
+      onClaimed(player.id);
+    } else {
+      setLoading(false);
+      setClaimError(error.message);
+    }
+  };
+
+  const available = window.PLAYERS.filter(p => !claimed.includes(p.id));
+
+  return (
+    <div style={{
+      minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center",
+      background: "var(--bg-0)", padding: 20,
+    }}>
+      <div style={{ width: "100%", maxWidth: 520 }}>
+        <div style={{ textAlign: "center", marginBottom: 40 }}>
+          <div className="display" style={{ fontSize: 54, color: "var(--ember)", lineHeight: 1, marginBottom: 8 }}>The Respite</div>
+          <div className="serif italic" style={{ color: "var(--ink-2)", fontSize: 15 }}>
+            {fetching ? "A moment…" : "First time here. Who are you?"}
+          </div>
+        </div>
+        {!fetching && available.length === 0 ? (
+          <div className="card" style={{ padding: 24, textAlign: "center", background: "var(--bg-1)" }}>
+            <div className="serif" style={{ fontSize: 16, color: "var(--ink-0)", marginBottom: 8 }}>All player slots are taken.</div>
+            <div className="dim" style={{ fontSize: 13 }}>Ask Aldric (your Director) to free a slot.</div>
+          </div>
+        ) : !fetching && (
+          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+            {available.map(player => {
+              const char = window.CHARACTERS[player.id];
+              return (
+                <button key={player.id} onClick={() => claim(player)} disabled={loading}
+                  className="card"
+                  style={{
+                    display: "grid", gridTemplateColumns: "auto 1fr auto",
+                    alignItems: "center", gap: 16, padding: "14px 18px",
+                    textAlign: "left", cursor: loading ? "default" : "pointer",
+                    background: "var(--bg-1)", border: "1px solid var(--line)", transition: "all 0.15s",
+                  }}
+                  onMouseEnter={e => { if (!loading) e.currentTarget.style.borderColor = "var(--ember)"; }}
+                  onMouseLeave={e => { e.currentTarget.style.borderColor = ""; }}
+                >
+                  <Avatar player={player}/>
+                  <div>
+                    <div className="serif" style={{ fontSize: 18, fontWeight: 600, color: "var(--ink-0)", marginBottom: 3 }}>{player.name}</div>
+                    <div className="dim" style={{ fontSize: 12 }}>{player.role}{char ? ` · ${char.name}, ${char.cls}` : ""}</div>
+                  </div>
+                  <div className="serif" style={{ fontSize: 22, color: "var(--ember)", opacity: 0.5 }}>→</div>
+                </button>
+              );
+            })}
+          </div>
+        )}
+        {claimError && (
+          <div style={{ marginTop: 16, padding: "8px 12px", borderRadius: 4, fontSize: 13, background: "oklch(0.25 0.08 25 / 0.3)", border: "1px solid oklch(0.40 0.10 25)", color: "var(--blood)" }}>
+            {claimError}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+window.AppLoading = AppLoading;
+window.LoginScreen = LoginScreen;
+window.ClaimProfile = ClaimProfile;
+</script>
+
+<script type="text/babel" data-presets="react">
 // useState/useEffect already pulled from React in ui.jsx (shared babel scope)
 
 const TWEAK_DEFAULTS = {
@@ -3680,59 +3880,234 @@ const TWEAK_DEFAULTS = {
 function App() {
   const [tweaks, setTweak] = useTweaks(TWEAK_DEFAULTS);
   const [tab, setTab] = useState("hub");
-  const [meId, setMeId] = useState("p1");
+
+  // authState: "booting" | "unauthenticated" | "claiming" | "loading" | "ready"
+  const [authState, setAuthState] = useState("booting");
+  const [authUserId, setAuthUserId] = useState(null);
+  const [meId, setMeId] = useState(null);
   const [selectedPlayer, setSelectedPlayer] = useState("p1");
+
   const [sessions, setSessions] = useState(window.SESSIONS);
   const [characters, setCharacters] = useState(window.CHARACTERS);
-  const [media] = useState(window.MEDIA);
+  const [media, setMedia] = useState(window.MEDIA);
   const [notes, setNotes] = useState(window.NOTES);
+
+  // Ref mirrors characters state so mutations can read current value synchronously
+  const charactersRef = useRef(window.CHARACTERS);
+  useEffect(() => { charactersRef.current = characters; }, [characters]);
+
+  // Debounced write queue — batches rapid pip/counter clicks into one DB write
+  const charWriteQueue = useRef({});
+  const charWriteTimer = useRef(null);
 
   useEffect(() => {
     document.documentElement.dataset.theme = tweaks.theme === "obsidian" ? "" : tweaks.theme;
   }, [tweaks.theme]);
 
-  const setRsvp = (sessionId, playerId, value) => {
-    setSessions(s => s.map(ss => ss.id === sessionId
-      ? { ...ss, rsvps: { ...ss.rsvps, [playerId]: value } }
-      : ss
-    ));
-  };
+  // ─── Data loading (seeds from window.* if DB is empty) ────────────────────
 
-  const updateCharacter = (playerId, path, value) => {
-    setCharacters(prev => {
-      const next = { ...prev };
-      const c = { ...next[playerId] };
-      const parts = path.split(".");
-      if (parts.length === 1) {
-        c[parts[0]] = value;
-      } else {
-        const obj = { ...c[parts[0]] };
-        obj[parts[1]] = value;
-        c[parts[0]] = obj;
-      }
-      next[playerId] = c;
-      return next;
+  const loadAllData = useCallback(async () => {
+    const { data: chars } = await window._db.from("characters").select("*");
+    if (chars && chars.length > 0) {
+      const map = {};
+      chars.forEach(c => { map[c.player_id] = c.data; });
+      setCharacters(prev => ({ ...prev, ...map }));
+      charactersRef.current = { ...charactersRef.current, ...map };
+    } else {
+      const rows = Object.entries(window.CHARACTERS).map(([pid, data]) => ({ player_id: pid, data }));
+      await window._db.from("characters").upsert(rows, { onConflict: "player_id" });
+    }
+
+    const { data: sess } = await window._db.from("sessions").select("*").order("id");
+    if (sess && sess.length > 0) {
+      setSessions(sess.map(s => s.data));
+    } else {
+      await window._db.from("sessions").upsert(
+        window.SESSIONS.map(s => ({ id: s.id, data: s })), { onConflict: "id" }
+      );
+    }
+
+    const { data: noteRows } = await window._db.from("notes").select("*").order("posted_at", { ascending: false });
+    if (noteRows && noteRows.length > 0) {
+      setNotes(noteRows.map(n => n.data));
+    } else if (window.NOTES.length > 0) {
+      await window._db.from("notes").upsert(
+        window.NOTES.map(n => ({ id: n.id, author_player_id: n.authorId, data: n, posted_at: n.posted })),
+        { onConflict: "id" }
+      );
+    }
+
+    const { data: mediaRows } = await window._db.from("media_items").select("*").order("created_at", { ascending: false });
+    if (mediaRows && mediaRows.length > 0) {
+      setMedia(mediaRows.map(m => m.data));
+    } else if (window.MEDIA.length > 0) {
+      await window._db.from("media_items").upsert(
+        window.MEDIA.map(m => ({ id: m.id, data: m, uploaded_by: m.uploader })),
+        { onConflict: "id" }
+      );
+    }
+  }, []);
+
+  // ─── Auth ─────────────────────────────────────────────────────────────────
+
+  const handleSession = useCallback(async (session) => {
+    if (!session) {
+      setAuthState("unauthenticated");
+      setAuthUserId(null);
+      setMeId(null);
+      return;
+    }
+    setAuthUserId(session.user.id);
+    const { data: profile } = await window._db
+      .from("player_profiles").select("player_id").eq("id", session.user.id).single();
+    if (!profile) {
+      setAuthState("claiming");
+      return;
+    }
+    setMeId(profile.player_id);
+    setSelectedPlayer(profile.player_id === "gm" ? "p1" : profile.player_id);
+    setAuthState("loading");
+    await loadAllData();
+    setAuthState("ready");
+  }, [loadAllData]);
+
+  useEffect(() => {
+    const { data: { subscription } } = window._db.auth.onAuthStateChange((_event, session) => {
+      handleSession(session);
     });
-  };
+    // Check current session immediately on mount
+    window._db.auth.getSession().then(({ data: { session } }) => {
+      if (!session) setAuthState("unauthenticated");
+      // if session exists, onAuthStateChange fires automatically
+    });
+    return () => subscription.unsubscribe();
+  }, [handleSession]);
 
-  const addNote = (note) => {
-    setNotes(n => [
-      { ...note, id: "n" + Date.now(), posted: new Date().toISOString() },
-      ...n,
-    ]);
-  };
+  // ─── Realtime sync ────────────────────────────────────────────────────────
+
+  useEffect(() => {
+    if (authState !== "ready") return;
+    const ch = window._db.channel("respite-live")
+      .on("postgres_changes", { event: "*", schema: "public", table: "characters" }, ({ new: row }) => {
+        if (row && row.player_id) {
+          setCharacters(prev => ({ ...prev, [row.player_id]: row.data }));
+          charactersRef.current = { ...charactersRef.current, [row.player_id]: row.data };
+        }
+      })
+      .on("postgres_changes", { event: "*", schema: "public", table: "sessions" }, ({ new: row }) => {
+        if (row && row.id) setSessions(prev => prev.map(s => s.id === row.id ? row.data : s));
+      })
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "notes" }, ({ new: row }) => {
+        if (row && row.data) setNotes(prev => prev.some(n => n.id === row.id) ? prev : [row.data, ...prev]);
+      })
+      .on("postgres_changes", { event: "*", schema: "public", table: "media_items" }, () => {
+        window._db.from("media_items").select("*").order("created_at", { ascending: false })
+          .then(({ data }) => { if (data) setMedia(data.map(m => m.data)); });
+      })
+      .subscribe();
+    return () => window._db.removeChannel(ch);
+  }, [authState]);
+
+  // ─── Mutations ────────────────────────────────────────────────────────────
+
+  const flushCharWrites = useCallback(() => {
+    const queue = { ...charWriteQueue.current };
+    charWriteQueue.current = {};
+    Object.entries(queue).forEach(([pid, data]) => {
+      window._db.from("characters").upsert({ player_id: pid, data }, { onConflict: "player_id" })
+        .then(({ error }) => { if (error) console.warn("Character save failed:", error.message); });
+    });
+  }, []);
+
+  const updateCharacter = useCallback((playerId, path, value) => {
+    const cur = charactersRef.current[playerId] || {};
+    const c = { ...cur };
+    const parts = path.split(".");
+    if (parts.length === 1) {
+      c[parts[0]] = value;
+    } else {
+      c[parts[0]] = { ...c[parts[0]], [parts[1]]: value };
+    }
+    setCharacters(prev => ({ ...prev, [playerId]: c }));
+    charactersRef.current = { ...charactersRef.current, [playerId]: c };
+    charWriteQueue.current[playerId] = c;
+    clearTimeout(charWriteTimer.current);
+    charWriteTimer.current = setTimeout(flushCharWrites, 800);
+  }, [flushCharWrites]);
+
+  const setRsvp = useCallback((sessionId, playerId, value) => {
+    setSessions(prev => prev.map(ss => {
+      if (ss.id !== sessionId) return ss;
+      const updated = { ...ss, rsvps: { ...ss.rsvps, [playerId]: value } };
+      window._db.from("sessions").update({ data: updated }).eq("id", sessionId)
+        .then(({ error }) => { if (error) console.warn("RSVP save failed:", error.message); });
+      return updated;
+    }));
+  }, []);
+
+  const addNote = useCallback(async (note) => {
+    const newNote = { ...note, id: "n" + Date.now(), posted: new Date().toISOString() };
+    setNotes(prev => [newNote, ...prev]);
+    await window._db.from("notes").insert({
+      id: newNote.id, author_player_id: newNote.authorId, data: newNote, posted_at: newNote.posted,
+    });
+  }, []);
+
+  const uploadMedia = useCallback(async (file, folder = "Uploads") => {
+    const ext = file.name.split(".").pop().toLowerCase();
+    const isImage = ["jpg","jpeg","png","gif","webp","svg","avif"].includes(ext);
+    const kind = isImage ? "image" : "doc";
+    const path = `${Date.now()}_${file.name.replace(/\s+/g, "_")}`;
+
+    const { error: upErr } = await window._db.storage.from("media").upload(path, file);
+    if (upErr) { console.error("Upload failed:", upErr.message); return null; }
+
+    const { data: urlData } = window._db.storage.from("media").getPublicUrl(path);
+    const newItem = {
+      id: "m" + Date.now(), kind, folder,
+      title: file.name.replace(/\.[^.]+$/, "").replace(/[_-]+/g, " "),
+      uploader: meId,
+      date: new Date().toISOString().split("T")[0],
+      tags: [ext], url: urlData.publicUrl, storage_path: path,
+      ...(isImage
+        ? { placeholder: file.name }
+        : { ext, size: file.size > 1048576 ? (file.size/1048576).toFixed(1)+" MB" : Math.round(file.size/1024)+" KB" }),
+    };
+    setMedia(prev => [newItem, ...prev]);
+    await window._db.from("media_items").insert({
+      id: newItem.id, data: newItem, storage_path: path, uploaded_by: meId,
+    });
+    return newItem;
+  }, [meId]);
+
+  const logout = useCallback(async () => {
+    await window._db.auth.signOut();
+  }, []);
+
+  // ─── Render gates ─────────────────────────────────────────────────────────
+
+  if (authState === "booting")         return <AppLoading message="Waking the fire…"/>;
+  if (authState === "unauthenticated") return <LoginScreen/>;
+  if (authState === "claiming")        return <ClaimProfile userId={authUserId} onClaimed={async (pid) => {
+    setMeId(pid);
+    setSelectedPlayer(pid === "gm" ? "p1" : pid);
+    setAuthState("loading");
+    await loadAllData();
+    setAuthState("ready");
+  }}/>;
+  if (authState === "loading")         return <AppLoading message="Loading your world…"/>;
+
+  const me = window.PLAYERS.find(p => p.id === meId) || window.PLAYERS[0];
 
   const ctx = {
     players: window.PLAYERS,
     characters, sessions, media, notes,
     tab, setTab,
-    meId, setMeId,
+    meId,
     selectedPlayer, setSelectedPlayer,
-    setRsvp, updateCharacter, addNote,
+    setRsvp, updateCharacter, addNote, uploadMedia,
     sheetLayout: tweaks.sheetLayout,
   };
-
-  const me = window.PLAYERS.find(p => p.id === meId);
 
   return (
     <AppContext.Provider value={ctx}>
@@ -3754,23 +4129,23 @@ function App() {
               { id: "notes", label: "Notes" },
               { id: "dice", label: "Dice" },
             ].map(t => (
-              <button key={t.id}
-                className={`tab ${tab === t.id ? "active" : ""}`}
-                onClick={() => setTab(t.id)}>
+              <button key={t.id} className={`tab ${tab === t.id ? "active" : ""}`} onClick={() => setTab(t.id)}>
                 {t.label}
               </button>
             ))}
           </nav>
-          <div className="user-chip" title="Switch profile" onClick={() => {
-            const list = window.PLAYERS;
-            const idx = list.findIndex(p => p.id === meId);
-            setMeId(list[(idx + 1) % list.length].id);
-          }}>
-            <Avatar player={me}/>
-            <div style={{ fontSize: 12, lineHeight: 1.2 }}>
-              <div className="serif" style={{ color: "var(--ink-0)", fontWeight: 600 }}>{me.name}</div>
-              <div className="dim" style={{ fontSize: 10 }}>{me.role}</div>
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <div className="user-chip">
+              <Avatar player={me}/>
+              <div style={{ fontSize: 12, lineHeight: 1.2 }}>
+                <div className="serif" style={{ color: "var(--ink-0)", fontWeight: 600 }}>{me.name}</div>
+                <div className="dim" style={{ fontSize: 10 }}>{me.role}</div>
+              </div>
             </div>
+            <button onClick={logout} className="btn ghost sm"
+              style={{ fontSize: 11, padding: "4px 10px", flexShrink: 0 }}>
+              Sign out
+            </button>
           </div>
         </div>
       </header>
@@ -3819,14 +4194,6 @@ function App() {
               { value: "spread", label: "Spread" },
               { value: "stacked", label: "Stacked" },
             ]}
-          />
-        </TweakSection>
-        <TweakSection title="Profile">
-          <TweakSelect
-            label="Viewing as"
-            value={meId}
-            onChange={setMeId}
-            options={window.PLAYERS.map(p => ({ value: p.id, label: `${p.name} (${p.role})` }))}
           />
         </TweakSection>
       </TweaksPanel>
