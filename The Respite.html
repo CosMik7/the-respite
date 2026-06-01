@@ -548,6 +548,66 @@ textarea.editable, input.editable {
 }
 .pulse { animation: ember-pulse 2s ease-in-out infinite; }
 
+/* ───────────────────────── Mobile / small screens ─────────────────────────
+   The app is built with inline grid styles, so most layout overrides here need
+   !important to win against the element's own style attribute. The selectors
+   match on the CSS property name (reliable) and known value fragments. */
+@media (max-width: 768px) {
+  html, body { max-width: 100%; overflow-x: hidden; }
+
+  /* Top navigation: brand + user on row 1, tabs scroll horizontally on row 2 */
+  .topnav-inner {
+    padding: 8px 14px;
+    gap: 10px 14px;
+    height: auto;
+    flex-wrap: wrap;
+  }
+  .brand-tag { display: none; }
+  .brand-name { font-size: 19px; }
+  .tabs {
+    order: 4;
+    width: 100%;
+    margin-left: 0;
+    gap: 2px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    padding-bottom: 2px;
+  }
+  .tabs::-webkit-scrollbar { height: 0; }
+  .tab { padding: 7px 11px; font-size: 12px; white-space: nowrap; flex: 0 0 auto; }
+  /* push the user/sign-out cluster (last child) to the right of row 1 */
+  .topnav-inner > div:last-of-type { margin-left: auto; }
+
+  /* Page shell + cards: tighter padding */
+  .page { padding: 18px 14px 64px; }
+  .card-pad { padding: 14px 14px; }
+  .section-h { flex-wrap: wrap; gap: 8px; }
+
+  /* Collapse fixed multi-column inline grids to a single column by default… */
+  [style*="grid-template-columns"] { grid-template-columns: 1fr !important; }
+  /* …but keep compact tile clusters in a tidy few-column layout */
+  [style*="repeat(5"] { grid-template-columns: repeat(3, 1fr) !important; }
+  [style*="repeat(4"] { grid-template-columns: repeat(2, 1fr) !important; }
+  [style*="repeat(3"] { grid-template-columns: repeat(2, 1fr) !important; }
+  [style*="repeat(auto-fill"] { grid-template-columns: 1fr !important; }
+
+  /* Sticky sidebars (sheet stacked layout) shouldn't pin on mobile */
+  [style*="position: sticky"] { position: static !important; }
+
+  /* Tame the largest display type so it never overflows the viewport */
+  [style*="font-size:64px"], [style*="font-size: 64px"] { font-size: 40px !important; }
+  [style*="font-size:48px"], [style*="font-size: 48px"] { font-size: 33px !important; }
+  [style*="font-size:38px"], [style*="font-size: 38px"],
+  [style*="font-size:36px"], [style*="font-size: 36px"] { font-size: 27px !important; }
+  [style*="font-size:30px"], [style*="font-size: 30px"] { font-size: 24px !important; }
+  .page h1 { font-size: 26px !important; }
+
+  /* Media + form controls never overflow their container; long text wraps */
+  img, video, input, textarea, select { max-width: 100%; }
+  .page, .page p, .serif { overflow-wrap: break-word; }
+}
+
 </style>
 </head>
 <body>
