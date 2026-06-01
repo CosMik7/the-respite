@@ -1094,6 +1094,7 @@ const COUNTDOWN_TARGET = SESSIONS.find(s => s.upcoming).date;
 
 Object.assign(window, {
   PLAYERS, CHARACTERS, SESSIONS, MEDIA, NOTES, COUNTDOWN_TARGET,
+  BASE_PLAYERS: PLAYERS.slice(),  // immutable snapshot of the premade roster
 });
 
 </script>
@@ -3823,11 +3824,97 @@ function LoginScreen() {
   );
 }
 
+// Avatar colour palette available to custom characters
+const AVATAR_COLORS = ["ember", "gold", "moss", "blood", "arcane"];
+
+// A structurally-complete, empty character so the sheet renders without crashing.
+// Player presentation meta (avatar/role/pronouns/handle) rides along under `_player`
+// so we don't need any extra DB columns.
+function blankCharacter({ ownerId, name, pronouns, cls, avatar, playerName, handle }) {
+  const av = avatar || "arcane";
+  const h = handle || ("@" + String(playerName || name || "player").toLowerCase().replace(/[^a-z0-9]/g, ""));
+  return {
+    ownerId,
+    name: name || "New Adventurer",
+    pronouns: pronouns || "",
+    ancestry: "",
+    career: "",
+    careerData: { benefits: "", skills: [], perk: "", incident: "" },
+    culture: { languages: [], environment: "", organization: "", upbringing: "", complications: [] },
+    cls: cls || "",
+    kit: "",
+    level: 1,
+    xp: { current: 0, next: 16 },
+    victories: 0,
+    surges: 0,
+    portrait: "",
+    portraitTint: av,
+    titles: [""],
+    stamina: { current: 20, max: 20, recoveries: { current: 8, max: 8, value: 6 } },
+    resource: { name: "Resource", current: 0, max: 0 },
+    characteristics: { Might: 0, Agility: 0, Reason: 0, Intuition: 0, Presence: 0 },
+    abilities: [],
+    features: [],
+    inventory: [],
+    ties: [],
+    backstory: "",
+    goals: [],
+    conditions: [],
+    notes: "",
+    weaknesses: [],
+    immunities: [],
+    wealth: 0,
+    renown: 0,
+    tempStamina: 0,
+    heroTokens: 0,
+    turnTaken: false,
+    skills: [],
+    perks: [],
+    projects: [],
+    _player: { avatar: av, role: "Player", pronouns: pronouns || "", handle: h },
+  };
+}
+
+// Merge the premade roster with any custom players (those have a row in
+// player_profiles whose player_id isn't one of the premade slots). Custom
+// presentation meta is pulled from the character's `_player` blob.
+function buildRoster(profiles, charsMap) {
+  const base = window.BASE_PLAYERS || window.PLAYERS;
+  const baseIds = new Set(base.map(p => p.id));
+  const roster = base.map(p => ({ ...p }));
+  (profiles || []).forEach(prof => {
+    if (baseIds.has(prof.player_id)) return; // premade slot already in roster
+    const char = (charsMap && charsMap[prof.player_id]) || {};
+    const meta = char._player || {};
+    const nm = prof.name || char.name || "Adventurer";
+    roster.push({
+      id: prof.player_id,
+      name: nm,
+      handle: meta.handle || ("@" + String(nm).toLowerCase().replace(/[^a-z0-9]/g, "")),
+      role: meta.role || "Player",
+      avatar: meta.avatar || "arcane",
+      initials: (String(nm).trim().charAt(0) || "?").toUpperCase(),
+      pronouns: meta.pronouns || char.pronouns || "",
+      joined: meta.joined || new Date().toISOString().split("T")[0],
+      custom: true,
+    });
+  });
+  return roster;
+}
+
 function ClaimProfile({ userId, onClaimed }) {
   const [claimed, setClaimed] = useState([]);
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(true);
   const [claimError, setClaimError] = useState("");
+  const [mode, setMode] = useState("pick"); // "pick" | "create"
+
+  // create-form fields
+  const [playerName, setPlayerName] = useState("");
+  const [charName, setCharName] = useState("");
+  const [charClass, setCharClass] = useState("");
+  const [charPronouns, setCharPronouns] = useState("");
+  const [avatar, setAvatar] = useState("arcane");
 
   useEffect(() => {
     window._db.from("player_profiles").select("player_id").then(({ data }) => {
@@ -3835,6 +3922,13 @@ function ClaimProfile({ userId, onClaimed }) {
       setFetching(false);
     });
   }, []);
+
+  const inputStyle = {
+    padding: "9px 12px", background: "var(--bg-2)",
+    border: "1px solid var(--line)", borderRadius: 5,
+    color: "var(--ink-0)", fontSize: 14, outline: "none",
+    fontFamily: "var(--font-sans)", width: "100%",
+  };
 
   const claim = async (player) => {
     setLoading(true);
@@ -3850,7 +3944,33 @@ function ClaimProfile({ userId, onClaimed }) {
     }
   };
 
-  const available = window.PLAYERS.filter(p => !claimed.includes(p.id));
+  const createOwn = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setClaimError("");
+    const playerId = "u_" + Math.random().toString(36).slice(2, 10);
+    const char = blankCharacter({
+      ownerId: playerId,
+      name: charName.trim(),
+      pronouns: charPronouns.trim(),
+      cls: charClass.trim(),
+      avatar,
+      playerName: playerName.trim(),
+    });
+    // 1) link this auth user to the new player slot FIRST — RLS on `characters`
+    //    typically checks ownership via player_profiles, so the link must exist
+    //    before we can write the character row.
+    const { error: profErr } = await window._db.from("player_profiles")
+      .insert({ id: userId, player_id: playerId, name: playerName.trim() || charName.trim() });
+    if (profErr) { setLoading(false); setClaimError(profErr.message); return; }
+    // 2) create the character row
+    const { error: charErr } = await window._db.from("characters")
+      .insert({ player_id: playerId, data: char });
+    if (charErr) { setLoading(false); setClaimError(charErr.message); return; }
+    onClaimed(playerId);
+  };
+
+  const available = (window.BASE_PLAYERS || window.PLAYERS).filter(p => !claimed.includes(p.id));
 
   return (
     <div style={{
@@ -3861,17 +3981,76 @@ function ClaimProfile({ userId, onClaimed }) {
         <div style={{ textAlign: "center", marginBottom: 40 }}>
           <div className="display" style={{ fontSize: 54, color: "var(--ember)", lineHeight: 1, marginBottom: 8 }}>The Respite</div>
           <div className="serif italic" style={{ color: "var(--ink-2)", fontSize: 15 }}>
-            {fetching ? "A moment…" : "First time here. Who are you?"}
+            {fetching ? "A moment…" : mode === "create" ? "Forge a new adventurer." : "First time here. Who are you?"}
           </div>
         </div>
-        {!fetching && available.length === 0 ? (
-          <div className="card" style={{ padding: 24, textAlign: "center", background: "var(--bg-1)" }}>
-            <div className="serif" style={{ fontSize: 16, color: "var(--ink-0)", marginBottom: 8 }}>All player slots are taken.</div>
-            <div className="dim" style={{ fontSize: 13 }}>Ask Aldric (your Director) to free a slot.</div>
+
+        {!fetching && mode === "create" && (
+          <div className="card" style={{ padding: "28px 32px", background: "var(--bg-1)" }}>
+            <div className="flourish" style={{ marginBottom: 24, justifyContent: "center" }}>Create your character</div>
+            <form onSubmit={createOwn} style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+              <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                <label className="eyebrow" style={{ fontSize: 10 }}>Your name (the player)</label>
+                <input value={playerName} onChange={e => setPlayerName(e.target.value)}
+                  placeholder="e.g. Miguel" required style={inputStyle}/>
+              </div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                <label className="eyebrow" style={{ fontSize: 10 }}>Character name</label>
+                <input value={charName} onChange={e => setCharName(e.target.value)}
+                  placeholder="e.g. Kael of the Ashlands" required style={inputStyle}/>
+              </div>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+                <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                  <label className="eyebrow" style={{ fontSize: 10 }}>Class</label>
+                  <input value={charClass} onChange={e => setCharClass(e.target.value)}
+                    placeholder="e.g. Censor" style={inputStyle}/>
+                </div>
+                <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                  <label className="eyebrow" style={{ fontSize: 10 }}>Pronouns</label>
+                  <input value={charPronouns} onChange={e => setCharPronouns(e.target.value)}
+                    placeholder="e.g. they/them" style={inputStyle}/>
+                </div>
+              </div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                <label className="eyebrow" style={{ fontSize: 10 }}>Avatar colour</label>
+                <div style={{ display: "flex", gap: 10 }}>
+                  {AVATAR_COLORS.map(c => (
+                    <button type="button" key={c} onClick={() => setAvatar(c)}
+                      title={c}
+                      style={{ padding: 0, border: avatar === c ? "2px solid var(--ink-0)" : "2px solid transparent",
+                        borderRadius: "50%", background: "none", cursor: "pointer", lineHeight: 0 }}>
+                      <div className={`avatar ${c}`}>{(playerName.trim().charAt(0) || "?").toUpperCase()}</div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+              {claimError && (
+                <div style={{ padding: "8px 12px", borderRadius: 4, fontSize: 13, background: "oklch(0.25 0.08 25 / 0.3)", border: "1px solid oklch(0.40 0.10 25)", color: "var(--blood)" }}>
+                  {claimError}
+                </div>
+              )}
+              <button type="submit" disabled={loading} className="btn"
+                style={{ padding: "11px 0", fontSize: 14, marginTop: 4, justifyContent: "center", width: "100%" }}>
+                {loading ? "Forging…" : "Create & enter →"}
+              </button>
+            </form>
+            <div style={{ textAlign: "center", marginTop: 20, fontSize: 13, color: "var(--ink-2)" }}>
+              <button type="button" onClick={() => { setMode("pick"); setClaimError(""); }}
+                style={{ background: "none", border: "none", padding: 0, cursor: "pointer", color: "var(--ember)", fontSize: 13, fontFamily: "var(--font-sans)", textDecoration: "underline" }}>
+                ← Pick a premade character instead
+              </button>
+            </div>
           </div>
-        ) : !fetching && (
+        )}
+
+        {!fetching && mode === "pick" && (
           <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-            {available.map(player => {
+            {available.length === 0 ? (
+              <div className="card" style={{ padding: 24, textAlign: "center", background: "var(--bg-1)" }}>
+                <div className="serif" style={{ fontSize: 16, color: "var(--ink-0)", marginBottom: 8 }}>All premade slots are taken.</div>
+                <div className="dim" style={{ fontSize: 13 }}>Create your own character below, or ask Aldric to free a slot.</div>
+              </div>
+            ) : available.map(player => {
               const char = window.CHARACTERS[player.id];
               return (
                 <button key={player.id} onClick={() => claim(player)} disabled={loading}
@@ -3894,9 +4073,29 @@ function ClaimProfile({ userId, onClaimed }) {
                 </button>
               );
             })}
+
+            <button onClick={() => { setMode("create"); setClaimError(""); }} disabled={loading}
+              className="card"
+              style={{
+                display: "grid", gridTemplateColumns: "auto 1fr auto",
+                alignItems: "center", gap: 16, padding: "14px 18px",
+                textAlign: "left", cursor: "pointer",
+                background: "var(--bg-2)", border: "1px dashed var(--ember)", transition: "all 0.15s",
+              }}
+              onMouseEnter={e => { e.currentTarget.style.background = "var(--bg-1)"; }}
+              onMouseLeave={e => { e.currentTarget.style.background = "var(--bg-2)"; }}
+            >
+              <div className="avatar" style={{ background: "var(--bg-0)", border: "1px dashed var(--ember)", color: "var(--ember)" }}>+</div>
+              <div>
+                <div className="serif" style={{ fontSize: 18, fontWeight: 600, color: "var(--ember)", marginBottom: 3 }}>Create your own character</div>
+                <div className="dim" style={{ fontSize: 12 }}>Build a brand-new adventurer from scratch</div>
+              </div>
+              <div className="serif" style={{ fontSize: 22, color: "var(--ember)", opacity: 0.5 }}>→</div>
+            </button>
           </div>
         )}
-        {claimError && (
+
+        {mode === "pick" && claimError && (
           <div style={{ marginTop: 16, padding: "8px 12px", borderRadius: 4, fontSize: 13, background: "oklch(0.25 0.08 25 / 0.3)", border: "1px solid oklch(0.40 0.10 25)", color: "var(--blood)" }}>
             {claimError}
           </div>
@@ -3909,6 +4108,8 @@ function ClaimProfile({ userId, onClaimed }) {
 window.AppLoading = AppLoading;
 window.LoginScreen = LoginScreen;
 window.ClaimProfile = ClaimProfile;
+window.blankCharacter = blankCharacter;
+window.buildRoster = buildRoster;
 </script>
 
 <script type="text/babel" data-presets="react">
@@ -3930,6 +4131,7 @@ function App() {
   const [meId, setMeId] = useState(null);
   const [selectedPlayer, setSelectedPlayer] = useState("p1");
 
+  const [players, setPlayers] = useState(window.PLAYERS);
   const [sessions, setSessions] = useState(window.SESSIONS);
   const [characters, setCharacters] = useState(window.CHARACTERS);
   const [media, setMedia] = useState(window.MEDIA);
@@ -3951,15 +4153,23 @@ function App() {
 
   const loadAllData = useCallback(async () => {
     const { data: chars } = await window._db.from("characters").select("*");
+    let charsMap = { ...window.CHARACTERS };
     if (chars && chars.length > 0) {
       const map = {};
       chars.forEach(c => { map[c.player_id] = c.data; });
-      setCharacters(prev => ({ ...prev, ...map }));
-      charactersRef.current = { ...charactersRef.current, ...map };
+      charsMap = { ...charsMap, ...map };
+      setCharacters(charsMap);
+      charactersRef.current = charsMap;
     } else {
       const rows = Object.entries(window.CHARACTERS).map(([pid, data]) => ({ player_id: pid, data }));
       await window._db.from("characters").upsert(rows, { onConflict: "player_id" });
     }
+
+    // Build the roster: premade slots + any custom-created players
+    const { data: profs } = await window._db.from("player_profiles").select("*");
+    const roster = window.buildRoster(profs, charsMap);
+    window.PLAYERS = roster;
+    setPlayers(roster);
 
     const { data: sess } = await window._db.from("sessions").select("*").order("id");
     if (sess && sess.length > 0) {
@@ -3989,6 +4199,13 @@ function App() {
         { onConflict: "id" }
       );
     }
+  }, []);
+
+  const refreshRoster = useCallback(async () => {
+    const { data: profs } = await window._db.from("player_profiles").select("*");
+    const roster = window.buildRoster(profs, charactersRef.current);
+    window.PLAYERS = roster;
+    setPlayers(roster);
   }, []);
 
   // ─── Auth ─────────────────────────────────────────────────────────────────
@@ -4035,6 +4252,8 @@ function App() {
         if (row && row.player_id) {
           setCharacters(prev => ({ ...prev, [row.player_id]: row.data }));
           charactersRef.current = { ...charactersRef.current, [row.player_id]: row.data };
+          // A character for a player we don't know yet — a new custom adventurer joined
+          if (!window.PLAYERS.some(p => p.id === row.player_id)) refreshRoster();
         }
       })
       .on("postgres_changes", { event: "*", schema: "public", table: "sessions" }, ({ new: row }) => {
@@ -4049,7 +4268,7 @@ function App() {
       })
       .subscribe();
     return () => window._db.removeChannel(ch);
-  }, [authState]);
+  }, [authState, refreshRoster]);
 
   // ─── Mutations ────────────────────────────────────────────────────────────
 
@@ -4140,10 +4359,10 @@ function App() {
   }}/>;
   if (authState === "loading")         return <AppLoading message="Loading your world…"/>;
 
-  const me = window.PLAYERS.find(p => p.id === meId) || window.PLAYERS[0];
+  const me = players.find(p => p.id === meId) || players[0];
 
   const ctx = {
-    players: window.PLAYERS,
+    players: players,
     characters, sessions, media, notes,
     tab, setTab,
     meId,
