@@ -1356,6 +1356,54 @@ function PortraitPlaceholder({ tint = "moss", label, ratio = "3 / 4", style = {}
   );
 }
 
+// ----- Character portrait (uploadable image, falls back to placeholder) -----
+function Portrait({ c, set, ratio = "3 / 4" }) {
+  const canEdit = useCanEdit();
+  const app = useApp();
+  const fileRef = useRef(null);
+  const [busy, setBusy] = useState(false);
+
+  const pick = () => fileRef.current && fileRef.current.click();
+  const onFile = async (e) => {
+    const file = e.target.files && e.target.files[0];
+    e.target.value = "";
+    if (!file) return;
+    setBusy(true);
+    const url = await app.uploadPortrait(file);
+    setBusy(false);
+    if (url) set("portraitUrl", url);
+  };
+
+  return (
+    <div style={{ position: "relative" }}>
+      {c.portraitUrl ? (
+        <div style={{ width: "100%", aspectRatio: ratio, borderRadius: 6, overflow: "hidden", border: "1px solid var(--line)" }}>
+          <img src={c.portraitUrl} alt={c.name}
+            style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}/>
+        </div>
+      ) : (
+        <PortraitPlaceholder tint={c.portraitTint} label={c.portrait || (canEdit ? "No portrait yet" : c.name)} ratio={ratio}/>
+      )}
+      {canEdit && (
+        <>
+          <input ref={fileRef} type="file" accept="image/*" onChange={onFile} style={{ display: "none" }}/>
+          <button className="btn ghost sm" onClick={pick} disabled={busy}
+            style={{ position: "absolute", bottom: 8, right: 8, fontSize: 11, padding: "4px 10px",
+              background: "var(--bg-0)", borderRadius: 4, opacity: busy ? 0.6 : 0.95 }}>
+            {busy ? "Uploading…" : (c.portraitUrl ? "Change" : "Upload portrait")}
+          </button>
+          {c.portraitUrl && !busy && (
+            <button className="btn ghost sm" onClick={() => set("portraitUrl", "")}
+              title="Remove portrait"
+              style={{ position: "absolute", top: 8, right: 8, fontSize: 13, padding: "0 8px",
+                background: "var(--bg-0)", borderRadius: 4, color: "var(--blood)" }}>×</button>
+          )}
+        </>
+      )}
+    </div>
+  );
+}
+
 // ----- Pill -----
 function Pill({ children, tone = "" }) {
   return <span className={`pill ${tone}`}>{children}</span>;
@@ -2043,11 +2091,12 @@ window.Hub = Hub;
 
 function EventsTab() {
   const app = useApp();
-  const { sessions, players, setRsvp, meId } = app;
+  const { sessions, players, setRsvp, meId, addSession, deleteSession } = app;
   const upcoming = sessions.filter(s => s.upcoming).sort((a,b) => new Date(a.date) - new Date(b.date));
   const past = sessions.filter(s => s.past).sort((a,b) => new Date(b.date) - new Date(a.date));
   const next = upcoming[0];
   const cd = useCountdown(next?.date);
+  const [showForm, setShowForm] = useState(false);
 
   return (
     <div className="page">
@@ -2081,10 +2130,16 @@ function EventsTab() {
 
       {/* Upcoming */}
       <SectionH eyebrow="Upcoming" title="On the road ahead" action={
-        <button className="btn ghost sm">+ Schedule</button>
+        <button className="btn ghost sm" onClick={() => setShowForm(v => !v)}>{showForm ? "Cancel" : "+ Schedule"}</button>
       }/>
+      {showForm && <ScheduleForm onCreate={async (form) => { await addSession(form); setShowForm(false); }}/>}
+      {upcoming.length === 0 && !showForm && (
+        <div className="muted italic serif" style={{ fontSize: 14, padding: "20px 0", textAlign: "center", marginBottom: 24 }}>
+          No sessions scheduled yet — hit <strong>+ Schedule</strong> to plan the next gathering.
+        </div>
+      )}
       <div style={{ display: "flex", flexDirection: "column", gap: 14, marginBottom: 36 }}>
-        {upcoming.map(s => <UpcomingRow key={s.id} session={s} players={players} setRsvp={setRsvp} meId={meId}/>)}
+        {upcoming.map(s => <UpcomingRow key={s.id} session={s} players={players} setRsvp={setRsvp} meId={meId} onDelete={deleteSession}/>)}
       </div>
 
       {/* Past */}
@@ -2098,7 +2153,66 @@ function EventsTab() {
   );
 }
 
-function UpcomingRow({ session, players, setRsvp, meId }) {
+function ScheduleForm({ onCreate }) {
+  const [title, setTitle] = useState("");
+  const [date, setDate] = useState("");
+  const [mode, setMode] = useState("in-person");
+  const [location, setLocation] = useState("");
+  const [summary, setSummary] = useState("");
+  const [busy, setBusy] = useState(false);
+  const valid = title.trim() && date;
+
+  const submit = async () => {
+    if (!valid || busy) return;
+    setBusy(true);
+    // datetime-local has no timezone; convert to ISO so countdowns work
+    await onCreate({ title: title.trim(), date: new Date(date).toISOString(), mode, location: location.trim(), summary: summary.trim() });
+    setBusy(false);
+  };
+
+  const field = { background: "var(--bg-0)", border: "1px solid var(--line)", borderRadius: 6, padding: "9px 12px", color: "var(--ink-0)", font: "inherit", fontSize: 14, width: "100%" };
+  const lbl = { display: "block", marginBottom: 4 };
+
+  return (
+    <Card style={{ marginBottom: 24 }} rail>
+      <div className="eyebrow" style={{ marginBottom: 14 }}>Schedule a session</div>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
+        <div style={{ gridColumn: "1 / -1" }}>
+          <span className="eyebrow" style={lbl}>Title</span>
+          <input style={field} value={title} onChange={e => setTitle(e.target.value)} placeholder="e.g. The Sunken Vault"/>
+        </div>
+        <div>
+          <span className="eyebrow" style={lbl}>Date & time</span>
+          <input style={field} type="datetime-local" value={date} onChange={e => setDate(e.target.value)}/>
+        </div>
+        <div>
+          <span className="eyebrow" style={lbl}>Mode</span>
+          <select style={field} value={mode} onChange={e => setMode(e.target.value)}>
+            <option value="in-person">in-person</option>
+            <option value="remote">remote</option>
+            <option value="hybrid">hybrid</option>
+          </select>
+        </div>
+        <div style={{ gridColumn: "1 / -1" }}>
+          <span className="eyebrow" style={lbl}>Location</span>
+          <input style={field} value={location} onChange={e => setLocation(e.target.value)} placeholder="Where (or which platform)"/>
+        </div>
+        <div style={{ gridColumn: "1 / -1" }}>
+          <span className="eyebrow" style={lbl}>Summary / teaser</span>
+          <textarea style={{ ...field, minHeight: 70, resize: "vertical" }} value={summary} onChange={e => setSummary(e.target.value)} placeholder="A short hook for the session…"/>
+        </div>
+      </div>
+      <div style={{ display: "flex", justifyContent: "flex-end", gap: 10, marginTop: 16 }}>
+        <button className={`btn ${valid ? "ember" : "ghost"}`} onClick={submit} disabled={!valid || busy}
+          style={{ opacity: !valid || busy ? 0.6 : 1 }}>
+          {busy ? "Scheduling…" : "Add to schedule"}
+        </button>
+      </div>
+    </Card>
+  );
+}
+
+function UpcomingRow({ session, players, setRsvp, meId, onDelete }) {
   const cd = useCountdown(session.date);
   const myRsvp = session.rsvps[meId];
   const yes = Object.entries(session.rsvps).filter(([_, v]) => v === "yes").map(([k]) => k);
@@ -2127,6 +2241,11 @@ function UpcomingRow({ session, players, setRsvp, meId }) {
             <span className="dim mono" style={{ fontSize: 11 }}>SESSION {String(session.number).padStart(2, "0")}</span>
             <Pill tone={session.mode === "in-person" ? "moss" : session.mode === "remote" ? "gold" : ""}>{session.mode}</Pill>
             <span className="dim" style={{ fontSize: 12 }}>· {cd.days}d {cd.hours}h away</span>
+            {onDelete && (
+              <button className="btn ghost sm" title="Remove session"
+                onClick={() => { if (confirm(`Remove "${session.title}" from the schedule?`)) onDelete(session.id); }}
+                style={{ padding: "0 7px", borderRadius: 4, color: "var(--blood)", fontSize: 13, marginLeft: "auto" }}>×</button>
+            )}
           </div>
           <div className="serif" style={{ fontSize: 22, color: "var(--ink-0)", fontWeight: 600, marginBottom: 6 }}>{session.title}</div>
           <div className="muted serif italic" style={{ fontSize: 14, marginBottom: 8, maxWidth: 640 }}>"{session.summary}"</div>
@@ -2335,7 +2454,7 @@ function SheetSpread({ character: c, updateCharacter, player }) {
       <Card pad={false} rail style={{ marginBottom: 20 }}>
         <div style={{ display: "grid", gridTemplateColumns: "240px 1fr", gap: 0 }}>
           <div style={{ padding: 18, borderRight: "1px solid var(--line)" }}>
-            <PortraitPlaceholder tint={c.portraitTint} label={c.portrait} ratio="3 / 4"/>
+            <Portrait c={c} set={set} ratio="3 / 4"/>
           </div>
           <div style={{ padding: "22px 26px" }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 16, marginBottom: 8 }}>
@@ -2471,7 +2590,7 @@ function SheetStacked({ character: c, updateCharacter, player }) {
     <div style={{ display: "grid", gridTemplateColumns: "300px 1fr", gap: 24 }}>
       <div style={{ position: "sticky", top: 92, alignSelf: "start", display: "flex", flexDirection: "column", gap: 16 }}>
         <Card pad={false}>
-          <div style={{ padding: 14 }}><PortraitPlaceholder tint={c.portraitTint} label={c.portrait} ratio="3 / 4"/></div>
+          <div style={{ padding: 14 }}><Portrait c={c} set={set} ratio="3 / 4"/></div>
           <div style={{ padding: "0 18px 18px" }}>
             <div className="eyebrow" style={{ marginBottom: 4 }}>
               <Editable value={c.titles[0] || ""} onChange={v => set("titles", [v])} placeholder="Title / epithet"/>
@@ -2689,20 +2808,46 @@ function SurgesTile({ c, set }) {
 
 // ----- Section Panels -----
 
+// ----- Shared list-edit helpers + controls for the sheet section panels -----
+function RemoveBtn({ onClick, title = "Remove" }) {
+  const canEdit = useCanEdit();
+  if (!canEdit) return null;
+  return (
+    <button className="btn ghost sm" title={title} onClick={onClick}
+      style={{ padding: "0 7px", borderRadius: 4, color: "var(--blood)", fontSize: 14, lineHeight: 1.3, flexShrink: 0 }}>×</button>
+  );
+}
+function AddBtn({ label, onClick }) {
+  const canEdit = useCanEdit();
+  if (!canEdit) return null;
+  return <button className="btn ghost sm" onClick={onClick}>{label}</button>;
+}
+
 function AbilitiesPanel({ c, set }) {
+  const canEdit = useCanEdit();
   const tiers = ["Signature", "Heroic", "Triggered"];
+  const abilities = c.abilities || [];
+  const addAbility = () => set("abilities", [...abilities, { name: "New Ability", tier: "Signature", type: "Action", cost: "", keywords: "", trigger: "", text: "" }]);
+  const updateAt = (gi, patch) => set("abilities", abilities.map((a, j) => j === gi ? { ...a, ...patch } : a));
+  const removeAt = (gi) => set("abilities", abilities.filter((_, j) => j !== gi));
   return (
     <div>
-      <SectionH eyebrow="The Arsenal" title="Abilities & Powers"/>
+      <SectionH eyebrow="The Arsenal" title="Abilities & Powers" action={<AddBtn label="+ Ability" onClick={addAbility}/>}/>
+      {abilities.length === 0 && !canEdit && (
+        <div className="muted italic serif" style={{ fontSize: 14, padding: "20px 0", textAlign: "center" }}>No abilities recorded.</div>
+      )}
       <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
         {tiers.map(tier => {
-          const list = c.abilities.filter(a => a.tier === tier);
+          const list = abilities.map((a, gi) => ({ a, gi })).filter(x => x.a.tier === tier);
           if (!list.length) return null;
           return (
             <div key={tier}>
               <div className="flourish" style={{ justifyContent: "flex-start", marginBottom: 10 }}>{tier}</div>
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(360px, 1fr))", gap: 12 }}>
-                {list.map((a, i) => <AbilityCard key={i} ability={a}/>)}
+                {list.map(({ a, gi }) => (
+                  <AbilityCard key={gi} ability={a} tiers={tiers}
+                    onChange={patch => updateAt(gi, patch)} onRemove={() => removeAt(gi)}/>
+                ))}
               </div>
             </div>
           );
@@ -2712,24 +2857,41 @@ function AbilitiesPanel({ c, set }) {
   );
 }
 
-function AbilityCard({ ability: a }) {
+function AbilityCard({ ability: a, tiers, onChange, onRemove }) {
+  const canEdit = useCanEdit();
   return (
     <div className="card" style={{ padding: "14px 16px", background: "var(--bg-2)" }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 4 }}>
-        <div className="serif" style={{ fontSize: 17, fontWeight: 600, color: "var(--ink-0)" }}>{a.name}</div>
-        <div className="dim mono" style={{ fontSize: 10 }}>{a.type}</div>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 4, gap: 8 }}>
+        <div className="serif" style={{ fontSize: 17, fontWeight: 600, color: "var(--ink-0)", flex: 1 }}>
+          <Editable value={a.name} onChange={v => onChange({ name: v })} placeholder="Ability name"/>
+        </div>
+        <div className="dim mono" style={{ fontSize: 10 }}>
+          <Editable value={a.type} onChange={v => onChange({ type: v })} placeholder="Type"/>
+        </div>
+        <RemoveBtn onClick={onRemove}/>
       </div>
-      <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 8 }}>
-        {a.cost && <Pill tone="ember">{a.cost}</Pill>}
-        {a.keywords && <span className="dim mono" style={{ fontSize: 10 }}>{a.keywords}</span>}
+      {canEdit && (
+        <div style={{ marginBottom: 8 }}>
+          <select value={a.tier} onChange={e => onChange({ tier: e.target.value })}
+            className="btn ghost sm" style={{ fontSize: 11, padding: "2px 6px" }}>
+            {tiers.map(t => <option key={t} value={t}>{t}</option>)}
+          </select>
+        </div>
+      )}
+      <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 8, alignItems: "center" }}>
+        {(a.cost || canEdit) && <Pill tone="ember"><Editable value={a.cost} onChange={v => onChange({ cost: v })} placeholder="Cost"/></Pill>}
+        {(a.keywords || canEdit) && <span className="dim mono" style={{ fontSize: 10 }}><Editable value={a.keywords} onChange={v => onChange({ keywords: v })} placeholder="keywords"/></span>}
       </div>
-      {a.trigger && (
+      {(a.trigger || canEdit) && (
         <div style={{ fontSize: 12, color: "var(--ink-2)", fontStyle: "italic", marginBottom: 6 }}>
-          <span className="eyebrow" style={{ marginRight: 6 }}>Trigger</span>{a.trigger}
+          <span className="eyebrow" style={{ marginRight: 6 }}>Trigger</span>
+          <Editable value={a.trigger} onChange={v => onChange({ trigger: v })} placeholder="—"/>
         </div>
       )}
       {a.potency && <PotencyStrip potency={a.potency}/>}
-      <div style={{ fontSize: 13, color: "var(--ink-1)", lineHeight: 1.55 }}>{a.text}</div>
+      <div style={{ fontSize: 13, color: "var(--ink-1)", lineHeight: 1.55 }}>
+        <Editable multiline value={a.text} onChange={v => onChange({ text: v })} placeholder="Describe the ability…"/>
+      </div>
     </div>
   );
 }
@@ -2817,12 +2979,37 @@ function SkillsPerksPanel({ c, set }) {
     next[i] = { ...next[i], edge: !next[i].edge };
     set("skills", next);
   };
+  const addSkill = () => set("skills", [...skills, { name: "New skill", group: "Lore", edge: false }]);
+  const setSkill = (i, patch) => set("skills", skills.map((s, j) => j === i ? { ...s, ...patch } : s));
+  const removeSkill = (i) => set("skills", skills.filter((_, j) => j !== i));
+  const addPerk = () => set("perks", [...perks, { name: "New perk", text: "" }]);
+  const setPerk = (i, patch) => set("perks", perks.map((p, j) => j === i ? { ...p, ...patch } : p));
+  const removePerk = (i) => set("perks", perks.filter((_, j) => j !== i));
+  const renderSkillRow = (s) => (
+    <div key={s._i} style={{ display: "grid", gridTemplateColumns: "auto 1fr auto auto", gap: 10, alignItems: "center", padding: "6px 8px", borderBottom: "1px solid var(--line)" }}>
+      <button onClick={canEdit ? () => toggleEdge(s._i) : undefined} title={canEdit ? "Edge" : undefined} style={{
+        width: 18, height: 18, padding: 0,
+        border: `1.5px solid ${s.edge ? "var(--ember)" : "var(--line-strong)"}`,
+        background: s.edge ? "var(--ember)" : "transparent",
+        borderRadius: 3, cursor: canEdit ? "pointer" : "default",
+        color: "var(--bg-0)", fontSize: 11, fontWeight: 700, lineHeight: 1,
+        boxShadow: s.edge ? "0 0 6px var(--ember-glow)" : "none",
+      }}>{s.edge ? "✓" : ""}</button>
+      <span className="serif" style={{ fontSize: 14, color: "var(--ink-0)" }}>
+        <Editable value={s.name} onChange={v => setSkill(s._i, { name: v })} placeholder="Skill"/>
+      </span>
+      <span className="mono" style={{ fontSize: 9, color: s.edge ? "var(--ember)" : "var(--ink-2)", letterSpacing: "0.06em", textTransform: "uppercase" }}>{s.edge ? "Edge" : "Trained"}</span>
+      <RemoveBtn onClick={() => removeSkill(s._i)}/>
+    </div>
+  );
   return (
     <div>
       <SectionH eyebrow="Trained & Honed" title="Skills & Perks"/>
       <div style={{ display: "grid", gridTemplateColumns: "1.4fr 1fr", gap: 24 }}>
         <div>
-          <div className="flourish" style={{ justifyContent: "flex-start", marginBottom: 10 }}>Skills</div>
+          <div className="flourish" style={{ justifyContent: "space-between", marginBottom: 10 }}>
+            <span>Skills</span><AddBtn label="+ Skill" onClick={addSkill}/>
+          </div>
           {skills.length === 0 ? (
             <div className="muted italic serif" style={{ fontSize: 14, padding: "12px 0" }}>No trained skills.</div>
           ) : (
@@ -2833,36 +3020,43 @@ function SkillsPerksPanel({ c, set }) {
                 return (
                   <div key={g} style={{ marginBottom: 8 }}>
                     <div className="dim mono" style={{ fontSize: 10, letterSpacing: "0.06em", textTransform: "uppercase", marginBottom: 4 }}>{g}</div>
-                    {list.map(s => (
-                      <div key={s._i} style={{ display: "grid", gridTemplateColumns: "auto 1fr auto", gap: 10, alignItems: "center", padding: "6px 8px", borderBottom: "1px solid var(--line)" }}>
-                        <button onClick={canEdit ? () => toggleEdge(s._i) : undefined} title={canEdit ? "Edge" : undefined} style={{
-                          width: 18, height: 18, padding: 0,
-                          border: `1.5px solid ${s.edge ? "var(--ember)" : "var(--line-strong)"}`,
-                          background: s.edge ? "var(--ember)" : "transparent",
-                          borderRadius: 3, cursor: canEdit ? "pointer" : "default",
-                          color: "var(--bg-0)", fontSize: 11, fontWeight: 700, lineHeight: 1,
-                          boxShadow: s.edge ? "0 0 6px var(--ember-glow)" : "none",
-                        }}>{s.edge ? "✓" : ""}</button>
-                        <span className="serif" style={{ fontSize: 14, color: "var(--ink-0)" }}>{s.name}</span>
-                        <span className="mono" style={{ fontSize: 9, color: s.edge ? "var(--ember)" : "var(--ink-2)", letterSpacing: "0.06em", textTransform: "uppercase" }}>{s.edge ? "Edge" : "Trained"}</span>
-                      </div>
-                    ))}
+                    {list.map(renderSkillRow)}
                   </div>
                 );
               })}
+              {/* skills with an unrecognized/blank group */}
+              {(() => {
+                const others = skills.map((s, i) => ({ ...s, _i: i })).filter(s => !groups.includes(s.group));
+                if (!others.length) return null;
+                return (
+                  <div style={{ marginBottom: 8 }}>
+                    <div className="dim mono" style={{ fontSize: 10, letterSpacing: "0.06em", textTransform: "uppercase", marginBottom: 4 }}>Other</div>
+                    {others.map(renderSkillRow)}
+                  </div>
+                );
+              })()}
             </div>
           )}
         </div>
         <div>
-          <div className="flourish" style={{ justifyContent: "flex-start", marginBottom: 10 }}>Perks</div>
+          <div className="flourish" style={{ justifyContent: "space-between", marginBottom: 10 }}>
+            <span>Perks</span><AddBtn label="+ Perk" onClick={addPerk}/>
+          </div>
           {perks.length === 0 ? (
             <div className="muted italic serif" style={{ fontSize: 14, padding: "12px 0" }}>No perks taken.</div>
           ) : (
             <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
               {perks.map((p, i) => (
                 <div key={i} style={{ padding: "10px 12px", border: "1px solid var(--line)", borderLeft: "2px solid var(--gold)", background: "var(--bg-2)", borderRadius: "0 6px 6px 0" }}>
-                  <div className="serif" style={{ fontSize: 14, color: "var(--ink-0)", fontWeight: 600, marginBottom: 3 }}>{p.name}</div>
-                  <div style={{ fontSize: 12, color: "var(--ink-1)", lineHeight: 1.5 }}>{p.text}</div>
+                  <div style={{ display: "flex", justifyContent: "space-between", gap: 8, marginBottom: 3 }}>
+                    <div className="serif" style={{ fontSize: 14, color: "var(--ink-0)", fontWeight: 600, flex: 1 }}>
+                      <Editable value={p.name} onChange={v => setPerk(i, { name: v })} placeholder="Perk name"/>
+                    </div>
+                    <RemoveBtn onClick={() => removePerk(i)}/>
+                  </div>
+                  <div style={{ fontSize: 12, color: "var(--ink-1)", lineHeight: 1.5 }}>
+                    <Editable multiline value={p.text} onChange={v => setPerk(i, { text: v })} placeholder="What the perk does…"/>
+                  </div>
                 </div>
               ))}
             </div>
@@ -2882,11 +3076,12 @@ function ProjectsPanel({ c, set }) {
     next[i] = { ...next[i], progress: Math.max(0, Math.min(next[i].goal, next[i].progress + delta)) };
     set("projects", next);
   };
+  const setProject = (i, patch) => set("projects", projects.map((p, j) => j === i ? { ...p, ...patch } : p));
+  const addProject = () => set("projects", [...projects, { name: "New project", goal: 10, progress: 0, characteristic: "" }]);
+  const removeProject = (i) => set("projects", projects.filter((_, j) => j !== i));
   return (
     <div>
-      <SectionH eyebrow="Between sessions" title="Downtime Projects" action={
-        canEdit ? <button className="btn ghost sm">+ Project</button> : null
-      }/>
+      <SectionH eyebrow="Between sessions" title="Downtime Projects" action={<AddBtn label="+ Project" onClick={addProject}/>}/>
       {projects.length === 0 ? (
         <div className="muted italic serif" style={{ fontSize: 14, padding: "20px 0", textAlign: "center" }}>Nothing in the workshop.</div>
       ) : (
@@ -2897,14 +3092,20 @@ function ProjectsPanel({ c, set }) {
             return (
               <div key={i} style={{ padding: "12px 14px", border: "1px solid var(--line)", borderRadius: 6, background: "var(--bg-2)" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 6, gap: 12 }}>
-                  <div className="serif" style={{ fontSize: 15, color: "var(--ink-0)", fontWeight: 600 }}>{p.name}</div>
+                  <div className="serif" style={{ fontSize: 15, color: "var(--ink-0)", fontWeight: 600, flex: 1 }}>
+                    <Editable value={p.name} onChange={v => setProject(i, { name: v })} placeholder="Project name"/>
+                  </div>
                   <div style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
-                    {p.characteristic && <span className="dim mono" style={{ fontSize: 10 }}>{p.characteristic}</span>}
+                    <span className="dim mono" style={{ fontSize: 10 }}>
+                      <Editable value={p.characteristic} onChange={v => setProject(i, { characteristic: v })} placeholder="—"/>
+                    </span>
                     {canEdit && <button className="btn ghost sm" style={{ padding: "1px 7px", borderRadius: 3, fontSize: 11 }} onClick={() => adjust(i, -1)}>−</button>}
                     {canEdit && <button className="btn ghost sm" style={{ padding: "1px 7px", borderRadius: 3, fontSize: 11 }} onClick={() => adjust(i, +1)}>+</button>}
                     <span className="serif" style={{ fontSize: 15, color: done ? "var(--moss)" : "var(--ink-0)", fontWeight: 600, fontVariantNumeric: "tabular-nums" }}>
                       {p.progress}<span className="dim" style={{ fontSize: 12 }}> / {p.goal}</span>
                     </span>
+                    <MaxControl label="Goal" value={p.goal} min={1} onChange={v => setProject(i, { goal: v })}/>
+                    <RemoveBtn onClick={() => removeProject(i)}/>
                   </div>
                 </div>
                 <div className="bar" style={{ height: 6 }}>
@@ -2924,14 +3125,25 @@ function ProjectsPanel({ c, set }) {
 }
 
 function FeaturesPanel({ c, set }) {
+  const features = c.features || [];
+  const setFeature = (i, patch) => set("features", features.map((f, j) => j === i ? { ...f, ...patch } : f));
+  const addFeature = () => set("features", [...features, { name: "New feature", text: "" }]);
+  const removeFeature = (i) => set("features", features.filter((_, j) => j !== i));
   return (
     <div>
-      <SectionH eyebrow="Class & Kit" title="Features"/>
+      <SectionH eyebrow="Class & Kit" title="Features" action={<AddBtn label="+ Feature" onClick={addFeature}/>}/>
       <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-        {c.features.map((f, i) => (
+        {features.map((f, i) => (
           <div key={i} style={{ padding: "12px 14px", border: "1px solid var(--line)", borderRadius: 6, background: "var(--bg-2)" }}>
-            <div className="serif" style={{ fontSize: 16, fontWeight: 600, color: "var(--ink-0)", marginBottom: 4 }}>{f.name}</div>
-            <div style={{ fontSize: 13, color: "var(--ink-1)", lineHeight: 1.55 }}>{f.text}</div>
+            <div style={{ display: "flex", justifyContent: "space-between", gap: 8, marginBottom: 4 }}>
+              <div className="serif" style={{ fontSize: 16, fontWeight: 600, color: "var(--ink-0)", flex: 1 }}>
+                <Editable value={f.name} onChange={v => setFeature(i, { name: v })} placeholder="Feature name"/>
+              </div>
+              <RemoveBtn onClick={() => removeFeature(i)}/>
+            </div>
+            <div style={{ fontSize: 13, color: "var(--ink-1)", lineHeight: 1.55 }}>
+              <Editable multiline value={f.text} onChange={v => setFeature(i, { text: v })} placeholder="What the feature does…"/>
+            </div>
           </div>
         ))}
       </div>
@@ -2940,17 +3152,23 @@ function FeaturesPanel({ c, set }) {
 }
 
 function InventoryPanel({ c, set }) {
-  const canEdit = useCanEdit();
+  const inventory = c.inventory || [];
+  const setItem = (i, patch) => set("inventory", inventory.map((it, j) => j === i ? { ...it, ...patch } : it));
+  const addItem = () => set("inventory", [...inventory, { name: "New item", note: "" }]);
+  const removeItem = (i) => set("inventory", inventory.filter((_, j) => j !== i));
   return (
     <div>
-      <SectionH eyebrow="On their person" title="Inventory & Treasures" action={
-        canEdit ? <button className="btn ghost sm">+ Item</button> : null
-      }/>
+      <SectionH eyebrow="On their person" title="Inventory & Treasures" action={<AddBtn label="+ Item" onClick={addItem}/>}/>
       <div style={{ borderTop: "1px solid var(--line)" }}>
-        {c.inventory.map((it, i) => (
-          <div key={i} style={{ display: "grid", gridTemplateColumns: "1fr 1.5fr", gap: 16, padding: "10px 4px", borderBottom: "1px solid var(--line)" }}>
-            <div className="serif" style={{ fontSize: 15, color: "var(--ink-0)" }}>{it.name}</div>
-            <div className="muted italic serif" style={{ fontSize: 13 }}>{it.note || "—"}</div>
+        {inventory.map((it, i) => (
+          <div key={i} style={{ display: "grid", gridTemplateColumns: "1fr 1.5fr auto", gap: 16, padding: "10px 4px", borderBottom: "1px solid var(--line)", alignItems: "center" }}>
+            <div className="serif" style={{ fontSize: 15, color: "var(--ink-0)" }}>
+              <Editable value={it.name} onChange={v => setItem(i, { name: v })} placeholder="Item"/>
+            </div>
+            <div className="muted italic serif" style={{ fontSize: 13 }}>
+              <Editable value={it.note} onChange={v => setItem(i, { note: v })} placeholder="—"/>
+            </div>
+            <RemoveBtn onClick={() => removeItem(i)}/>
           </div>
         ))}
       </div>
@@ -2959,20 +3177,38 @@ function InventoryPanel({ c, set }) {
 }
 
 function TiesPanel({ c, set }) {
+  const canEdit = useCanEdit();
+  const ties = c.ties || [];
+  const goals = c.goals || [];
+  const setTie = (i, patch) => set("ties", ties.map((t, j) => j === i ? { ...t, ...patch } : t));
+  const addTie = () => set("ties", [...ties, { who: "Someone", how: "", note: "" }]);
+  const removeTie = (i) => set("ties", ties.filter((_, j) => j !== i));
+  const setGoal = (i, v) => set("goals", goals.map((g, j) => j === i ? v : g));
+  const addGoal = () => set("goals", [...goals, "New goal"]);
+  const removeGoal = (i) => set("goals", goals.filter((_, j) => j !== i));
   return (
     <div>
       <SectionH eyebrow="The Web" title="Ties & Backstory"/>
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
         <div>
-          <div className="flourish" style={{ justifyContent: "flex-start", marginBottom: 10 }}>Ties</div>
+          <div className="flourish" style={{ justifyContent: "space-between", marginBottom: 10 }}>
+            <span>Ties</span><AddBtn label="+ Tie" onClick={addTie}/>
+          </div>
           <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-            {c.ties.map((t, i) => (
+            {ties.map((t, i) => (
               <div key={i} style={{ padding: "10px 12px", border: "1px solid var(--line)", borderLeft: "2px solid var(--ember)", background: "var(--bg-2)", borderRadius: "0 6px 6px 0" }}>
-                <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 2 }}>
-                  <span className="serif" style={{ fontSize: 14, color: "var(--ink-0)", fontWeight: 600 }}>{t.who}</span>
-                  <span className="dim mono" style={{ fontSize: 10 }}>{t.how}</span>
+                <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 2, gap: 8 }}>
+                  <span className="serif" style={{ fontSize: 14, color: "var(--ink-0)", fontWeight: 600, flex: 1 }}>
+                    <Editable value={t.who} onChange={v => setTie(i, { who: v })} placeholder="Who"/>
+                  </span>
+                  <span className="dim mono" style={{ fontSize: 10 }}>
+                    <Editable value={t.how} onChange={v => setTie(i, { how: v })} placeholder="how"/>
+                  </span>
+                  <RemoveBtn onClick={() => removeTie(i)}/>
                 </div>
-                <div className="muted italic" style={{ fontSize: 12 }}>{t.note}</div>
+                <div className="muted italic" style={{ fontSize: 12 }}>
+                  <Editable multiline value={t.note} onChange={v => setTie(i, { note: v })} placeholder="Notes on this tie…"/>
+                </div>
               </div>
             ))}
           </div>
@@ -2980,13 +3216,17 @@ function TiesPanel({ c, set }) {
         <div>
           <div className="flourish" style={{ justifyContent: "flex-start", marginBottom: 10 }}>Story</div>
           <div className="serif italic" style={{ fontSize: 14, color: "var(--ink-1)", lineHeight: 1.65, marginBottom: 16, padding: "0 4px" }}>
-            "<Editable multiline value={c.backstory} onChange={v => set("backstory", v)}/>"
+            "<Editable multiline value={c.backstory} onChange={v => set("backstory", v)} placeholder="Their backstory…"/>"
           </div>
-          <div className="flourish" style={{ justifyContent: "flex-start", marginBottom: 10 }}>Goals</div>
+          <div className="flourish" style={{ justifyContent: "space-between", marginBottom: 10 }}>
+            <span>Goals</span><AddBtn label="+ Goal" onClick={addGoal}/>
+          </div>
           <ul style={{ margin: 0, padding: 0, listStyle: "none", display: "flex", flexDirection: "column", gap: 6 }}>
-            {c.goals.map((g, i) => (
-              <li key={i} style={{ display: "flex", gap: 10, fontSize: 13, color: "var(--ink-1)", padding: "6px 0", borderBottom: "1px solid var(--line)" }}>
-                <span style={{ color: "var(--ember)", fontFamily: "var(--font-display)" }}>✦</span> {g}
+            {goals.map((g, i) => (
+              <li key={i} style={{ display: "flex", gap: 10, alignItems: "center", fontSize: 13, color: "var(--ink-1)", padding: "6px 0", borderBottom: "1px solid var(--line)" }}>
+                <span style={{ color: "var(--ember)", fontFamily: "var(--font-display)" }}>✦</span>
+                <span style={{ flex: 1 }}><Editable value={g} onChange={v => setGoal(i, v)} placeholder="A goal"/></span>
+                <RemoveBtn onClick={() => removeGoal(i)}/>
               </li>
             ))}
           </ul>
@@ -2997,23 +3237,34 @@ function TiesPanel({ c, set }) {
 }
 
 function ConditionsPanel({ c, set }) {
+  const conditions = c.conditions || [];
+  const setCond = (i, patch) => set("conditions", conditions.map((cd, j) => j === i ? { ...cd, ...patch } : cd));
+  const addCond = () => set("conditions", [...conditions, { name: "Condition", duration: "", source: "" }]);
+  const removeCond = (i) => set("conditions", conditions.filter((_, j) => j !== i));
   return (
     <div>
-      <SectionH eyebrow="The State of Things" title="Conditions & Notes"/>
+      <SectionH eyebrow="The State of Things" title="Conditions & Notes" action={<AddBtn label="+ Condition" onClick={addCond}/>}/>
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 20 }}>
         <div>
           <div className="flourish" style={{ justifyContent: "flex-start", marginBottom: 10 }}>Conditions</div>
-          {c.conditions.length === 0 ? (
+          {conditions.length === 0 ? (
             <div className="muted italic serif" style={{ fontSize: 14, padding: "20px 0", textAlign: "center" }}>None — for now.</div>
           ) : (
             <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-              {c.conditions.map((cond, i) => (
+              {conditions.map((cond, i) => (
                 <div key={i} style={{ padding: "10px 12px", border: "1px solid oklch(0.42 0.10 25)", background: "oklch(0.30 0.08 25 / 0.20)", borderRadius: 6 }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
-                    <span className="serif" style={{ color: "var(--ink-0)", fontWeight: 600 }}>{cond.name}</span>
-                    <span className="dim mono" style={{ fontSize: 10 }}>{cond.duration}</span>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 8 }}>
+                    <span className="serif" style={{ color: "var(--ink-0)", fontWeight: 600, flex: 1 }}>
+                      <Editable value={cond.name} onChange={v => setCond(i, { name: v })} placeholder="Condition"/>
+                    </span>
+                    <span className="dim mono" style={{ fontSize: 10 }}>
+                      <Editable value={cond.duration} onChange={v => setCond(i, { duration: v })} placeholder="duration"/>
+                    </span>
+                    <RemoveBtn onClick={() => removeCond(i)}/>
                   </div>
-                  <div className="muted" style={{ fontSize: 12, marginTop: 2 }}>{cond.source}</div>
+                  <div className="muted" style={{ fontSize: 12, marginTop: 2 }}>
+                    <Editable value={cond.source} onChange={v => setCond(i, { source: v })} placeholder="source"/>
+                  </div>
                 </div>
               ))}
             </div>
@@ -3021,27 +3272,21 @@ function ConditionsPanel({ c, set }) {
         </div>
         <div>
           <DamageList
-            title="Weaknesses"
-            tone="blood"
+            title="Weaknesses" tone="blood" listKey="weaknesses" set={set}
             items={c.weaknesses || []}
-            empty="No known weaknesses."
-            sign="+"
-            sub="extra damage taken"
+            empty="No known weaknesses." sign="+" sub="extra damage taken"
           />
           <div style={{ height: 16 }}></div>
           <DamageList
-            title="Immunities"
-            tone="moss"
+            title="Immunities" tone="moss" listKey="immunities" set={set}
             items={c.immunities || []}
-            empty="Vulnerable to all."
-            sign="−"
-            sub="damage reduced"
+            empty="Vulnerable to all." sign="−" sub="damage reduced"
           />
         </div>
         <div>
           <div className="flourish" style={{ justifyContent: "flex-start", marginBottom: 10 }}>Notes</div>
           <div style={{ padding: "0 4px" }}>
-            <Editable multiline value={c.notes} onChange={v => set("notes", v)}
+            <Editable multiline value={c.notes} onChange={v => set("notes", v)} placeholder="Anything worth remembering…"
               style={{ minHeight: 100, fontFamily: "var(--font-serif)", fontStyle: "italic", fontSize: 14, color: "var(--ink-1)", lineHeight: 1.6 }}/>
           </div>
         </div>
@@ -3050,30 +3295,45 @@ function ConditionsPanel({ c, set }) {
   );
 }
 
-function DamageList({ title, tone, items, empty, sign, sub }) {
+function DamageList({ title, tone, items, empty, sign, sub, listKey, set }) {
+  const canEdit = useCanEdit();
   const colors = tone === "blood"
     ? { border: "oklch(0.42 0.10 25)", bg: "oklch(0.30 0.08 25 / 0.20)", text: "var(--blood)" }
     : { border: "oklch(0.40 0.06 140)", bg: "oklch(0.30 0.05 140 / 0.20)", text: "var(--moss)" };
+  const setItem = (i, patch) => set(listKey, items.map((it, j) => j === i ? { ...it, ...patch } : it));
+  const addItem = () => set(listKey, [...items, { type: "Damage", value: 1 }]);
+  const removeItem = (i) => set(listKey, items.filter((_, j) => j !== i));
   return (
     <div>
-      <div className="flourish" style={{ justifyContent: "flex-start", marginBottom: 10 }}>{title}</div>
+      <div className="flourish" style={{ justifyContent: "space-between", marginBottom: 10 }}>
+        <span>{title}</span>{set && <AddBtn label="+" onClick={addItem}/>}
+      </div>
       {items.length === 0 ? (
         <div className="muted italic serif" style={{ fontSize: 13, padding: "12px 0" }}>{empty}</div>
       ) : (
         <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
           {items.map((it, i) => (
             <div key={i} style={{
-              display: "grid", gridTemplateColumns: "1fr auto", alignItems: "center", gap: 12,
+              display: "grid", gridTemplateColumns: "1fr auto auto", alignItems: "center", gap: 12,
               padding: "8px 12px", border: `1px solid ${colors.border}`,
               background: colors.bg, borderRadius: 6,
             }}>
               <div>
-                <div className="serif" style={{ fontSize: 14, color: "var(--ink-0)", fontWeight: 600 }}>{it.type}</div>
+                <div className="serif" style={{ fontSize: 14, color: "var(--ink-0)", fontWeight: 600 }}>
+                  <Editable value={it.type} onChange={v => setItem(i, { type: v })} placeholder="Type"/>
+                </div>
                 <div className="dim mono" style={{ fontSize: 10, marginTop: 1 }}>{sub}</div>
               </div>
-              <div className="serif" style={{ fontSize: 22, fontWeight: 600, color: colors.text, fontVariantNumeric: "tabular-nums", lineHeight: 1 }}>
+              <div className="serif" style={{ fontSize: 22, fontWeight: 600, color: colors.text, fontVariantNumeric: "tabular-nums", lineHeight: 1, display: "flex", alignItems: "center", gap: 4 }}>
                 {sign}{it.value}
+                {canEdit && (
+                  <span style={{ display: "flex", flexDirection: "column" }}>
+                    <button className="btn ghost sm" style={{ padding: "0 5px", borderRadius: 3, fontSize: 10, lineHeight: 1 }} onClick={() => setItem(i, { value: it.value + 1 })}>+</button>
+                    <button className="btn ghost sm" style={{ padding: "0 5px", borderRadius: 3, fontSize: 10, lineHeight: 1 }} onClick={() => setItem(i, { value: Math.max(0, it.value - 1) })}>−</button>
+                  </span>
+                )}
               </div>
+              <RemoveBtn onClick={() => removeItem(i)}/>
             </div>
           ))}
         </div>
@@ -3086,8 +3346,15 @@ window.CharactersTab = CharactersTab;
 
 // ----- Culture & Career panel -----
 function OriginPanel({ c, set }) {
+  const canEdit = useCanEdit();
   const culture = c.culture || {};
   const career = c.careerData || {};
+  const setCulture = (patch) => set("culture", { ...culture, ...patch });
+  const setCareer = (patch) => set("careerData", { ...career, ...patch });
+  const complications = culture.complications || [];
+  const addComplication = () => setCulture({ complications: [...complications, "New complication"] });
+  const setComplication = (i, v) => setCulture({ complications: complications.map((x, j) => j === i ? v : x) });
+  const removeComplication = (i) => setCulture({ complications: complications.filter((_, j) => j !== i) });
   return (
     <div>
       <SectionH eyebrow="Where they come from" title="Culture & Career"/>
@@ -3102,30 +3369,41 @@ function OriginPanel({ c, set }) {
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 12, gap: 12 }}>
           <div>
             <div className="eyebrow" style={{ marginBottom: 4 }}>Career</div>
-            <div className="serif" style={{ fontSize: 22, fontWeight: 600, color: "var(--ink-0)", letterSpacing: "0.005em" }}>{c.career}</div>
-          </div>
-          {career.skills && career.skills.length > 0 && (
-            <div style={{ display: "flex", gap: 6, flexWrap: "wrap", justifyContent: "flex-end" }}>
-              {career.skills.map(s => <Pill key={s} tone="gold">{s}</Pill>)}
+            <div className="serif" style={{ fontSize: 22, fontWeight: 600, color: "var(--ink-0)", letterSpacing: "0.005em" }}>
+              <Editable value={c.career} onChange={v => set("career", v)} placeholder="Career"/>
             </div>
-          )}
+          </div>
+          <div style={{ display: "flex", gap: 6, flexWrap: "wrap", justifyContent: "flex-end", alignItems: "center" }}>
+            {(career.skills || []).map((s, i) => <Pill key={i} tone="gold">{s}</Pill>)}
+            {canEdit && (
+              <span className="dim mono" style={{ fontSize: 10 }}>
+                skills: <Editable value={(career.skills || []).join(", ")}
+                  onChange={v => setCareer({ skills: v.split(",").map(x => x.trim()).filter(Boolean) })}
+                  placeholder="comma, separated"/>
+              </span>
+            )}
+          </div>
         </div>
-        {career.benefits && (
+        {(career.benefits || canEdit) && (
           <div style={{ marginBottom: 14 }}>
             <div className="dim mono" style={{ fontSize: 10, letterSpacing: "0.06em", textTransform: "uppercase", marginBottom: 4 }}>Benefits</div>
-            <div style={{ fontSize: 13, color: "var(--ink-1)", lineHeight: 1.55 }}>{career.benefits}</div>
+            <div style={{ fontSize: 13, color: "var(--ink-1)", lineHeight: 1.55 }}>
+              <Editable multiline value={career.benefits} onChange={v => setCareer({ benefits: v })} placeholder="Career benefits…"/>
+            </div>
           </div>
         )}
-        {career.perk && (
+        {(career.perk || canEdit) && (
           <div style={{ marginBottom: 14, padding: "10px 12px", background: "var(--bg-2)", borderRadius: 4, border: "1px solid var(--line)" }}>
             <div className="dim mono" style={{ fontSize: 10, letterSpacing: "0.06em", textTransform: "uppercase", marginBottom: 4, color: "var(--gold)" }}>Career Perk</div>
-            <div style={{ fontSize: 13, color: "var(--ink-1)", lineHeight: 1.55 }}>{career.perk}</div>
+            <div style={{ fontSize: 13, color: "var(--ink-1)", lineHeight: 1.55 }}>
+              <Editable multiline value={career.perk} onChange={v => setCareer({ perk: v })} placeholder="Career perk…"/>
+            </div>
           </div>
         )}
-        {career.incident && (
+        {(career.incident || canEdit) && (
           <div className="serif italic" style={{ fontSize: 14, color: "var(--ink-2)", lineHeight: 1.6, paddingLeft: 12, borderLeft: "2px solid var(--ember-deep)" }}>
             <span className="eyebrow" style={{ marginRight: 8, color: "var(--ember)" }}>Inciting Incident</span>
-            {career.incident}
+            <Editable multiline value={career.incident} onChange={v => setCareer({ incident: v })} placeholder="What set them on this path…"/>
           </div>
         )}
       </div>
@@ -3133,29 +3411,35 @@ function OriginPanel({ c, set }) {
       {/* Culture & Backgrounds */}
       <div className="flourish" style={{ justifyContent: "flex-start", marginBottom: 14 }}>Culture & Backgrounds</div>
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 16 }}>
-        <CultureField label="Environment" value={culture.environment} icon="◐"/>
-        <CultureField label="Organization" value={culture.organization} icon="◇"/>
-        <CultureField label="Upbringing" value={culture.upbringing} icon="✦"/>
-        <CultureField label="Languages" value={(culture.languages || []).join(" · ")} icon="❝"/>
+        <CultureField label="Environment" value={culture.environment} icon="◐" onChange={v => setCulture({ environment: v })}/>
+        <CultureField label="Organization" value={culture.organization} icon="◇" onChange={v => setCulture({ organization: v })}/>
+        <CultureField label="Upbringing" value={culture.upbringing} icon="✦" onChange={v => setCulture({ upbringing: v })}/>
+        <CultureField label="Languages" value={(culture.languages || []).join(" · ")} icon="❝"
+          onChange={v => setCulture({ languages: v.split(/[·,]/).map(x => x.trim()).filter(Boolean) })}/>
       </div>
 
       {/* Complications */}
       <div>
-        <div className="dim mono" style={{ fontSize: 10, letterSpacing: "0.06em", textTransform: "uppercase", marginBottom: 8, color: "var(--blood)" }}>Complications</div>
-        {(!culture.complications || culture.complications.length === 0) ? (
+        <div className="dim mono" style={{ fontSize: 10, letterSpacing: "0.06em", textTransform: "uppercase", marginBottom: 8, color: "var(--blood)", display: "flex", justifyContent: "space-between" }}>
+          <span>Complications</span><AddBtn label="+" onClick={addComplication}/>
+        </div>
+        {complications.length === 0 ? (
           <div className="muted italic serif" style={{ fontSize: 13, padding: "8px 0" }}>No known complications.</div>
         ) : (
           <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-            {culture.complications.map((comp, i) => (
+            {complications.map((comp, i) => (
               <div key={i} style={{
-                display: "flex", gap: 10, alignItems: "flex-start",
+                display: "flex", gap: 10, alignItems: "center",
                 padding: "8px 12px",
                 background: "oklch(0.30 0.06 25 / 0.15)",
                 border: "1px solid oklch(0.40 0.08 25)",
                 borderRadius: 4,
               }}>
                 <span style={{ color: "var(--blood)", fontFamily: "var(--font-display)", fontSize: 14, lineHeight: 1.4, flexShrink: 0 }}>※</span>
-                <span className="serif italic" style={{ fontSize: 13, color: "var(--ink-1)", lineHeight: 1.55 }}>{comp}</span>
+                <span className="serif italic" style={{ fontSize: 13, color: "var(--ink-1)", lineHeight: 1.55, flex: 1 }}>
+                  <Editable value={comp} onChange={v => setComplication(i, v)} placeholder="A complication…"/>
+                </span>
+                <RemoveBtn onClick={() => removeComplication(i)}/>
               </div>
             ))}
           </div>
@@ -3165,7 +3449,7 @@ function OriginPanel({ c, set }) {
   );
 }
 
-function CultureField({ label, value, icon }) {
+function CultureField({ label, value, icon, onChange }) {
   return (
     <div style={{
       padding: "10px 14px",
@@ -3177,7 +3461,9 @@ function CultureField({ label, value, icon }) {
         <span style={{ color: "var(--ember)", fontFamily: "var(--font-display)", fontSize: 11, opacity: 0.8 }}>{icon}</span>
         {label}
       </div>
-      <div className="serif" style={{ fontSize: 14, color: "var(--ink-0)", lineHeight: 1.4 }}>{value || <span className="muted italic">Unknown</span>}</div>
+      <div className="serif" style={{ fontSize: 14, color: "var(--ink-0)", lineHeight: 1.4 }}>
+        <Editable value={value} onChange={onChange} placeholder="Unknown"/>
+      </div>
     </div>
   );
 }
@@ -4442,6 +4728,42 @@ function App() {
     });
   }, []);
 
+  const addSession = useCallback(async (form) => {
+    const id = "s" + Date.now();
+    const existingNums = sessions.map(s => s.number || 0);
+    const number = (existingNums.length ? Math.max(...existingNums) : 0) + 1;
+    const session = {
+      id, number,
+      title: form.title || "Untitled session",
+      summary: form.summary || "",
+      date: form.date,                 // ISO datetime string
+      mode: form.mode || "in-person",
+      location: form.location || "",
+      upcoming: true, past: false,
+      rsvps: {},
+    };
+    setSessions(prev => [...prev, session]);
+    const { error } = await window._db.from("sessions").insert({ id, data: session });
+    if (error) console.warn("Session save failed:", error.message);
+    return session;
+  }, [sessions]);
+
+  const updateSession = useCallback(async (sessionId, patch) => {
+    setSessions(prev => prev.map(s => {
+      if (s.id !== sessionId) return s;
+      const updated = { ...s, ...patch };
+      window._db.from("sessions").update({ data: updated }).eq("id", sessionId)
+        .then(({ error }) => { if (error) console.warn("Session update failed:", error.message); });
+      return updated;
+    }));
+  }, []);
+
+  const deleteSession = useCallback(async (sessionId) => {
+    setSessions(prev => prev.filter(s => s.id !== sessionId));
+    const { error } = await window._db.from("sessions").delete().eq("id", sessionId);
+    if (error) console.warn("Session delete failed:", error.message);
+  }, []);
+
   const uploadMedia = useCallback(async (file, folder = "Uploads") => {
     const ext = file.name.split(".").pop().toLowerCase();
     const isImage = ["jpg","jpeg","png","gif","webp","svg","avif"].includes(ext);
@@ -4469,6 +4791,20 @@ function App() {
     return newItem;
   }, [meId]);
 
+  // Upload a character portrait image to the shared "media" bucket; returns its public URL.
+  const uploadPortrait = useCallback(async (file) => {
+    const ext = (file.name.split(".").pop() || "img").toLowerCase();
+    if (!["jpg","jpeg","png","gif","webp","avif"].includes(ext)) {
+      alert("Please choose an image file (jpg, png, gif, webp, avif).");
+      return null;
+    }
+    const path = `portraits/${Date.now()}_${file.name.replace(/\s+/g, "_")}`;
+    const { error: upErr } = await window._db.storage.from("media").upload(path, file, { upsert: true });
+    if (upErr) { console.error("Portrait upload failed:", upErr.message); alert("Upload failed: " + upErr.message); return null; }
+    const { data: urlData } = window._db.storage.from("media").getPublicUrl(path);
+    return urlData.publicUrl;
+  }, []);
+
   const logout = useCallback(async () => {
     await window._db.auth.signOut();
   }, []);
@@ -4494,7 +4830,8 @@ function App() {
     tab, setTab,
     meId,
     selectedPlayer, setSelectedPlayer,
-    setRsvp, updateCharacter, addNote, uploadMedia,
+    setRsvp, updateCharacter, addNote, uploadMedia, uploadPortrait,
+    addSession, updateSession, deleteSession,
     sheetLayout: tweaks.sheetLayout,
   };
 
