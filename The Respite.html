@@ -1,0 +1,3800 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>The Respite</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+/* The Respite — Obsidian & Ember theme */
+
+@import url('https://fonts.googleapis.com/css2?family=UnifrakturCook:wght@700&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+:root {
+  /* Obsidian (default) */
+  --bg-0: oklch(0.14 0.005 60);
+  --bg-1: oklch(0.18 0.008 60);
+  --bg-2: oklch(0.22 0.010 60);
+  --bg-3: oklch(0.26 0.012 60);
+  --ink-0: oklch(0.96 0.012 80);
+  --ink-1: oklch(0.84 0.014 80);
+  --ink-2: oklch(0.66 0.012 80);
+  --ink-3: oklch(0.50 0.010 80);
+  --line: oklch(0.32 0.010 60);
+  --line-strong: oklch(0.42 0.012 60);
+
+  --ember: oklch(0.70 0.17 45);
+  --ember-soft: oklch(0.55 0.12 45);
+  --ember-deep: oklch(0.40 0.10 45);
+  --ember-glow: oklch(0.75 0.18 50);
+
+  --gold: oklch(0.80 0.11 85);
+  --gold-soft: oklch(0.65 0.08 85);
+
+  --blood: oklch(0.50 0.14 25);
+  --moss: oklch(0.55 0.07 140);
+  --arcane: oklch(0.60 0.10 280);
+
+  --font-display: "UnifrakturCook", "Cormorant Garamond", serif;
+  --font-serif: "Cormorant Garamond", "EB Garamond", Georgia, serif;
+  --font-sans: "Inter", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+
+  --radius-sm: 4px;
+  --radius: 6px;
+  --radius-lg: 10px;
+
+  --shadow-1: 0 1px 0 0 oklch(0.30 0.010 60 / 0.4);
+  --shadow-2: 0 8px 24px -8px oklch(0 0 0 / 0.7), 0 1px 0 0 oklch(0.30 0.010 60 / 0.4);
+  --shadow-glow: 0 0 24px -4px oklch(0.70 0.17 45 / 0.35);
+}
+
+/* Theme: Inn at dusk (warm parchment) */
+[data-theme="inn"] {
+  --bg-0: oklch(0.18 0.020 60);
+  --bg-1: oklch(0.22 0.025 55);
+  --bg-2: oklch(0.27 0.028 55);
+  --bg-3: oklch(0.32 0.030 55);
+  --ink-0: oklch(0.94 0.025 80);
+  --ink-1: oklch(0.82 0.030 75);
+  --ink-2: oklch(0.62 0.025 70);
+  --ink-3: oklch(0.48 0.020 70);
+  --line: oklch(0.36 0.025 55);
+  --line-strong: oklch(0.48 0.030 55);
+  --ember: oklch(0.72 0.16 55);
+}
+
+/* Theme: Arcane tome */
+[data-theme="arcane"] {
+  --bg-0: oklch(0.16 0.040 265);
+  --bg-1: oklch(0.20 0.045 265);
+  --bg-2: oklch(0.25 0.050 265);
+  --bg-3: oklch(0.30 0.052 265);
+  --ink-0: oklch(0.95 0.020 90);
+  --ink-1: oklch(0.85 0.025 85);
+  --ink-2: oklch(0.65 0.030 270);
+  --ink-3: oklch(0.50 0.030 270);
+  --line: oklch(0.34 0.045 265);
+  --line-strong: oklch(0.46 0.050 265);
+  --ember: oklch(0.80 0.13 85); /* swap to gold leaf */
+  --gold: oklch(0.82 0.13 85);
+}
+
+/* Theme: Wilderness */
+[data-theme="wild"] {
+  --bg-0: oklch(0.18 0.018 150);
+  --bg-1: oklch(0.22 0.020 150);
+  --bg-2: oklch(0.27 0.024 150);
+  --bg-3: oklch(0.32 0.026 150);
+  --ink-0: oklch(0.94 0.015 110);
+  --ink-1: oklch(0.82 0.018 110);
+  --ink-2: oklch(0.62 0.020 140);
+  --ink-3: oklch(0.48 0.018 140);
+  --line: oklch(0.36 0.025 145);
+  --line-strong: oklch(0.48 0.028 145);
+  --ember: oklch(0.68 0.13 60);
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg-0);
+  color: var(--ink-1);
+  font-family: var(--font-sans);
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  min-height: 100vh;
+  background:
+    radial-gradient(ellipse 70% 40% at 50% -10%, oklch(0.70 0.17 45 / 0.08), transparent 70%),
+    radial-gradient(ellipse 60% 30% at 80% 110%, oklch(0.70 0.17 45 / 0.05), transparent 70%),
+    var(--bg-0);
+}
+
+button {
+  font-family: inherit;
+  font-size: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
+input, textarea, select {
+  font-family: inherit;
+  color: inherit;
+}
+
+/* Display + ornamentation */
+.brand-mark {
+  font-family: var(--font-display);
+  letter-spacing: 0.01em;
+}
+
+.flourish {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--gold-soft);
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 13px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.flourish::before, .flourish::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--line-strong), transparent);
+  min-width: 24px;
+}
+
+/* Hairline gold rule */
+.rule {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--gold-soft), transparent);
+  opacity: 0.45;
+  margin: 16px 0;
+}
+
+/* Cards */
+.card {
+  background: var(--bg-1);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  position: relative;
+  overflow: hidden;
+}
+.card.with-rail::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 2px;
+  background: linear-gradient(180deg, transparent, var(--ember), transparent);
+}
+.card-pad { padding: 18px 20px; }
+
+/* Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 8px 14px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--line-strong);
+  background: var(--bg-2);
+  color: var(--ink-0);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  transition: all 0.15s ease;
+  text-decoration: none;
+}
+.btn:hover {
+  border-color: var(--ember-soft);
+  color: var(--ink-0);
+  background: var(--bg-3);
+}
+.btn.ember {
+  background: linear-gradient(180deg, var(--ember) 0%, var(--ember-soft) 100%);
+  border-color: var(--ember-deep);
+  color: oklch(0.18 0.02 50);
+  font-weight: 600;
+  text-shadow: 0 1px 0 oklch(0.85 0.10 60 / 0.4);
+}
+.btn.ember:hover { box-shadow: var(--shadow-glow); }
+.btn.ghost {
+  background: transparent;
+  border-color: var(--line);
+  color: var(--ink-2);
+}
+.btn.ghost:hover { color: var(--ink-0); border-color: var(--line-strong); }
+.btn.sm { padding: 5px 10px; font-size: 12px; }
+.btn.icon { padding: 7px; aspect-ratio: 1; }
+
+/* Pill */
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 9px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  border: 1px solid var(--line);
+  background: var(--bg-2);
+  color: var(--ink-2);
+}
+.pill.ember { color: var(--ember); border-color: var(--ember-deep); background: oklch(0.40 0.10 45 / 0.15); }
+.pill.gold { color: var(--gold); border-color: oklch(0.55 0.08 85); background: oklch(0.45 0.06 85 / 0.12); }
+.pill.moss { color: var(--moss); border-color: oklch(0.40 0.06 140); background: oklch(0.35 0.05 140 / 0.15); }
+.pill.race { color: oklch(0.78 0.05 280); border-color: oklch(0.40 0.06 280); background: oklch(0.30 0.05 280 / 0.20); }
+.pill.race::before { content: "⚜"; margin-right: 4px; opacity: 0.7; font-size: 0.85em; }
+.pill.dot::before { content: ""; width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
+
+/* Section heading */
+.section-h {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+.section-h h2 {
+  font-family: var(--font-serif);
+  font-weight: 600;
+  font-size: 22px;
+  margin: 0;
+  color: var(--ink-0);
+  letter-spacing: 0.005em;
+}
+.section-h .eyebrow {
+  font-family: var(--font-display);
+  color: var(--ember);
+  font-size: 13px;
+  display: block;
+  margin-bottom: 4px;
+  letter-spacing: 0.02em;
+}
+
+/* Editable field */
+.editable {
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  padding: 4px 6px;
+  margin: -4px -6px;
+  transition: all 0.12s ease;
+  cursor: text;
+  display: inline-block;
+  min-width: 40px;
+}
+.editable:hover { background: var(--bg-2); border-color: var(--line); }
+.editable:focus { background: var(--bg-2); border-color: var(--ember); outline: none; }
+
+/* Stat tile */
+.stat-tile {
+  background: var(--bg-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 12px 10px;
+  text-align: center;
+  position: relative;
+}
+.stat-tile .label {
+  font-family: var(--font-display);
+  color: var(--ink-2);
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  margin-bottom: 4px;
+}
+.stat-tile .value {
+  font-family: var(--font-serif);
+  font-size: 32px;
+  font-weight: 600;
+  color: var(--ink-0);
+  line-height: 1;
+}
+.stat-tile .sub { font-size: 10px; color: var(--ink-3); margin-top: 4px; letter-spacing: 0.05em; text-transform: uppercase; }
+
+/* Top nav */
+.topnav {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: oklch(0.14 0.005 60 / 0.85);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--line);
+}
+.topnav-inner {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 28px;
+  display: flex;
+  align-items: center;
+  gap: 32px;
+  height: 64px;
+}
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.brand-sigil {
+  width: 30px;
+  height: 30px;
+  border: 1px solid var(--ember);
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  position: relative;
+  background: radial-gradient(circle at 50% 60%, oklch(0.70 0.17 45 / 0.5), transparent 70%);
+}
+.brand-sigil::after {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--ember);
+  box-shadow: 0 0 8px var(--ember-glow);
+}
+.brand-name {
+  font-family: var(--font-display);
+  font-size: 22px;
+  color: var(--ink-0);
+  line-height: 1;
+}
+.brand-tag {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 12px;
+  color: var(--ink-3);
+  letter-spacing: 0.08em;
+  margin-top: 2px;
+}
+
+.tabs {
+  display: flex;
+  gap: 4px;
+  margin-left: auto;
+}
+.tab {
+  padding: 8px 16px;
+  background: transparent;
+  border: 0;
+  color: var(--ink-2);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  position: relative;
+  font-family: var(--font-sans);
+  text-transform: uppercase;
+}
+.tab:hover { color: var(--ink-0); }
+.tab.active { color: var(--ember); }
+.tab.active::after {
+  content: "";
+  position: absolute;
+  left: 16px; right: 16px;
+  bottom: -1px;
+  height: 2px;
+  background: var(--ember);
+  box-shadow: 0 0 8px var(--ember-glow);
+}
+
+.user-chip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 10px 4px 4px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--bg-1);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.user-chip:hover { border-color: var(--ember-soft); }
+
+.avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--bg-3);
+  border: 1px solid var(--line-strong);
+  display: grid;
+  place-items: center;
+  font-family: var(--font-serif);
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--ink-0);
+  flex-shrink: 0;
+  position: relative;
+  overflow: hidden;
+}
+.avatar.lg { width: 56px; height: 56px; font-size: 22px; }
+.avatar.xl { width: 84px; height: 84px; font-size: 32px; }
+.avatar.ember { background: linear-gradient(135deg, var(--ember-soft), var(--ember-deep)); color: oklch(0.95 0.02 80); border-color: var(--ember); }
+.avatar.gold { background: linear-gradient(135deg, var(--gold), var(--gold-soft)); color: oklch(0.20 0.02 80); border-color: var(--gold); }
+.avatar.moss { background: linear-gradient(135deg, var(--moss), oklch(0.40 0.06 140)); color: oklch(0.95 0.01 110); border-color: var(--moss); }
+.avatar.blood { background: linear-gradient(135deg, var(--blood), oklch(0.35 0.10 25)); color: oklch(0.95 0.02 60); border-color: var(--blood); }
+.avatar.arcane { background: linear-gradient(135deg, var(--arcane), oklch(0.40 0.08 280)); color: oklch(0.95 0.02 280); border-color: var(--arcane); }
+
+/* Page shell */
+.page {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 32px 28px 80px;
+}
+
+/* Striped placeholder */
+.placeholder {
+  background:
+    repeating-linear-gradient(
+      135deg,
+      var(--bg-2) 0,
+      var(--bg-2) 6px,
+      var(--bg-1) 6px,
+      var(--bg-1) 12px
+    );
+  border: 1px dashed var(--line-strong);
+  border-radius: var(--radius);
+  display: grid;
+  place-items: center;
+  color: var(--ink-3);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+/* Resource pip / track */
+.pip-track {
+  display: inline-flex;
+  gap: 4px;
+}
+.pip {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 1px solid var(--line-strong);
+  background: var(--bg-2);
+  cursor: pointer;
+  transition: all 0.12s;
+}
+.pip.filled {
+  background: var(--ember);
+  border-color: var(--ember-deep);
+  box-shadow: 0 0 6px var(--ember-glow);
+}
+.pip:hover { transform: scale(1.15); }
+
+/* Bar */
+.bar {
+  height: 8px;
+  background: var(--bg-2);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  overflow: hidden;
+  position: relative;
+}
+.bar > .fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--blood), var(--ember));
+  border-radius: 999px;
+  transition: width 0.4s ease;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: var(--bg-0); }
+::-webkit-scrollbar-thumb { background: var(--bg-3); border-radius: 999px; border: 2px solid var(--bg-0); }
+::-webkit-scrollbar-thumb:hover { background: var(--line-strong); }
+
+/* Misc */
+.muted { color: var(--ink-2); }
+.dim { color: var(--ink-3); }
+.serif { font-family: var(--font-serif); }
+.display { font-family: var(--font-display); }
+.mono { font-family: var(--font-mono); }
+.italic { font-style: italic; }
+.row { display: flex; gap: 12px; align-items: center; }
+.col { display: flex; flex-direction: column; gap: 12px; }
+.grow { flex: 1; }
+.eyebrow {
+  font-family: var(--font-display);
+  font-size: 12px;
+  color: var(--ember);
+  letter-spacing: 0.04em;
+}
+
+textarea.editable, input.editable {
+  width: 100%;
+  font: inherit;
+  resize: vertical;
+}
+
+.kbd {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  padding: 1px 5px;
+  border-radius: 3px;
+  background: var(--bg-2);
+  border: 1px solid var(--line);
+  color: var(--ink-2);
+}
+
+/* Tooltip-ish hover */
+@keyframes ember-pulse {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
+.pulse { animation: ember-pulse 2s ease-in-out infinite; }
+
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script>
+(function() {
+  window.addEventListener("error", function(e) {
+    if (e.message && e.message.indexOf("ResizeObserver") !== -1) {
+      e.stopImmediatePropagation();
+      e.preventDefault();
+      return true;
+    }
+  }, true);
+  const origConsoleError = console.error;
+  console.error = function(...args) {
+    if (args[0] && typeof args[0] === "string" && args[0].indexOf("ResizeObserver") !== -1) return;
+    return origConsoleError.apply(console, args);
+  };
+})();
+</script>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<script>
+// Mock data for The Respite — a Drawsteel TTRPG companion
+// Drawsteel uses: Might/Agility/Reason/Intuition/Presence, Stamina, Recoveries, Heroic Resources
+
+const PLAYERS = [
+  {
+    id: "gm",
+    name: "Aldric",
+    handle: "@aldric",
+    role: "Director",
+    avatar: "ember",
+    initials: "A",
+    pronouns: "he/him",
+    joined: "2024-11-02",
+  },
+  {
+    id: "p1",
+    name: "Mira",
+    handle: "@mira",
+    role: "Player",
+    avatar: "moss",
+    initials: "M",
+    pronouns: "she/her",
+    joined: "2024-11-02",
+  },
+  {
+    id: "p2",
+    name: "Caspian",
+    handle: "@cas",
+    role: "Player",
+    avatar: "arcane",
+    initials: "C",
+    pronouns: "he/him",
+    joined: "2024-11-02",
+  },
+  {
+    id: "p3",
+    name: "Wren",
+    handle: "@wren",
+    role: "Player",
+    avatar: "gold",
+    initials: "W",
+    pronouns: "they/them",
+    joined: "2024-11-15",
+  },
+  {
+    id: "p4",
+    name: "Tova",
+    handle: "@tova",
+    role: "Player",
+    avatar: "blood",
+    initials: "T",
+    pronouns: "she/her",
+    joined: "2024-12-08",
+  },
+];
+
+const CHARACTERS = {
+  p1: {
+    ownerId: "p1",
+    name: "Sable Vex",
+    pronouns: "she/her",
+    ancestry: "Revenant",
+    career: "Bounty Hunter",
+    careerData: {
+      benefits: "Start with one Renown and one favor owed by a local guard captain. +2 Project Points per downtime.",
+      skills: ["Track", "Intimidate"],
+      perk: "Marked Quarry — once per session, declare an enemy your bounty; gain edge on attacks against them.",
+      incident: "The hunt that went wrong. A name you don't say aloud.",
+    },
+    culture: {
+      languages: ["Caelian", "Khoursir cant", "Old Tongue (read only)"],
+      environment: "Urban — fog-cities, wet stone, lamplight",
+      organization: "Anarchic — the Eighth Hour answers to none",
+      upbringing: "Underclass — raised in the cinder-warrens",
+      complications: ["The Sablecut sings when blood is near", "Sunlight makes her skin itch"],
+    },
+    cls: "Shadow",
+    kit: "Stickybomb",
+    level: 4,
+    xp: { current: 38, next: 60 },
+    victories: 11,
+    surges: 2,
+    portrait: "shadow-blade portrait",
+    portraitTint: "moss",
+    titles: ["The Quiet Knife", "Of the Eighth Hour"],
+    stamina: { current: 38, max: 52, recoveries: { current: 6, max: 8, value: 17 } },
+    resource: { name: "Insight", current: 4, max: 7 },
+    characteristics: {
+      Might: 1, Agility: 3, Reason: 2, Intuition: 2, Presence: 0,
+    },
+    abilities: [
+      { tier: "Signature", name: "Twin Fang", type: "Action", keywords: "Melee, Weapon", text: "Two strikes against one or two creatures within reach. ⊕ Roll: Tier 1 — 2 dmg. Tier 2 — 5 dmg. Tier 3 — 8 dmg + bleeding (EoT).", potency: { stat: "Agility", weak: 1, average: 2, strong: 3 } },
+      { tier: "Heroic", name: "Caltrops of the Eighth Hour", type: "Maneuver", cost: "3 Insight", keywords: "Area, Burst 2", text: "Each enemy in a burst takes 4 damage and is slowed (save ends). You may shift 1.", potency: { stat: "Agility", weak: 1, average: 2, strong: 3 } },
+      { tier: "Heroic", name: "Vanish", type: "Maneuver", cost: "5 Insight", keywords: "Stealth", text: "Become hidden until end of next turn, even while observed. First attack from hidden gains edge." },
+      { tier: "Triggered", name: "Cut & Run", type: "Triggered", trigger: "An enemy ends its turn adjacent.", keywords: "Movement", text: "Shift up to your speed. If you end adjacent to a different enemy, deal 1d6+Agility damage.", potency: { stat: "Agility", weak: 1, average: 2, strong: 3 } },
+    ],
+    features: [
+      { name: "Shadow Step", text: "Once per turn, when you move, you may teleport up to 3 squares instead." },
+      { name: "Stickybomb Kit", text: "Each combat begins with three alchemical stickbombs. Throw as a maneuver — 4 fire damage, square is difficult terrain until EoE." },
+      { name: "Echo of the Mourning Bell", text: "When you fall to 0 stamina, the next attack against you misses. (Once per session.)" },
+    ],
+    inventory: [
+      { name: "Twin shortswords (Sablecut)", note: "Reforged from a knight's broken longsword." },
+      { name: "Hooded greatcloak, ash-grey", note: "" },
+      { name: "Tinderbox & 8 stickbombs", note: "" },
+      { name: "Locket — empty", note: "Was once a portrait. Cannot remember whose." },
+      { name: "73 silver marks", note: "" },
+    ],
+    ties: [
+      { who: "Brann Hollowfast", how: "Mentor (deceased)", note: "Owes him a final mercy. Has not yet delivered it." },
+      { who: "Caspian", how: "Trust, reluctant", note: "Saved her life in the Underway. She does not like being indebted." },
+      { who: "The Cinderwake Cartel", how: "Hunted by", note: "They have her name on a slate." },
+    ],
+    backstory: "Died once, on the steps of the cathedral, on the eighth hour of the eighth night. Came back wrong. The bell still rings in her chest when she sleeps.",
+    goals: ["Find out who she was before the bell.", "Burn down the Cinderwake counting house.", "Stop flinching at warm hands."],
+    conditions: [
+      { name: "Bleeding (1)", source: "Marrowmaw bite", duration: "EoNT" },
+    ],
+    notes: "Refuses to drink wine. Will not say why.",
+    weaknesses: [{ type: "Holy", value: 2 }],
+    immunities: [{ type: "Necrotic", value: 5 }],
+    wealth: 3,
+    renown: 2,
+    tempStamina: 4,
+    heroTokens: 2,
+    turnTaken: false,
+    skills: [
+      { name: "Sneak", group: "Intrigue", edge: true },
+      { name: "Alertness", group: "Intrigue", edge: false },
+      { name: "Climb", group: "Exploration", edge: false },
+      { name: "Streetwise", group: "Lore", edge: true },
+    ],
+    perks: [
+      { name: "Eighth Hour Resolve", text: "Edge on saves vs frightened." },
+      { name: "Cinder-marked", text: "You always know which way is north." },
+    ],
+    projects: [
+      { name: "Reforge the Sablecut", goal: 30, progress: 18, characteristic: "Reason" },
+      { name: "Investigate the locket", goal: 20, progress: 5, characteristic: "Intuition" },
+    ],
+  },
+  p2: {
+    ownerId: "p2",
+    name: "Vael Ostrim",
+    pronouns: "he/him",
+    ancestry: "Human (Khoursir)",
+    career: "Sage",
+    careerData: {
+      benefits: "Start with a personal library worth 50gp. +1 Wealth from a stipend. Edge on Lore tests in any city with a temple.",
+      skills: ["Research", "Decipher"],
+      perk: "Folded Page — once per session, declare you have read about this; the Director answers one factual question.",
+      incident: "You read a book you should not have. The page is still in your pocket.",
+    },
+    culture: {
+      languages: ["Caelian", "Khoursir", "High Litany", "Two dead tongues"],
+      environment: "Urban — universities, archives, scriptoria",
+      organization: "Hierarchical — the Brotherhood of the Folded Page",
+      upbringing: "Cloistered — raised among scholars",
+      complications: ["The page in your pocket whispers in dreams", "You owe a debt of three favors to your old master"],
+    },
+    cls: "Talent",
+    kit: "Cloak",
+    level: 4,
+    xp: { current: 41, next: 60 },
+    victories: 14,
+    surges: 1,
+    portrait: "scholar in storm-grey robes",
+    portraitTint: "arcane",
+    titles: ["Of the Glassmoor Athenæum", "Reader of the Folded Page"],
+    stamina: { current: 22, max: 34, recoveries: { current: 5, max: 6, value: 11 } },
+    resource: { name: "Clarity", current: 6, max: 9 },
+    characteristics: {
+      Might: 0, Agility: 1, Reason: 3, Intuition: 2, Presence: 2,
+    },
+    abilities: [
+      { tier: "Signature", name: "Lash of Thought", type: "Action", keywords: "Ranged 10, Psionic", potency: { stat: "Reason", weak: 1, average: 2, strong: 3 }, text: "Mind-spear at one target. Tier 1 — 3 psychic. Tier 2 — 6 psychic + slide 1. Tier 3 — 9 psychic + dazed (EoT)." },
+      { tier: "Heroic", name: "Citadel of the Folded Page", type: "Maneuver", cost: "4 Clarity", keywords: "Aura 3", potency: { stat: "Reason", weak: 1, average: 2, strong: 3 }, text: "Allies in aura gain +2 to resist forced movement and have edge on Reason tests." },
+      { tier: "Heroic", name: "Quiet the Storm", type: "Action", cost: "7 Clarity", keywords: "Area, Burst 3", text: "Each creature in burst is calmed — saves vs frightened, restrained, taunted end. Allies regain 1 recovery worth of stamina." },
+      { tier: "Triggered", name: "Mark the Memory", type: "Triggered", trigger: "An enemy uses an ability.", keywords: "Reaction", text: "You memorize the ability. Once before next short rest, you may use it as if it were yours." },
+    ],
+    features: [
+      { name: "Cloak Kit", text: "Robes of muted argent. While unarmored, +2 stamina max and disengage as a free action." },
+      { name: "Reader of Folded Pages", text: "Once per session, ask the Director one question about an object's history. They must answer truthfully." },
+    ],
+    inventory: [
+      { name: "Stormglass focus", note: "Hums when lightning is within a mile." },
+      { name: "Field journal, half-full", note: "" },
+      { name: "Letter from his sister, unopened", note: "Six months in his pocket." },
+      { name: "Vial of moonsalt", note: "" },
+    ],
+    ties: [
+      { who: "Sable Vex", how: "Allyship", note: "She is the most interesting problem he has met." },
+      { who: "Master Halvern", how: "Estranged tutor", note: "Last words: 'Don't follow me.'" },
+    ],
+    backstory: "Walked away from the Athenæum after they classified his sister's death as 'incidental research loss.' Has been looking for the right page ever since.",
+    goals: ["Find Halvern.", "Translate the page he stole.", "Not become his teacher."],
+    conditions: [],
+    notes: "Doesn't sleep with the lamp out.",
+    weaknesses: [{ type: "Psychic", value: 3 }],
+    immunities: [],
+    wealth: 4,
+    renown: 3,
+    tempStamina: 0,
+    heroTokens: 1,
+    turnTaken: true,
+    skills: [
+      { name: "Magic", group: "Lore", edge: true },
+      { name: "History", group: "Lore", edge: true },
+      { name: "Insight", group: "Interpersonal", edge: false },
+    ],
+    perks: [
+      { name: "Folded Page", text: "Once per session, ask the Director one question about an object." },
+    ],
+    projects: [
+      { name: "Translate the stolen page", goal: 40, progress: 22, characteristic: "Reason" },
+    ],
+  },
+  p3: {
+    ownerId: "p3",
+    name: "Bramble Underhowe",
+    pronouns: "they/them",
+    ancestry: "Polder",
+    career: "Wise One",
+    careerData: {
+      benefits: "Locals offer hearth and bread without coin. Edge on Heal tests outside settlements.",
+      skills: ["Heal", "Nature"],
+      perk: "Stillwater Vow — your spoken word stops violence for one round, once per session. Cannot be broken.",
+      incident: "The grove you tend is dying. You don't know why.",
+    },
+    culture: {
+      languages: ["Caelian", "Sylvan murmur", "Sign of the Hollow"],
+      environment: "Wilderness — the Hollow Reach, the moss-line",
+      organization: "Communal — kin-circles, no ranks",
+      upbringing: "Pastoral — raised by hearth and herb",
+      complications: ["Cannot lie. Ever.", "A knot of holly grows from the wound that killed your sibling"],
+    },
+    cls: "Conduit",
+    kit: "Mountain",
+    level: 4,
+    xp: { current: 35, next: 60 },
+    victories: 8,
+    surges: 3,
+    portrait: "polder cleric, oak charm",
+    portraitTint: "gold",
+    titles: ["Hand of the Stillwater Grove"],
+    stamina: { current: 41, max: 48, recoveries: { current: 7, max: 8, value: 16 } },
+    resource: { name: "Piety", current: 5, max: 6 },
+    characteristics: {
+      Might: 2, Agility: 0, Reason: 1, Intuition: 3, Presence: 2,
+    },
+    abilities: [
+      { tier: "Signature", name: "Sanctified Strike", type: "Action", keywords: "Melee, Weapon, Holy", potency: { stat: "Intuition", weak: 1, average: 2, strong: 3 }, text: "Tier 1 — 3 dmg. Tier 2 — 6 dmg + ally within 5 regains 1d6 stamina. Tier 3 — 9 dmg + bright light EoT." },
+      { tier: "Heroic", name: "Hands That Do Not Falter", type: "Action", cost: "3 Piety", keywords: "Ranged 5, Healing", text: "An ally spends a recovery and adds +Intuition." },
+      { tier: "Heroic", name: "The Grove Endures", type: "Maneuver", cost: "5 Piety", keywords: "Aura 2", text: "Allies in aura have +2 stamina temporary at the start of each of their turns until EoE." },
+    ],
+    features: [
+      { name: "Mountain Kit", text: "Heavy plate. -1 speed, +6 stamina max, +1 to stability checks." },
+      { name: "Stillwater Vow", text: "Cannot tell a knowing lie. In return: once per session, your word stops violence for one round." },
+    ],
+    inventory: [
+      { name: "Oaken war-hammer 'Quiet'", note: "Carved with the names of the saved." },
+      { name: "Reliquary of the Stillwater", note: "" },
+      { name: "Pouch of dried thyme & bread", note: "" },
+    ],
+    ties: [
+      { who: "The Grove", how: "Sworn", note: "" },
+      { who: "Tova", how: "Found-family", note: "Met on the road. Refuses to leave her behind." },
+    ],
+    backstory: "Walked out of the grove with a hammer and a promise. Has not yet broken either.",
+    goals: ["Bring the lost back to the Stillwater.", "Forgive Tova for what she did at Greysend.", "Eat a proper meal."],
+    conditions: [
+      { name: "Blessed (+1 to first roll)", source: "Morning rite", duration: "Until used" },
+    ],
+    notes: "Sings while cooking. Badly.",
+    weaknesses: [],
+    immunities: [{ type: "Poison", value: 5 }, { type: "Corruption", value: 3 }],
+    wealth: 2,
+    renown: 4,
+    tempStamina: 6,
+    heroTokens: 3,
+    turnTaken: false,
+    skills: [
+      { name: "Heal", group: "Crafting", edge: true },
+      { name: "Nature", group: "Exploration", edge: false },
+      { name: "Persuade", group: "Interpersonal", edge: false },
+    ],
+    perks: [
+      { name: "Stillwater Vow", text: "Cannot lie. In return: your word stops violence for one round, once per session." },
+    ],
+    projects: [
+      { name: "Build a roadside shrine", goal: 25, progress: 11, characteristic: "Might" },
+    ],
+  },
+  p4: {
+    ownerId: "p4",
+    name: "Iskra Vail",
+    pronouns: "she/her",
+    ancestry: "Devil",
+    career: "Soldier",
+    careerData: {
+      benefits: "Field commission. +1 Renown among veterans. Begin with a signed pardon for one past crime.",
+      skills: ["Strategy", "Endurance"],
+      perk: "Lieutenant's Eye — once per encounter, name an enemy; allies have edge against it until your next turn.",
+      incident: "The Tenth Cohort burned. You walked out. The records say otherwise.",
+    },
+    culture: {
+      languages: ["Caelian", "Infernal", "Field-cant"],
+      environment: "Urban & wilderness — wherever the cohort is sent",
+      organization: "Hierarchical — the Reformed Cohorts (former)",
+      upbringing: "Martial — raised in barracks, drilled in steel",
+      complications: ["Your pardon expires in one year", "Cinderbar grows hot when you lie"],
+    },
+    cls: "Tactician",
+    kit: "Panoply",
+    level: 4,
+    xp: { current: 39, next: 60 },
+    victories: 17,
+    surges: 0,
+    portrait: "horned soldier, scarred jaw",
+    portraitTint: "blood",
+    titles: ["Lieutenant of the Black Spire (former)"],
+    stamina: { current: 30, max: 56, recoveries: { current: 4, max: 8, value: 18 } },
+    resource: { name: "Focus", current: 3, max: 7 },
+    characteristics: {
+      Might: 3, Agility: 2, Reason: 1, Intuition: 1, Presence: 0,
+    },
+    abilities: [
+      { tier: "Signature", name: "Cleaving Order", type: "Action", keywords: "Melee, Weapon", potency: { stat: "Might", weak: 2, average: 3, strong: 4 }, text: "Strike one creature, then an ally within 5 may make a free strike. Tier 1 — 3. Tier 2 — 6 + slow. Tier 3 — 9 + prone." },
+      { tier: "Heroic", name: "Hold the Line", type: "Maneuver", cost: "4 Focus", keywords: "Aura 2", potency: { stat: "Might", weak: 2, average: 3, strong: 4 }, text: "Allies in aura gain +2 to all defenses until start of your next turn." },
+      { tier: "Heroic", name: "On My Mark", type: "Triggered", cost: "6 Focus", trigger: "An ally rolls a tier 1.", keywords: "Reaction", text: "They reroll. Use the new result." },
+    ],
+    features: [
+      { name: "Panoply Kit", text: "Full plate, tower shield. -2 speed, +8 stamina max, +1 to all defenses while shield is held." },
+      { name: "Lieutenant's Eye", text: "Once per encounter, name an enemy. Allies have edge on attacks against it until EoE." },
+    ],
+    inventory: [
+      { name: "Greatsword 'Cinderbar'", note: "Notched. She keeps the notches." },
+      { name: "Tower shield, repainted black over crimson", note: "" },
+      { name: "Stack of orders, never delivered", note: "" },
+    ],
+    ties: [
+      { who: "Bramble", how: "Found-family", note: "Bramble is the one who pulled her out of Greysend." },
+      { who: "The Black Spire", how: "Hunted by, hunts back", note: "" },
+    ],
+    backstory: "Followed orders for thirty years. Then she didn't. Greysend burned anyway.",
+    goals: ["Make sure the next order is hers.", "Find the records of the Tenth Cohort.", "Apologize to Bramble. Eventually."],
+    conditions: [
+      { name: "Wounded", source: "Fell to 0 last session", duration: "Until full rest" },
+    ],
+    notes: "Will not sit with her back to a door.",
+    weaknesses: [{ type: "Cold", value: 5 }],
+    immunities: [{ type: "Fire", value: 5 }],
+    wealth: 5,
+    renown: 5,
+    tempStamina: 0,
+    heroTokens: 0,
+    turnTaken: false,
+    skills: [
+      { name: "Intimidate", group: "Interpersonal", edge: true },
+      { name: "Strategy", group: "Lore", edge: true },
+      { name: "Endurance", group: "Exploration", edge: false },
+    ],
+    perks: [
+      { name: "Lieutenant's Eye", text: "Once per encounter, name an enemy. Allies have edge against it." },
+    ],
+    projects: [
+      { name: "Find the Tenth Cohort records", goal: 35, progress: 9, characteristic: "Presence" },
+      { name: "Repair Cinderbar", goal: 15, progress: 12, characteristic: "Might" },
+    ],
+  },
+};
+
+const SESSIONS = [
+  {
+    id: "s14",
+    number: 14,
+    title: "The Hollow Beneath Greysend",
+    date: "2026-06-14T19:00:00",
+    location: "Aldric's place + Discord",
+    mode: "hybrid",
+    rsvps: { gm: "yes", p1: "yes", p2: "yes", p3: "maybe", p4: "yes" },
+    summary: "Confront whatever has been pulling lights down the well. The Cinderwake ledger fragment points here.",
+    upcoming: true,
+  },
+  {
+    id: "s15",
+    number: 15,
+    title: "Wakeknight's Court",
+    date: "2026-06-28T19:00:00",
+    location: "Discord only — Aldric out of town",
+    mode: "remote",
+    rsvps: { gm: "yes", p1: "yes", p2: "yes", p3: "yes", p4: "no" },
+    summary: "An audience with the masked judge. Bring a gift, or a confession.",
+    upcoming: true,
+  },
+  {
+    id: "s13",
+    number: 13,
+    title: "The Eighth Hour Bell",
+    date: "2026-04-25T19:00:00",
+    location: "Aldric's place",
+    mode: "in-person",
+    rsvps: { gm: "yes", p1: "yes", p2: "yes", p3: "yes", p4: "yes" },
+    summary: "Sable heard the bell from her own chest. Vael bottled the sound. The ferryman is owed a name.",
+    recap: "We met the ferryman. He took a name from each of us — but not the one he was supposed to. Caspian gave him 'Halvern' instead of his own. We do not yet know what this costs.",
+    past: true,
+  },
+  {
+    id: "s12",
+    number: 12,
+    title: "Greysend Burns",
+    date: "2026-04-11T19:00:00",
+    location: "Aldric's place",
+    mode: "in-person",
+    rsvps: { gm: "yes", p1: "yes", p2: "yes", p3: "yes", p4: "yes" },
+    summary: "Iskra's old cohort came for the village. We were not enough.",
+    recap: "Iskra fell to 0 holding the bridge. Bramble pulled her out. The village did not survive. None of us are okay.",
+    past: true,
+  },
+  {
+    id: "s11",
+    number: 11,
+    title: "The Folded Page",
+    date: "2026-03-28T19:00:00",
+    location: "Park café (rained out → moved to Mira's)",
+    mode: "in-person",
+    rsvps: { gm: "yes", p1: "yes", p2: "yes", p3: "no", p4: "yes" },
+    summary: "Vael read the page he stole. He has not been the same since.",
+    recap: "We learned three things. We can only say one of them aloud.",
+    past: true,
+  },
+  {
+    id: "s10",
+    number: 10,
+    title: "The Underway",
+    date: "2026-03-14T19:00:00",
+    location: "Aldric's place",
+    mode: "in-person",
+    rsvps: { gm: "yes", p1: "yes", p2: "yes", p3: "yes", p4: "yes" },
+    summary: "First descent. Sable nearly didn't come back up.",
+    recap: "Caspian carried her home. They have not spoken about it since.",
+    past: true,
+  },
+];
+
+const MEDIA = [
+  { id: "m1", kind: "image", title: "Greysend, before", folder: "Maps", uploader: "gm", date: "2026-04-04", tags: ["map", "village"], placeholder: "village map · greysend" },
+  { id: "m2", kind: "image", title: "The Underway, level 1", folder: "Maps", uploader: "gm", date: "2026-03-12", tags: ["map", "dungeon"], placeholder: "dungeon map · underway L1" },
+  { id: "m3", kind: "image", title: "Sable Vex (commission)", folder: "Character art", uploader: "p1", date: "2026-02-19", tags: ["portrait", "sable"], placeholder: "portrait · sable vex" },
+  { id: "m4", kind: "image", title: "Vael at the Athenæum", folder: "Character art", uploader: "p2", date: "2026-03-02", tags: ["portrait", "vael"], placeholder: "portrait · vael ostrim" },
+  { id: "m5", kind: "image", title: "Iskra's tabard, before", folder: "Character art", uploader: "p4", date: "2026-04-12", tags: ["portrait", "iskra"], placeholder: "portrait · iskra vail" },
+  { id: "m6", kind: "image", title: "Wakeknight (mask sketch)", folder: "NPC art", uploader: "gm", date: "2026-04-30", tags: ["npc", "mask"], placeholder: "sketch · wakeknight mask" },
+  { id: "m7", kind: "doc", title: "Drawsteel Backer Packet v0.7", folder: "Rules", uploader: "gm", date: "2026-01-08", tags: ["rules", "pdf"], size: "14.2 MB", ext: "pdf" },
+  { id: "m8", kind: "doc", title: "House Rules — The Respite", folder: "Rules", uploader: "gm", date: "2026-02-01", tags: ["rules", "house"], size: "84 KB", ext: "md" },
+  { id: "m9", kind: "doc", title: "Cinderwake ledger (fragment)", folder: "Handouts", uploader: "gm", date: "2026-04-25", tags: ["handout", "lore"], size: "1.1 MB", ext: "pdf" },
+  { id: "m10", kind: "link", title: "Drawsteel official", folder: "References", uploader: "gm", date: "2026-01-08", tags: ["link", "rules"], url: "mcdmproductions.com" },
+  { id: "m11", kind: "link", title: "MCDM combat ambient (YT)", folder: "References", uploader: "p2", date: "2026-03-04", tags: ["link", "audio"], url: "youtube.com/..." },
+  { id: "m12", kind: "link", title: "Tactical map tool", folder: "References", uploader: "gm", date: "2026-02-22", tags: ["link", "tool"], url: "owlbear.rodeo" },
+];
+
+const NOTES = [
+  {
+    id: "n1",
+    authorId: "gm",
+    sessionId: "s14",
+    posted: "2026-05-02T22:14:00",
+    body: "Reminder for Saturday — we left off at the lip of the well. If you want to do any prep (potions, rites, info-gathering in town), DM me before Friday and we'll resolve it offline.",
+    tags: ["prep"],
+  },
+  {
+    id: "n2",
+    authorId: "p2",
+    sessionId: "s13",
+    posted: "2026-04-26T01:08:00",
+    body: "I've been thinking about the ferryman. He took 'Halvern' from me. I'm starting to think that wasn't a substitution — I think the ferryman knows who Halvern is, and he just collected on a different debt. We need to find out what Halvern owed.",
+    tags: ["theory", "ferryman"],
+  },
+  {
+    id: "n3",
+    authorId: "p4",
+    sessionId: "s12",
+    posted: "2026-04-12T11:42:00",
+    body: "I'm not going to be able to play this Saturday well if we just pick up. Can we open with five minutes of Iskra writing the names of the dead? I don't need it to be mechanical, just — a moment. Thanks.",
+    tags: ["request", "tone"],
+  },
+  {
+    id: "n4",
+    authorId: "p1",
+    sessionId: "s13",
+    posted: "2026-04-26T00:55:00",
+    body: "If anyone is keeping a count: the bell rang twice this session. Once when we crossed water, once when Vael read the page. I think it rings when something becomes irrevocable.",
+    tags: ["lore", "bell"],
+  },
+  {
+    id: "n5",
+    authorId: "p3",
+    sessionId: "s13",
+    posted: "2026-04-26T09:12:00",
+    body: "Bringing a stew. Iskra please eat this time. Bramble will not stop nagging until you do.",
+    tags: ["snacks"],
+  },
+  {
+    id: "n6",
+    authorId: "gm",
+    sessionId: "s11",
+    posted: "2026-03-29T20:01:00",
+    body: "Updated the Cinderwake page in Media → Handouts. The ledger fragment Sable lifted has three names redacted. One of them is in the Stillwater Grove records. Bramble — when you're ready, ask me about it in-character.",
+    tags: ["gm-note", "thread"],
+  },
+  {
+    id: "n7",
+    authorId: "p2",
+    sessionId: null,
+    posted: "2026-04-29T18:30:00",
+    body: "Tiny rules thing — I keep forgetting that triggered abilities don't cost an action. Can we agree to call it out when someone burns one so we all stay sharp?",
+    tags: ["rules"],
+  },
+];
+
+const COUNTDOWN_TARGET = SESSIONS.find(s => s.upcoming).date;
+
+Object.assign(window, {
+  PLAYERS, CHARACTERS, SESSIONS, MEDIA, NOTES, COUNTDOWN_TARGET,
+});
+
+</script>
+
+<script type="text/babel" data-presets="react">
+// Shared UI primitives for The Respite
+
+const { useState, useEffect, useRef, useMemo, createContext, useContext } = React;
+
+// ----- App-wide context -----
+const AppContext = createContext(null);
+const useApp = () => useContext(AppContext);
+
+// ----- Avatar -----
+function Avatar({ player, size = "md" }) {
+  if (!player) return null;
+  const cls = size === "lg" ? "avatar lg" : size === "xl" ? "avatar xl" : "avatar";
+  return (
+    <div className={`${cls} ${player.avatar}`} title={player.name}>
+      {player.initials}
+    </div>
+  );
+}
+
+// ----- Editable text field (inline) -----
+function Editable({ value, onChange, multiline = false, placeholder = "", className = "", style = {} }) {
+  const [v, setV] = useState(value);
+  useEffect(() => { setV(value); }, [value]);
+
+  const commit = () => { if (v !== value) onChange(v); };
+  const Tag = multiline ? "textarea" : "input";
+
+  return (
+    <Tag
+      className={`editable ${className}`}
+      value={v}
+      placeholder={placeholder}
+      style={style}
+      rows={multiline ? 3 : undefined}
+      onChange={(e) => setV(e.target.value)}
+      onBlur={commit}
+      onKeyDown={(e) => {
+        if (!multiline && e.key === "Enter") { e.preventDefault(); e.target.blur(); }
+        if (e.key === "Escape") { setV(value); e.target.blur(); }
+      }}
+    />
+  );
+}
+
+// ----- Editable number with +/- pip control -----
+function NumberStepper({ value, max, onChange, label, sub }) {
+  return (
+    <div className="stat-tile" style={{ minWidth: 88 }}>
+      {label && <div className="label">{label}</div>}
+      <div style={{ display: "flex", alignItems: "baseline", justifyContent: "center", gap: 6 }}>
+        <button className="btn ghost sm" style={{ padding: "2px 7px", borderRadius: 4 }}
+          onClick={() => onChange(Math.max(0, value - 1))}>−</button>
+        <div className="value">{value}</div>
+        <button className="btn ghost sm" style={{ padding: "2px 7px", borderRadius: 4 }}
+          onClick={() => onChange(Math.min(max ?? 999, value + 1))}>+</button>
+      </div>
+      {sub && <div className="sub">{sub}</div>}
+    </div>
+  );
+}
+
+// ----- Pip track (for resources, recoveries) -----
+function PipTrack({ current, max, onChange, color = "ember" }) {
+  return (
+    <div className="pip-track">
+      {Array.from({ length: max }).map((_, i) => (
+        <div
+          key={i}
+          className={`pip ${i < current ? "filled" : ""}`}
+          onClick={() => onChange(i + 1 === current ? i : i + 1)}
+        />
+      ))}
+    </div>
+  );
+}
+
+// ----- Stamina bar -----
+function StaminaBar({ current, max, temp = 0, winded, dying = 0, onTempChange }) {
+  const windedAt = typeof winded === "number" ? winded : Math.floor(max / 2);
+  const pct = Math.max(0, Math.min(100, (current / max) * 100));
+  const tempPct = Math.max(0, Math.min(100, (temp / max) * 100));
+  const windedPct = Math.max(0, Math.min(100, (windedAt / max) * 100));
+  // dying is shown as a band below 0; visualize on the left edge as a tick
+  const isDying = current <= dying;
+  const isWinded = current <= windedAt && !isDying;
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 8 }}>
+        <span className="eyebrow">Stamina</span>
+        <div style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
+          {isDying && <span className="mono" style={{ fontSize: 10, color: "var(--blood)", letterSpacing: "0.08em", textTransform: "uppercase", fontWeight: 700 }}>● Dying</span>}
+          {isWinded && <span className="mono" style={{ fontSize: 10, color: "var(--gold-soft)", letterSpacing: "0.08em", textTransform: "uppercase", fontWeight: 700 }}>● Winded</span>}
+          <span className="serif" style={{ fontSize: 18, fontWeight: 600, color: "var(--ink-0)" }}>
+            {current}{temp > 0 && <span style={{ color: "var(--moss)", fontSize: 13 }}> +{temp}</span>} <span className="dim" style={{ fontSize: 13 }}>/ {max}</span>
+          </span>
+        </div>
+      </div>
+      <div className="bar" style={{ position: "relative", overflow: "visible" }}>
+        <div className="fill" style={{ width: `${pct}%`, background: isDying ? "var(--blood)" : isWinded ? "linear-gradient(90deg, var(--gold-soft), var(--ember))" : undefined }}></div>
+        {/* temp stamina overlay (striped) */}
+        {temp > 0 && (
+          <div style={{
+            position: "absolute", top: 0, bottom: 0,
+            left: `${pct}%`, width: `${tempPct}%`,
+            background: "repeating-linear-gradient(45deg, oklch(0.55 0.10 140) 0 4px, oklch(0.45 0.08 140) 4px 8px)",
+            borderRight: "1px solid var(--moss)",
+          }}/>
+        )}
+        {/* winded threshold tick */}
+        <div style={{
+          position: "absolute", top: -2, bottom: -2, left: `${windedPct}%`, width: 1,
+          background: "var(--gold-soft)", boxShadow: "0 0 4px var(--gold)",
+        }} title={`Winded at ${windedAt}`}/>
+      </div>
+      <div className="dim mono" style={{ fontSize: 10, display: "flex", justifyContent: "space-between" }}>
+        <span>Dying ≤ {dying}</span>
+        <span style={{ color: "var(--gold-soft)" }}>Winded ≤ {windedAt}</span>
+        {onTempChange ? (
+          <span style={{ display: "flex", alignItems: "center", gap: 4, color: "var(--moss)" }}>
+            <button onClick={() => onTempChange(Math.max(0, temp - 1))} style={{ background: "none", border: "none", color: "var(--moss)", cursor: "pointer", padding: "0 4px", fontSize: 11 }}>−</button>
+            Temp {temp}
+            <button onClick={() => onTempChange(temp + 1)} style={{ background: "none", border: "none", color: "var(--moss)", cursor: "pointer", padding: "0 4px", fontSize: 11 }}>+</button>
+          </span>
+        ) : (
+          <span style={{ color: "var(--moss)" }}>Temp +{temp}</span>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ----- Section header -----
+function SectionH({ eyebrow, title, action }) {
+  return (
+    <div className="section-h">
+      <div>
+        {eyebrow && <span className="eyebrow">{eyebrow}</span>}
+        <h2>{title}</h2>
+      </div>
+      {action}
+    </div>
+  );
+}
+
+// ----- Card -----
+function Card({ children, rail = false, pad = true, style = {}, className = "" }) {
+  return (
+    <div className={`card ${rail ? "with-rail" : ""} ${className}`} style={style}>
+      {pad ? <div className="card-pad">{children}</div> : children}
+    </div>
+  );
+}
+
+// ----- Striped placeholder -----
+function Placeholder({ label, ratio = "16 / 9", style = {}, className = "" }) {
+  return (
+    <div className={`placeholder ${className}`} style={{ aspectRatio: ratio, width: "100%", ...style }}>
+      {label}
+    </div>
+  );
+}
+
+// ----- Portrait placeholder (with tinted overlay) -----
+function PortraitPlaceholder({ tint = "moss", label, ratio = "3 / 4", style = {} }) {
+  const tintMap = {
+    moss: "oklch(0.55 0.07 140 / 0.18)",
+    arcane: "oklch(0.60 0.10 280 / 0.18)",
+    gold: "oklch(0.80 0.11 85 / 0.16)",
+    blood: "oklch(0.50 0.14 25 / 0.18)",
+    ember: "oklch(0.70 0.17 45 / 0.16)",
+  };
+  return (
+    <div
+      className="placeholder"
+      style={{
+        aspectRatio: ratio,
+        width: "100%",
+        position: "relative",
+        background: `
+          linear-gradient(180deg, ${tintMap[tint] || tintMap.moss}, transparent 60%),
+          repeating-linear-gradient(135deg, var(--bg-2) 0, var(--bg-2) 6px, var(--bg-1) 6px, var(--bg-1) 12px)
+        `,
+        ...style,
+      }}
+    >
+      <div style={{ textAlign: "center", padding: 12, lineHeight: 1.4 }}>{label}</div>
+    </div>
+  );
+}
+
+// ----- Pill -----
+function Pill({ children, tone = "" }) {
+  return <span className={`pill ${tone}`}>{children}</span>;
+}
+
+// ----- Format date helpers -----
+function fmtDate(iso, opts = {}) {
+  const d = new Date(iso);
+  return d.toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric", ...opts });
+}
+function fmtTime(iso) {
+  const d = new Date(iso);
+  return d.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
+}
+function fmtRelative(iso) {
+  const d = new Date(iso);
+  const now = new Date();
+  const diff = (d - now) / 1000;
+  const abs = Math.abs(diff);
+  if (abs < 60) return "just now";
+  if (abs < 3600) return `${Math.round(abs / 60)}m ${diff < 0 ? "ago" : ""}`;
+  if (abs < 86400) return `${Math.round(abs / 3600)}h ${diff < 0 ? "ago" : ""}`;
+  if (abs < 86400 * 7) return `${Math.round(abs / 86400)}d ${diff < 0 ? "ago" : ""}`;
+  return fmtDate(iso);
+}
+
+// ----- Countdown -----
+function useCountdown(targetIso) {
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    const id = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(id);
+  }, []);
+  const target = new Date(targetIso).getTime();
+  const diff = Math.max(0, target - now);
+  const days = Math.floor(diff / 86400000);
+  const hours = Math.floor((diff % 86400000) / 3600000);
+  const mins = Math.floor((diff % 3600000) / 60000);
+  const secs = Math.floor((diff % 60000) / 1000);
+  return { days, hours, mins, secs, done: diff === 0 };
+}
+
+Object.assign(window, {
+  AppContext, useApp,
+  Avatar, Editable, NumberStepper, PipTrack, StaminaBar,
+  SectionH, Card, Placeholder, PortraitPlaceholder, Pill,
+  fmtDate, fmtTime, fmtRelative, useCountdown,
+});
+
+</script>
+
+<script type="text/babel" data-presets="react">
+
+// tweaks-panel.jsx
+// Reusable Tweaks shell + form-control helpers.
+//
+// Owns the host protocol (listens for __activate_edit_mode / __deactivate_edit_mode,
+// posts __edit_mode_available / __edit_mode_set_keys / __edit_mode_dismissed) so
+// individual prototypes don't re-roll it. Ships a consistent set of controls so you
+// don't hand-draw <input type="range">, segmented radios, steppers, etc.
+//
+// Usage (in an HTML file that loads React + Babel):
+//
+//   const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
+//     "primaryColor": "#D97757",
+//     "fontSize": 16,
+//     "density": "regular",
+//     "dark": false
+//   }/*EDITMODE-END*/;
+//
+//   function App() {
+//     const [t, setTweak] = useTweaks(TWEAK_DEFAULTS);
+//     return (
+//       <div style={{ fontSize: t.fontSize, color: t.primaryColor }}>
+//         Hello
+//         <TweaksPanel>
+//           <TweakSection label="Typography" />
+//           <TweakSlider label="Font size" value={t.fontSize} min={10} max={32} unit="px"
+//                        onChange={(v) => setTweak('fontSize', v)} />
+//           <TweakRadio  label="Density" value={t.density}
+//                        options={['compact', 'regular', 'comfy']}
+//                        onChange={(v) => setTweak('density', v)} />
+//           <TweakSection label="Theme" />
+//           <TweakColor  label="Primary" value={t.primaryColor}
+//                        onChange={(v) => setTweak('primaryColor', v)} />
+//           <TweakToggle label="Dark mode" value={t.dark}
+//                        onChange={(v) => setTweak('dark', v)} />
+//         </TweaksPanel>
+//       </div>
+//     );
+//   }
+//
+// ─────────────────────────────────────────────────────────────────────────────
+
+const __TWEAKS_STYLE = `
+  .twk-panel{position:fixed;right:16px;bottom:16px;z-index:2147483646;width:280px;
+    max-height:calc(100vh - 32px);display:flex;flex-direction:column;
+    background:rgba(250,249,247,.78);color:#29261b;
+    -webkit-backdrop-filter:blur(24px) saturate(160%);backdrop-filter:blur(24px) saturate(160%);
+    border:.5px solid rgba(255,255,255,.6);border-radius:14px;
+    box-shadow:0 1px 0 rgba(255,255,255,.5) inset,0 12px 40px rgba(0,0,0,.18);
+    font:11.5px/1.4 ui-sans-serif,system-ui,-apple-system,sans-serif;overflow:hidden}
+  .twk-hd{display:flex;align-items:center;justify-content:space-between;
+    padding:10px 8px 10px 14px;cursor:move;user-select:none}
+  .twk-hd b{font-size:12px;font-weight:600;letter-spacing:.01em}
+  .twk-x{appearance:none;border:0;background:transparent;color:rgba(41,38,27,.55);
+    width:22px;height:22px;border-radius:6px;cursor:default;font-size:13px;line-height:1}
+  .twk-x:hover{background:rgba(0,0,0,.06);color:#29261b}
+  .twk-body{padding:2px 14px 14px;display:flex;flex-direction:column;gap:10px;
+    overflow-y:auto;overflow-x:hidden;min-height:0;
+    scrollbar-width:thin;scrollbar-color:rgba(0,0,0,.15) transparent}
+  .twk-body::-webkit-scrollbar{width:8px}
+  .twk-body::-webkit-scrollbar-track{background:transparent;margin:2px}
+  .twk-body::-webkit-scrollbar-thumb{background:rgba(0,0,0,.15);border-radius:4px;
+    border:2px solid transparent;background-clip:content-box}
+  .twk-body::-webkit-scrollbar-thumb:hover{background:rgba(0,0,0,.25);
+    border:2px solid transparent;background-clip:content-box}
+  .twk-row{display:flex;flex-direction:column;gap:5px}
+  .twk-row-h{flex-direction:row;align-items:center;justify-content:space-between;gap:10px}
+  .twk-lbl{display:flex;justify-content:space-between;align-items:baseline;
+    color:rgba(41,38,27,.72)}
+  .twk-lbl>span:first-child{font-weight:500}
+  .twk-val{color:rgba(41,38,27,.5);font-variant-numeric:tabular-nums}
+
+  .twk-sect{font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;
+    color:rgba(41,38,27,.45);padding:10px 0 0}
+  .twk-sect:first-child{padding-top:0}
+
+  .twk-field{appearance:none;width:100%;height:26px;padding:0 8px;
+    border:.5px solid rgba(0,0,0,.1);border-radius:7px;
+    background:rgba(255,255,255,.6);color:inherit;font:inherit;outline:none}
+  .twk-field:focus{border-color:rgba(0,0,0,.25);background:rgba(255,255,255,.85)}
+  select.twk-field{padding-right:22px;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'><path fill='rgba(0,0,0,.5)' d='M0 0h10L5 6z'/></svg>");
+    background-repeat:no-repeat;background-position:right 8px center}
+
+  .twk-slider{appearance:none;-webkit-appearance:none;width:100%;height:4px;margin:6px 0;
+    border-radius:999px;background:rgba(0,0,0,.12);outline:none}
+  .twk-slider::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;
+    width:14px;height:14px;border-radius:50%;background:#fff;
+    border:.5px solid rgba(0,0,0,.12);box-shadow:0 1px 3px rgba(0,0,0,.2);cursor:default}
+  .twk-slider::-moz-range-thumb{width:14px;height:14px;border-radius:50%;
+    background:#fff;border:.5px solid rgba(0,0,0,.12);box-shadow:0 1px 3px rgba(0,0,0,.2);cursor:default}
+
+  .twk-seg{position:relative;display:flex;padding:2px;border-radius:8px;
+    background:rgba(0,0,0,.06);user-select:none}
+  .twk-seg-thumb{position:absolute;top:2px;bottom:2px;border-radius:6px;
+    background:rgba(255,255,255,.9);box-shadow:0 1px 2px rgba(0,0,0,.12);
+    transition:left .15s cubic-bezier(.3,.7,.4,1),width .15s}
+  .twk-seg.dragging .twk-seg-thumb{transition:none}
+  .twk-seg button{appearance:none;position:relative;z-index:1;flex:1;border:0;
+    background:transparent;color:inherit;font:inherit;font-weight:500;min-height:22px;
+    border-radius:6px;cursor:default;padding:4px 6px;line-height:1.2;
+    overflow-wrap:anywhere}
+
+  .twk-toggle{position:relative;width:32px;height:18px;border:0;border-radius:999px;
+    background:rgba(0,0,0,.15);transition:background .15s;cursor:default;padding:0}
+  .twk-toggle[data-on="1"]{background:#34c759}
+  .twk-toggle i{position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;
+    background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.25);transition:transform .15s}
+  .twk-toggle[data-on="1"] i{transform:translateX(14px)}
+
+  .twk-num{display:flex;align-items:center;height:26px;padding:0 0 0 8px;
+    border:.5px solid rgba(0,0,0,.1);border-radius:7px;background:rgba(255,255,255,.6)}
+  .twk-num-lbl{font-weight:500;color:rgba(41,38,27,.6);cursor:ew-resize;
+    user-select:none;padding-right:8px}
+  .twk-num input{flex:1;min-width:0;height:100%;border:0;background:transparent;
+    font:inherit;font-variant-numeric:tabular-nums;text-align:right;padding:0 8px 0 0;
+    outline:none;color:inherit;-moz-appearance:textfield}
+  .twk-num input::-webkit-inner-spin-button,.twk-num input::-webkit-outer-spin-button{
+    -webkit-appearance:none;margin:0}
+  .twk-num-unit{padding-right:8px;color:rgba(41,38,27,.45)}
+
+  .twk-btn{appearance:none;height:26px;padding:0 12px;border:0;border-radius:7px;
+    background:rgba(0,0,0,.78);color:#fff;font:inherit;font-weight:500;cursor:default}
+  .twk-btn:hover{background:rgba(0,0,0,.88)}
+  .twk-btn.secondary{background:rgba(0,0,0,.06);color:inherit}
+  .twk-btn.secondary:hover{background:rgba(0,0,0,.1)}
+
+  .twk-swatch{appearance:none;-webkit-appearance:none;width:56px;height:22px;
+    border:.5px solid rgba(0,0,0,.1);border-radius:6px;padding:0;cursor:default;
+    background:transparent;flex-shrink:0}
+  .twk-swatch::-webkit-color-swatch-wrapper{padding:0}
+  .twk-swatch::-webkit-color-swatch{border:0;border-radius:5.5px}
+  .twk-swatch::-moz-color-swatch{border:0;border-radius:5.5px}
+`;
+
+// ── useTweaks ───────────────────────────────────────────────────────────────
+// Single source of truth for tweak values. setTweak persists via the host
+// (__edit_mode_set_keys → host rewrites the EDITMODE block on disk).
+function useTweaks(defaults) {
+  const [values, setValues] = React.useState(defaults);
+  // Accepts either setTweak('key', value) or setTweak({ key: value, ... }) so a
+  // useState-style call doesn't write a "[object Object]" key into the persisted
+  // JSON block.
+  const setTweak = React.useCallback((keyOrEdits, val) => {
+    const edits = typeof keyOrEdits === 'object' && keyOrEdits !== null
+      ? keyOrEdits : { [keyOrEdits]: val };
+    setValues((prev) => ({ ...prev, ...edits }));
+    window.parent.postMessage({ type: '__edit_mode_set_keys', edits }, '*');
+  }, []);
+  return [values, setTweak];
+}
+
+// ── TweaksPanel ─────────────────────────────────────────────────────────────
+// Floating shell. Registers the protocol listener BEFORE announcing
+// availability — if the announce ran first, the host's activate could land
+// before our handler exists and the toolbar toggle would silently no-op.
+// The close button posts __edit_mode_dismissed so the host's toolbar toggle
+// flips off in lockstep; the host echoes __deactivate_edit_mode back which
+// is what actually hides the panel.
+function TweaksPanel({ title = 'Tweaks', children }) {
+  const [open, setOpen] = React.useState(false);
+  const dragRef = React.useRef(null);
+  const offsetRef = React.useRef({ x: 16, y: 16 });
+  const PAD = 16;
+
+  const clampToViewport = React.useCallback(() => {
+    const panel = dragRef.current;
+    if (!panel) return;
+    const w = panel.offsetWidth, h = panel.offsetHeight;
+    const maxRight = Math.max(PAD, window.innerWidth - w - PAD);
+    const maxBottom = Math.max(PAD, window.innerHeight - h - PAD);
+    offsetRef.current = {
+      x: Math.min(maxRight, Math.max(PAD, offsetRef.current.x)),
+      y: Math.min(maxBottom, Math.max(PAD, offsetRef.current.y)),
+    };
+    panel.style.right = offsetRef.current.x + 'px';
+    panel.style.bottom = offsetRef.current.y + 'px';
+  }, []);
+
+  React.useEffect(() => {
+    if (!open) return;
+    clampToViewport();
+    if (typeof ResizeObserver === 'undefined') {
+      window.addEventListener('resize', clampToViewport);
+      return () => window.removeEventListener('resize', clampToViewport);
+    }
+    const ro = new ResizeObserver(clampToViewport);
+    ro.observe(document.documentElement);
+    return () => ro.disconnect();
+  }, [open, clampToViewport]);
+
+  React.useEffect(() => {
+    const onMsg = (e) => {
+      const t = e?.data?.type;
+      if (t === '__activate_edit_mode') setOpen(true);
+      else if (t === '__deactivate_edit_mode') setOpen(false);
+    };
+    window.addEventListener('message', onMsg);
+    window.parent.postMessage({ type: '__edit_mode_available' }, '*');
+    return () => window.removeEventListener('message', onMsg);
+  }, []);
+
+  const dismiss = () => {
+    setOpen(false);
+    window.parent.postMessage({ type: '__edit_mode_dismissed' }, '*');
+  };
+
+  const onDragStart = (e) => {
+    const panel = dragRef.current;
+    if (!panel) return;
+    const r = panel.getBoundingClientRect();
+    const sx = e.clientX, sy = e.clientY;
+    const startRight = window.innerWidth - r.right;
+    const startBottom = window.innerHeight - r.bottom;
+    const move = (ev) => {
+      offsetRef.current = {
+        x: startRight - (ev.clientX - sx),
+        y: startBottom - (ev.clientY - sy),
+      };
+      clampToViewport();
+    };
+    const up = () => {
+      window.removeEventListener('mousemove', move);
+      window.removeEventListener('mouseup', up);
+    };
+    window.addEventListener('mousemove', move);
+    window.addEventListener('mouseup', up);
+  };
+
+  if (!open) return null;
+  return (
+    <>
+      <style>{__TWEAKS_STYLE}</style>
+      <div ref={dragRef} className="twk-panel" data-noncommentable=""
+           style={{ right: offsetRef.current.x, bottom: offsetRef.current.y }}>
+        <div className="twk-hd" onMouseDown={onDragStart}>
+          <b>{title}</b>
+          <button className="twk-x" aria-label="Close tweaks"
+                  onMouseDown={(e) => e.stopPropagation()}
+                  onClick={dismiss}>✕</button>
+        </div>
+        <div className="twk-body">{children}</div>
+      </div>
+    </>
+  );
+}
+
+// ── Layout helpers ──────────────────────────────────────────────────────────
+
+function TweakSection({ label, children }) {
+  return (
+    <>
+      <div className="twk-sect">{label}</div>
+      {children}
+    </>
+  );
+}
+
+function TweakRow({ label, value, children, inline = false }) {
+  return (
+    <div className={inline ? 'twk-row twk-row-h' : 'twk-row'}>
+      <div className="twk-lbl">
+        <span>{label}</span>
+        {value != null && <span className="twk-val">{value}</span>}
+      </div>
+      {children}
+    </div>
+  );
+}
+
+// ── Controls ────────────────────────────────────────────────────────────────
+
+function TweakSlider({ label, value, min = 0, max = 100, step = 1, unit = '', onChange }) {
+  return (
+    <TweakRow label={label} value={`${value}${unit}`}>
+      <input type="range" className="twk-slider" min={min} max={max} step={step}
+             value={value} onChange={(e) => onChange(Number(e.target.value))} />
+    </TweakRow>
+  );
+}
+
+function TweakToggle({ label, value, onChange }) {
+  return (
+    <div className="twk-row twk-row-h">
+      <div className="twk-lbl"><span>{label}</span></div>
+      <button type="button" className="twk-toggle" data-on={value ? '1' : '0'}
+              role="switch" aria-checked={!!value}
+              onClick={() => onChange(!value)}><i /></button>
+    </div>
+  );
+}
+
+function TweakRadio({ label, value, options, onChange }) {
+  const trackRef = React.useRef(null);
+  const [dragging, setDragging] = React.useState(false);
+  const opts = options.map((o) => (typeof o === 'object' ? o : { value: o, label: o }));
+  const idx = Math.max(0, opts.findIndex((o) => o.value === value));
+  const n = opts.length;
+
+  // The active value is read by pointer-move handlers attached for the lifetime
+  // of a drag — ref it so a stale closure doesn't fire onChange for every move.
+  const valueRef = React.useRef(value);
+  valueRef.current = value;
+
+  const segAt = (clientX) => {
+    const r = trackRef.current.getBoundingClientRect();
+    const inner = r.width - 4;
+    const i = Math.floor(((clientX - r.left - 2) / inner) * n);
+    return opts[Math.max(0, Math.min(n - 1, i))].value;
+  };
+
+  const onPointerDown = (e) => {
+    setDragging(true);
+    const v0 = segAt(e.clientX);
+    if (v0 !== valueRef.current) onChange(v0);
+    const move = (ev) => {
+      if (!trackRef.current) return;
+      const v = segAt(ev.clientX);
+      if (v !== valueRef.current) onChange(v);
+    };
+    const up = () => {
+      setDragging(false);
+      window.removeEventListener('pointermove', move);
+      window.removeEventListener('pointerup', up);
+    };
+    window.addEventListener('pointermove', move);
+    window.addEventListener('pointerup', up);
+  };
+
+  return (
+    <TweakRow label={label}>
+      <div ref={trackRef} role="radiogroup" onPointerDown={onPointerDown}
+           className={dragging ? 'twk-seg dragging' : 'twk-seg'}>
+        <div className="twk-seg-thumb"
+             style={{ left: `calc(2px + ${idx} * (100% - 4px) / ${n})`,
+                      width: `calc((100% - 4px) / ${n})` }} />
+        {opts.map((o) => (
+          <button key={o.value} type="button" role="radio" aria-checked={o.value === value}>
+            {o.label}
+          </button>
+        ))}
+      </div>
+    </TweakRow>
+  );
+}
+
+function TweakSelect({ label, value, options, onChange }) {
+  return (
+    <TweakRow label={label}>
+      <select className="twk-field" value={value} onChange={(e) => onChange(e.target.value)}>
+        {options.map((o) => {
+          const v = typeof o === 'object' ? o.value : o;
+          const l = typeof o === 'object' ? o.label : o;
+          return <option key={v} value={v}>{l}</option>;
+        })}
+      </select>
+    </TweakRow>
+  );
+}
+
+function TweakText({ label, value, placeholder, onChange }) {
+  return (
+    <TweakRow label={label}>
+      <input className="twk-field" type="text" value={value} placeholder={placeholder}
+             onChange={(e) => onChange(e.target.value)} />
+    </TweakRow>
+  );
+}
+
+function TweakNumber({ label, value, min, max, step = 1, unit = '', onChange }) {
+  const clamp = (n) => {
+    if (min != null && n < min) return min;
+    if (max != null && n > max) return max;
+    return n;
+  };
+  const startRef = React.useRef({ x: 0, val: 0 });
+  const onScrubStart = (e) => {
+    e.preventDefault();
+    startRef.current = { x: e.clientX, val: value };
+    const decimals = (String(step).split('.')[1] || '').length;
+    const move = (ev) => {
+      const dx = ev.clientX - startRef.current.x;
+      const raw = startRef.current.val + dx * step;
+      const snapped = Math.round(raw / step) * step;
+      onChange(clamp(Number(snapped.toFixed(decimals))));
+    };
+    const up = () => {
+      window.removeEventListener('pointermove', move);
+      window.removeEventListener('pointerup', up);
+    };
+    window.addEventListener('pointermove', move);
+    window.addEventListener('pointerup', up);
+  };
+  return (
+    <div className="twk-num">
+      <span className="twk-num-lbl" onPointerDown={onScrubStart}>{label}</span>
+      <input type="number" value={value} min={min} max={max} step={step}
+             onChange={(e) => onChange(clamp(Number(e.target.value)))} />
+      {unit && <span className="twk-num-unit">{unit}</span>}
+    </div>
+  );
+}
+
+function TweakColor({ label, value, onChange }) {
+  return (
+    <div className="twk-row twk-row-h">
+      <div className="twk-lbl"><span>{label}</span></div>
+      <input type="color" className="twk-swatch" value={value}
+             onChange={(e) => onChange(e.target.value)} />
+    </div>
+  );
+}
+
+function TweakButton({ label, onClick, secondary = false }) {
+  return (
+    <button type="button" className={secondary ? 'twk-btn secondary' : 'twk-btn'}
+            onClick={onClick}>{label}</button>
+  );
+}
+
+Object.assign(window, {
+  useTweaks, TweaksPanel, TweakSection, TweakRow,
+  TweakSlider, TweakToggle, TweakRadio, TweakSelect,
+  TweakText, TweakNumber, TweakColor, TweakButton,
+});
+
+</script>
+
+<script type="text/babel" data-presets="react">
+// Hub homepage — landing dashboard
+
+const { useApp: _useAppHub, Card: _CardHub, Avatar: _AvatarHub, Pill: _PillHub, useCountdown: _useCountdownHub, fmtDate: _fmtDateHub, fmtTime: _fmtTimeHub, fmtRelative: _fmtRelativeHub, PortraitPlaceholder: _PortraitHub } = window;
+
+function Hub() {
+  const app = useApp();
+  const { setTab, setSelectedPlayer, sessions, players, characters, notes } = app;
+  const upcoming = sessions.find(s => s.upcoming);
+  const cd = useCountdown(upcoming.date);
+  const recentNotes = [...notes].sort((a,b) => new Date(b.posted) - new Date(a.posted)).slice(0, 3);
+
+  const meId = app.meId;
+  const myRsvp = upcoming.rsvps[meId];
+
+  return (
+    <div className="page">
+      {/* Hero — countdown + welcome */}
+      <div style={{ display: "grid", gridTemplateColumns: "1.4fr 1fr", gap: 24, marginBottom: 36 }}>
+        <Card rail style={{ padding: "32px 36px", background: "linear-gradient(135deg, var(--bg-1) 0%, var(--bg-2) 100%)" }} pad={false}>
+          <div style={{ padding: "32px 36px" }}>
+            <div className="flourish" style={{ marginBottom: 16, justifyContent: "flex-start", maxWidth: 360 }}>By the hearth · Session {upcoming.number}</div>
+            <h1 className="brand-mark" style={{ fontSize: 44, margin: "0 0 8px", color: "var(--ink-0)", lineHeight: 1.1, letterSpacing: "0.005em" }}>
+              {upcoming.title}
+            </h1>
+            <div className="serif italic" style={{ color: "var(--ink-2)", fontSize: 17, marginBottom: 24, maxWidth: 540 }}>
+              "{upcoming.summary}"
+            </div>
+
+            <div style={{ display: "flex", gap: 28, alignItems: "flex-end", flexWrap: "wrap" }}>
+              {[
+                { label: "Days", val: cd.days },
+                { label: "Hours", val: cd.hours },
+                { label: "Mins", val: cd.mins },
+                { label: "Secs", val: cd.secs },
+              ].map(b => (
+                <div key={b.label}>
+                  <div className="serif" style={{ fontSize: 56, fontWeight: 600, color: "var(--ember)", lineHeight: 1, fontVariantNumeric: "tabular-nums", textShadow: "0 0 24px oklch(0.70 0.17 45 / 0.4)" }}>
+                    {String(b.val).padStart(2, "0")}
+                  </div>
+                  <div className="display" style={{ fontSize: 12, color: "var(--ink-3)", marginTop: 6, letterSpacing: "0.06em", textTransform: "uppercase" }}>{b.label}</div>
+                </div>
+              ))}
+            </div>
+
+            <div className="rule" style={{ margin: "28px 0 20px" }}></div>
+
+            <div style={{ display: "flex", gap: 18, alignItems: "center", flexWrap: "wrap" }}>
+              <span className="muted" style={{ fontSize: 13 }}>
+                <span className="display" style={{ color: "var(--ember)", marginRight: 8 }}>{fmtDate(upcoming.date, { weekday: "long" })}</span>
+                · {fmtTime(upcoming.date)} · {upcoming.location}
+              </span>
+              <div style={{ marginLeft: "auto", display: "flex", gap: 8 }}>
+                {["yes", "maybe", "no"].map(opt => (
+                  <button
+                    key={opt}
+                    className={`btn sm ${myRsvp === opt ? "ember" : "ghost"}`}
+                    onClick={() => app.setRsvp(upcoming.id, meId, opt)}
+                    style={{ textTransform: "capitalize" }}
+                  >
+                    {opt === "yes" ? "I'll be there" : opt === "maybe" ? "Maybe" : "Can't make it"}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        </Card>
+
+        <Card>
+          <div className="flourish" style={{ marginBottom: 14, justifyContent: "flex-start" }}>The Party</div>
+          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+            {players.filter(p => p.role === "Player").map(p => {
+              const c = characters[p.id];
+              const rsvp = upcoming.rsvps[p.id];
+              return (
+                <div
+                  key={p.id}
+                  onClick={() => { setSelectedPlayer(p.id); setTab("characters"); }}
+                  style={{
+                    display: "grid", gridTemplateColumns: "auto 1fr auto", gap: 12, alignItems: "center",
+                    padding: "10px 12px", border: "1px solid var(--line)", borderRadius: 6,
+                    background: "var(--bg-0)", cursor: "pointer", transition: "all 0.15s",
+                  }}
+                  onMouseEnter={e => { e.currentTarget.style.borderColor = "var(--ember-soft)"; }}
+                  onMouseLeave={e => { e.currentTarget.style.borderColor = "var(--line)"; }}
+                >
+                  <Avatar player={p} />
+                  <div style={{ minWidth: 0 }}>
+                    <div className="serif" style={{ fontSize: 16, color: "var(--ink-0)", fontWeight: 600, lineHeight: 1.1 }}>
+                      {c?.name || p.name}
+                    </div>
+                    <div className="dim" style={{ fontSize: 11, marginTop: 2 }}>
+                      {c ? `${c.ancestry} · ${c.cls} ${c.level}` : p.role} · played by {p.name}
+                    </div>
+                  </div>
+                  <div style={{
+                    width: 8, height: 8, borderRadius: "50%",
+                    background: rsvp === "yes" ? "var(--moss)" : rsvp === "maybe" ? "var(--gold)" : rsvp === "no" ? "var(--blood)" : "var(--ink-3)",
+                    boxShadow: rsvp === "yes" ? "0 0 8px var(--moss)" : "none",
+                  }} title={`RSVP: ${rsvp}`}/>
+                </div>
+              );
+            })}
+          </div>
+        </Card>
+      </div>
+
+      {/* Quick tiles */}
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 16, marginBottom: 36 }}>
+        {[
+          { tab: "events", eyebrow: "Schedule", title: "Events", body: `${sessions.filter(s => s.upcoming).length} upcoming · ${sessions.filter(s => s.past).length} logged` },
+          { tab: "characters", eyebrow: "Heroes", title: "Sheets", body: `${Object.keys(characters).length} characters · L${Object.values(characters)[0].level}` },
+          { tab: "media", eyebrow: "Vault", title: "Media", body: `${app.media.length} items in ${new Set(app.media.map(m => m.folder)).size} folders` },
+          { tab: "notes", eyebrow: "Memoria", title: "Notes", body: `${notes.length} entries · ${recentNotes.length ? fmtRelative(recentNotes[0].posted) : ""}` },
+        ].map(t => (
+          <button
+            key={t.tab}
+            onClick={() => setTab(t.tab)}
+            className="card"
+            style={{
+              padding: "20px 22px", textAlign: "left", cursor: "pointer", transition: "all 0.15s",
+              background: "var(--bg-1)", border: "1px solid var(--line)",
+            }}
+            onMouseEnter={e => { e.currentTarget.style.borderColor = "var(--ember-soft)"; e.currentTarget.style.transform = "translateY(-1px)"; }}
+            onMouseLeave={e => { e.currentTarget.style.borderColor = "var(--line)"; e.currentTarget.style.transform = "none"; }}
+          >
+            <div className="eyebrow" style={{ marginBottom: 8 }}>{t.eyebrow}</div>
+            <div className="serif" style={{ fontSize: 24, fontWeight: 600, color: "var(--ink-0)", marginBottom: 4 }}>{t.title}</div>
+            <div className="dim" style={{ fontSize: 12 }}>{t.body}</div>
+          </button>
+        ))}
+      </div>
+
+      {/* Recent notes + last session */}
+      <div style={{ display: "grid", gridTemplateColumns: "1.4fr 1fr", gap: 24 }}>
+        <Card>
+          <SectionH eyebrow="Memoria" title="From the table" action={
+            <button className="btn ghost sm" onClick={() => setTab("notes")}>All notes →</button>
+          } />
+          <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+            {recentNotes.map(n => {
+              const author = players.find(p => p.id === n.authorId);
+              return (
+                <div key={n.id} style={{ display: "grid", gridTemplateColumns: "auto 1fr", gap: 12 }}>
+                  <Avatar player={author} />
+                  <div>
+                    <div style={{ display: "flex", gap: 8, alignItems: "baseline", marginBottom: 4 }}>
+                      <span className="serif" style={{ color: "var(--ink-0)", fontWeight: 600 }}>{author?.name}</span>
+                      <span className="dim" style={{ fontSize: 11 }}>· {fmtRelative(n.posted)}</span>
+                    </div>
+                    <div style={{ fontSize: 13, color: "var(--ink-1)", lineHeight: 1.55 }}>{n.body}</div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </Card>
+
+        <Card>
+          <SectionH eyebrow="Last session" title={`#${sessions.find(s => s.past).number} — ${sessions.find(s => s.past).title}`} action={null}/>
+          <div className="serif italic" style={{ color: "var(--ink-1)", fontSize: 15, lineHeight: 1.55, marginBottom: 16 }}>
+            "{sessions.find(s => s.past).recap}"
+          </div>
+          <div className="dim" style={{ fontSize: 11, letterSpacing: "0.05em", textTransform: "uppercase", marginBottom: 8 }}>Attendance</div>
+          <div style={{ display: "flex", gap: 6 }}>
+            {players.map(p => {
+              const r = sessions.find(s => s.past).rsvps[p.id];
+              return (
+                <div key={p.id} style={{ position: "relative", opacity: r === "yes" ? 1 : 0.35 }}>
+                  <Avatar player={p}/>
+                </div>
+              );
+            })}
+          </div>
+        </Card>
+      </div>
+    </div>
+  );
+}
+
+window.Hub = Hub;
+
+</script>
+
+<script type="text/babel" data-presets="react">
+// Events tab — upcoming, past, attendance
+
+function EventsTab() {
+  const app = useApp();
+  const { sessions, players, setRsvp, meId } = app;
+  const upcoming = sessions.filter(s => s.upcoming).sort((a,b) => new Date(a.date) - new Date(b.date));
+  const past = sessions.filter(s => s.past).sort((a,b) => new Date(b.date) - new Date(a.date));
+  const next = upcoming[0];
+  const cd = useCountdown(next.date);
+
+  return (
+    <div className="page">
+      {/* Hero countdown */}
+      <Card pad={false} style={{ marginBottom: 32, padding: "32px 36px", background: "linear-gradient(135deg, var(--bg-1) 0%, var(--bg-2) 100%)" }} rail>
+        <div style={{ padding: "32px 36px", display: "grid", gridTemplateColumns: "1fr auto", gap: 32, alignItems: "center" }}>
+          <div>
+            <div className="eyebrow" style={{ marginBottom: 6 }}>The next gathering</div>
+            <h1 className="serif" style={{ fontSize: 36, margin: "0 0 8px", color: "var(--ink-0)", letterSpacing: "0.005em" }}>{next.title}</h1>
+            <div className="muted serif italic" style={{ fontSize: 16, marginBottom: 16 }}>"{next.summary}"</div>
+            <div style={{ display: "flex", gap: 16, flexWrap: "wrap", alignItems: "center" }}>
+              <Pill tone="ember">{fmtDate(next.date, { weekday: "long" })}</Pill>
+              <Pill>{fmtTime(next.date)}</Pill>
+              <Pill tone={next.mode === "in-person" ? "moss" : next.mode === "remote" ? "gold" : ""}>{next.mode}</Pill>
+              <span className="dim" style={{ fontSize: 13 }}>· {next.location}</span>
+            </div>
+          </div>
+          <div style={{ textAlign: "right" }}>
+            <div className="eyebrow" style={{ marginBottom: 8 }}>Until then</div>
+            <div className="serif" style={{ fontSize: 64, fontWeight: 600, color: "var(--ember)", lineHeight: 1, fontVariantNumeric: "tabular-nums", textShadow: "0 0 24px oklch(0.70 0.17 45 / 0.4)" }}>
+              {cd.days}<span className="dim" style={{ fontSize: 22 }}>d</span> {String(cd.hours).padStart(2,"0")}<span className="dim" style={{ fontSize: 22 }}>h</span>
+            </div>
+            <div className="dim mono" style={{ fontSize: 11, marginTop: 6 }}>
+              {String(cd.mins).padStart(2, "0")}m {String(cd.secs).padStart(2, "0")}s
+            </div>
+          </div>
+        </div>
+      </Card>
+
+      {/* Upcoming */}
+      <SectionH eyebrow="Upcoming" title="On the road ahead" action={
+        <button className="btn ghost sm">+ Schedule</button>
+      }/>
+      <div style={{ display: "flex", flexDirection: "column", gap: 14, marginBottom: 36 }}>
+        {upcoming.map(s => <UpcomingRow key={s.id} session={s} players={players} setRsvp={setRsvp} meId={meId}/>)}
+      </div>
+
+      {/* Past */}
+      <SectionH eyebrow="The Chronicle" title="Sessions logged" action={
+        <span className="dim mono" style={{ fontSize: 11 }}>{past.length} sessions · {past.reduce((a,s) => a + Object.values(s.rsvps).filter(v => v === "yes").length, 0)} attendances</span>
+      }/>
+      <div style={{ display: "flex", flexDirection: "column", gap: 0, borderTop: "1px solid var(--line)" }}>
+        {past.map(s => <PastRow key={s.id} session={s} players={players}/>)}
+      </div>
+    </div>
+  );
+}
+
+function UpcomingRow({ session, players, setRsvp, meId }) {
+  const cd = useCountdown(session.date);
+  const myRsvp = session.rsvps[meId];
+  const yes = Object.entries(session.rsvps).filter(([_, v]) => v === "yes").map(([k]) => k);
+  const maybe = Object.entries(session.rsvps).filter(([_, v]) => v === "maybe").map(([k]) => k);
+  const no = Object.entries(session.rsvps).filter(([_, v]) => v === "no").map(([k]) => k);
+
+  return (
+    <Card rail>
+      <div style={{ display: "grid", gridTemplateColumns: "120px 1fr auto", gap: 24, alignItems: "center" }}>
+        {/* Date block */}
+        <div style={{ textAlign: "center", borderRight: "1px solid var(--line)", paddingRight: 24 }}>
+          <div className="display" style={{ color: "var(--ember)", fontSize: 14, marginBottom: 2, textTransform: "uppercase", letterSpacing: "0.06em" }}>
+            {new Date(session.date).toLocaleDateString(undefined, { month: "short" })}
+          </div>
+          <div className="serif" style={{ fontSize: 38, color: "var(--ink-0)", lineHeight: 1, fontWeight: 600 }}>
+            {new Date(session.date).getDate()}
+          </div>
+          <div className="dim" style={{ fontSize: 11, marginTop: 4, letterSpacing: "0.04em", textTransform: "uppercase" }}>
+            {new Date(session.date).toLocaleDateString(undefined, { weekday: "short" })} · {fmtTime(session.date)}
+          </div>
+        </div>
+
+        {/* Body */}
+        <div>
+          <div style={{ display: "flex", gap: 10, alignItems: "baseline", marginBottom: 6 }}>
+            <span className="dim mono" style={{ fontSize: 11 }}>SESSION {String(session.number).padStart(2, "0")}</span>
+            <Pill tone={session.mode === "in-person" ? "moss" : session.mode === "remote" ? "gold" : ""}>{session.mode}</Pill>
+            <span className="dim" style={{ fontSize: 12 }}>· {cd.days}d {cd.hours}h away</span>
+          </div>
+          <div className="serif" style={{ fontSize: 22, color: "var(--ink-0)", fontWeight: 600, marginBottom: 6 }}>{session.title}</div>
+          <div className="muted serif italic" style={{ fontSize: 14, marginBottom: 8, maxWidth: 640 }}>"{session.summary}"</div>
+          <div className="dim" style={{ fontSize: 12 }}>📍 {session.location}</div>
+        </div>
+
+        {/* RSVP */}
+        <div style={{ minWidth: 200 }}>
+          <div className="dim" style={{ fontSize: 11, letterSpacing: "0.05em", textTransform: "uppercase", marginBottom: 6, textAlign: "right" }}>Your RSVP</div>
+          <div style={{ display: "flex", gap: 4, marginBottom: 12, justifyContent: "flex-end" }}>
+            {[
+              { v: "yes", label: "Yes" },
+              { v: "maybe", label: "Maybe" },
+              { v: "no", label: "No" },
+            ].map(o => (
+              <button key={o.v}
+                className={`btn sm ${myRsvp === o.v ? "ember" : "ghost"}`}
+                onClick={() => setRsvp(session.id, meId, o.v)}>
+                {o.label}
+              </button>
+            ))}
+          </div>
+          <div style={{ display: "flex", gap: 8, justifyContent: "flex-end", flexWrap: "wrap" }}>
+            <AttendanceCluster players={players} ids={yes} tone="moss" label={`${yes.length} in`}/>
+            {maybe.length > 0 && <AttendanceCluster players={players} ids={maybe} tone="gold" label={`${maybe.length} maybe`}/>}
+            {no.length > 0 && <AttendanceCluster players={players} ids={no} tone="blood" label={`${no.length} out`} dim/>}
+          </div>
+        </div>
+      </div>
+    </Card>
+  );
+}
+
+function AttendanceCluster({ players, ids, tone, label, dim = false }) {
+  return (
+    <div style={{ display: "inline-flex", alignItems: "center", gap: 6, opacity: dim ? 0.6 : 1 }} title={label}>
+      <div style={{ display: "flex" }}>
+        {ids.map((id, i) => {
+          const p = players.find(pp => pp.id === id);
+          if (!p) return null;
+          return (
+            <div key={id} style={{ marginLeft: i === 0 ? 0 : -8, border: "2px solid var(--bg-1)", borderRadius: "50%" }}>
+              <Avatar player={p}/>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function PastRow({ session, players }) {
+  const [open, setOpen] = useState(false);
+  const yes = Object.entries(session.rsvps).filter(([_, v]) => v === "yes").map(([k]) => k);
+
+  return (
+    <div style={{ borderBottom: "1px solid var(--line)" }}>
+      <button
+        onClick={() => setOpen(!open)}
+        style={{
+          display: "grid", gridTemplateColumns: "60px 1fr auto auto", gap: 20, alignItems: "center",
+          width: "100%", textAlign: "left", padding: "16px 4px", background: "transparent", border: 0,
+        }}
+      >
+        <div className="dim mono" style={{ fontSize: 11 }}>S{String(session.number).padStart(2, "0")}</div>
+        <div>
+          <div className="serif" style={{ fontSize: 16, color: "var(--ink-0)", fontWeight: 600 }}>{session.title}</div>
+          <div className="dim" style={{ fontSize: 12, marginTop: 2 }}>{fmtDate(session.date)} · {session.location}</div>
+        </div>
+        <div style={{ display: "flex" }}>
+          {players.map((p, i) => {
+            const present = yes.includes(p.id);
+            return (
+              <div key={p.id} style={{
+                marginLeft: i === 0 ? 0 : -6,
+                opacity: present ? 1 : 0.25,
+                filter: present ? "none" : "grayscale(0.8)",
+              }}>
+                <Avatar player={p}/>
+              </div>
+            );
+          })}
+        </div>
+        <div className="dim" style={{ fontSize: 18, transform: open ? "rotate(90deg)" : "none", transition: "transform 0.2s" }}>›</div>
+      </button>
+      {open && (
+        <div style={{ padding: "0 4px 20px 84px" }}>
+          <div className="muted serif italic" style={{ fontSize: 14, lineHeight: 1.6, marginBottom: 8 }}>"{session.summary}"</div>
+          {session.recap && (
+            <div style={{
+              padding: "12px 16px", borderLeft: "2px solid var(--ember)",
+              background: "var(--bg-1)", borderRadius: "0 6px 6px 0",
+              fontSize: 13, color: "var(--ink-1)", lineHeight: 1.6,
+            }}>
+              <div className="eyebrow" style={{ marginBottom: 4 }}>Recap</div>
+              {session.recap}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+window.EventsTab = EventsTab;
+
+</script>
+
+<script type="text/babel" data-presets="react">
+// Character sheet tab — profile switcher + sheet, inline edit, layout variants
+
+function CharactersTab() {
+  const app = useApp();
+  const { players, characters, selectedPlayer, setSelectedPlayer, updateCharacter, sheetLayout } = app;
+  const playerList = players.filter(p => p.role === "Player");
+  const player = playerList.find(p => p.id === selectedPlayer) || playerList[0];
+  const c = characters[player.id];
+
+  return (
+    <div className="page">
+      {/* Player switcher */}
+      <div style={{ display: "flex", gap: 8, marginBottom: 24, alignItems: "center", overflowX: "auto", paddingBottom: 4 }}>
+        <span className="eyebrow" style={{ marginRight: 8, flexShrink: 0 }}>Profiles</span>
+        {playerList.map(p => {
+          const active = p.id === player.id;
+          const ch = characters[p.id];
+          return (
+            <button key={p.id}
+              onClick={() => setSelectedPlayer(p.id)}
+              className="card"
+              style={{
+                display: "flex", gap: 10, alignItems: "center", padding: "8px 14px 8px 8px",
+                background: active ? "var(--bg-2)" : "var(--bg-1)",
+                border: active ? "1px solid var(--ember)" : "1px solid var(--line)",
+                cursor: "pointer", flexShrink: 0,
+                boxShadow: active ? "0 0 0 1px oklch(0.70 0.17 45 / 0.3), var(--shadow-glow)" : "none",
+                transition: "all 0.15s",
+              }}
+            >
+              <Avatar player={p}/>
+              <div style={{ textAlign: "left" }}>
+                <div className="serif" style={{ fontSize: 14, color: active ? "var(--ink-0)" : "var(--ink-1)", fontWeight: 600, lineHeight: 1.1 }}>{ch?.name || p.name}</div>
+                <div className="dim" style={{ fontSize: 11 }}>{p.name} · {ch ? `${ch.cls} ${ch.level}` : "—"}</div>
+              </div>
+            </button>
+          );
+        })}
+      </div>
+
+      {sheetLayout === "stacked"
+        ? <SheetStacked character={c} updateCharacter={updateCharacter} player={player}/>
+        : <SheetSpread character={c} updateCharacter={updateCharacter} player={player}/>}
+    </div>
+  );
+}
+
+// Layout A: spread (portrait left + stats right + content tabs below)
+function SheetSpread({ character: c, updateCharacter, player }) {
+  const set = (path, value) => updateCharacter(player.id, path, value);
+  const [section, setSection] = useState("abilities");
+  const sections = [
+    { id: "abilities", label: "Abilities" },
+    { id: "features", label: "Features & Kit" },
+    { id: "skills", label: "Skills & Perks" },
+    { id: "origin", label: "Culture & Career" },
+    { id: "projects", label: "Downtime" },
+    { id: "inventory", label: "Inventory" },
+    { id: "ties", label: "Ties & Backstory" },
+    { id: "conditions", label: "Conditions & Notes" },
+    { id: "dice", label: "Dice" },
+  ];
+
+  return (
+    <>
+      {/* Header card */}
+      <Card pad={false} rail style={{ marginBottom: 20 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "240px 1fr", gap: 0 }}>
+          <div style={{ padding: 18, borderRight: "1px solid var(--line)" }}>
+            <PortraitPlaceholder tint={c.portraitTint} label={c.portrait} ratio="3 / 4"/>
+          </div>
+          <div style={{ padding: "22px 26px" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 16, marginBottom: 8 }}>
+              <div>
+                <div className="eyebrow" style={{ marginBottom: 4 }}>{c.titles[0]}</div>
+                <h1 className="serif" style={{ fontSize: 36, margin: 0, color: "var(--ink-0)", letterSpacing: "0.005em", lineHeight: 1 }}>
+                  <Editable value={c.name} onChange={v => set("name", v)}/>
+                </h1>
+                <div className="muted serif italic" style={{ fontSize: 14, marginTop: 6 }}>{c.pronouns} · played by {player.name}</div>
+              </div>
+              <div style={{ display: "flex", gap: 8, flexWrap: "wrap", justifyContent: "flex-end" }}>
+                <Pill tone="ember">Level {c.level}</Pill>
+                <Pill tone="race">{c.ancestry}</Pill>
+                <Pill>{c.cls}</Pill>
+                <Pill tone="gold">{c.career}</Pill>
+                <Pill tone="gold">{c.kit} kit</Pill>
+              </div>
+            </div>
+
+            <div className="rule"></div>
+
+            {/* Characteristics */}
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 10, marginBottom: 18 }}>
+              {Object.entries(c.characteristics).map(([k, v]) => (
+                <div key={k} className="stat-tile" style={{ background: "var(--bg-0)" }}>
+                  <div className="label">{k}</div>
+                  <div className="value" style={{ fontVariantNumeric: "tabular-nums" }}>{v >= 0 ? `+${v}` : v}</div>
+                </div>
+              ))}
+            </div>
+
+            {/* Stamina + recoveries + resource + surges */}
+            <div style={{ display: "grid", gridTemplateColumns: "1.5fr 1fr 1fr 1fr", gap: 12 }}>
+              <div className="card" style={{ padding: "12px 14px", background: "var(--bg-0)" }}>
+                <StaminaBar
+                  current={c.stamina.current} max={c.stamina.max}
+                  temp={c.tempStamina ?? 0}
+                  winded={Math.floor(c.stamina.max / 2)}
+                  dying={-Math.floor(c.stamina.max / 2)}
+                  onTempChange={v => set("tempStamina", v)}
+                />
+              </div>
+              <div className="card" style={{ padding: "10px 14px", background: "var(--bg-0)" }}>
+                <div className="eyebrow" style={{ marginBottom: 6 }}>Recoveries</div>
+                <div style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
+                  <span className="serif" style={{ fontSize: 22, fontWeight: 600, color: "var(--ink-0)" }}>{c.stamina.recoveries.current}</span>
+                  <span className="dim">/ {c.stamina.recoveries.max}</span>
+                </div>
+                <div className="dim mono" style={{ fontSize: 10, marginTop: 4 }}>{c.stamina.recoveries.value} stamina each</div>
+              </div>
+              <div className="card" style={{ padding: "10px 14px", background: "var(--bg-0)" }}>
+                <div className="eyebrow" style={{ marginBottom: 6 }}>{c.resource.name}</div>
+                <PipTrack current={c.resource.current} max={c.resource.max}
+                  onChange={v => set("resource.current", v)}/>
+              </div>
+              <SurgesTile c={c} set={set}/>
+            </div>
+
+            {/* XP + Victories strip */}
+            <div style={{ display: "grid", gridTemplateColumns: "1.6fr 1fr", gap: 16, marginTop: 16 }}>
+              <XPBar c={c} set={set}/>
+              <VictoriesTrack c={c} set={set}/>
+            </div>
+
+            {/* Wealth / Renown / Hero tokens / Turn taken */}
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1.2fr", gap: 12, marginTop: 12 }}>
+              <CounterTile label="Wealth" value={c.wealth ?? 0} icon="◆" tone="gold" onChange={v => set("wealth", Math.max(0, v))}/>
+              <CounterTile label="Renown" value={c.renown ?? 0} icon="✦" tone="gold" onChange={v => set("renown", Math.max(0, v))}/>
+              <CounterTile label="Hero Tokens" value={c.heroTokens ?? 0} icon="●" tone="ember" onChange={v => set("heroTokens", Math.max(0, v))}/>
+              <TurnTakenTile taken={c.turnTaken ?? false} onToggle={() => set("turnTaken", !c.turnTaken)}/>
+            </div>
+          </div>
+        </div>
+      </Card>
+
+      {/* Section tabs */}
+      <div style={{ display: "flex", gap: 4, borderBottom: "1px solid var(--line)", marginBottom: 20 }}>
+        {sections.map(s => (
+          <button key={s.id}
+            onClick={() => setSection(s.id)}
+            className="tab"
+            style={{
+              color: section === s.id ? "var(--ember)" : "var(--ink-2)",
+              fontFamily: "var(--font-serif)",
+              textTransform: "none",
+              fontSize: 15,
+              fontWeight: 500,
+              letterSpacing: "0.01em",
+              padding: "10px 18px",
+            }}>
+            {s.label}
+            {section === s.id && <span style={{ position: "absolute", left: 18, right: 18, bottom: -1, height: 2, background: "var(--ember)", boxShadow: "0 0 8px var(--ember-glow)" }}/>}
+          </button>
+        ))}
+      </div>
+
+      {section === "abilities" && <AbilitiesPanel c={c} set={set}/>}
+      {section === "features" && <FeaturesPanel c={c} set={set}/>}
+      {section === "skills" && <SkillsPerksPanel c={c} set={set}/>}
+      {section === "origin" && <OriginPanel c={c} set={set}/>}
+      {section === "projects" && <ProjectsPanel c={c} set={set}/>}
+      {section === "inventory" && <InventoryPanel c={c} set={set}/>}
+      {section === "ties" && <TiesPanel c={c} set={set}/>}
+      {section === "conditions" && <ConditionsPanel c={c} set={set}/>}
+      {section === "dice" && <DicePanel/>}
+    </>
+  );
+}
+
+// Layout B: stacked (single column, all sections visible)
+function SheetStacked({ character: c, updateCharacter, player }) {
+  const set = (path, value) => updateCharacter(player.id, path, value);
+  return (
+    <div style={{ display: "grid", gridTemplateColumns: "300px 1fr", gap: 24 }}>
+      <div style={{ position: "sticky", top: 92, alignSelf: "start", display: "flex", flexDirection: "column", gap: 16 }}>
+        <Card pad={false}>
+          <div style={{ padding: 14 }}><PortraitPlaceholder tint={c.portraitTint} label={c.portrait} ratio="3 / 4"/></div>
+          <div style={{ padding: "0 18px 18px" }}>
+            <div className="eyebrow" style={{ marginBottom: 4 }}>{c.titles[0]}</div>
+            <h1 className="serif" style={{ fontSize: 26, margin: "0 0 4px", color: "var(--ink-0)", lineHeight: 1.1 }}>
+              <Editable value={c.name} onChange={v => set("name", v)}/>
+            </h1>
+            <div className="dim" style={{ fontSize: 12, marginBottom: 10 }}>{c.pronouns} · {player.name}</div>
+            <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+              <Pill tone="ember">L{c.level}</Pill>
+              <Pill tone="race">{c.ancestry}</Pill>
+              <Pill>{c.cls}</Pill>
+              <Pill tone="gold">{c.career}</Pill>
+            </div>
+          </div>
+        </Card>
+        <Card>
+          <StaminaBar
+            current={c.stamina.current} max={c.stamina.max}
+            temp={c.tempStamina ?? 0}
+            winded={Math.floor(c.stamina.max / 2)}
+            dying={-Math.floor(c.stamina.max / 2)}
+            onTempChange={v => set("tempStamina", v)}
+          />
+          <div className="rule"></div>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12 }}>
+            <div>
+              <div className="eyebrow" style={{ marginBottom: 4 }}>Recoveries</div>
+              <div className="serif" style={{ fontSize: 18, color: "var(--ink-0)" }}>{c.stamina.recoveries.current}/{c.stamina.recoveries.max}</div>
+            </div>
+            <div>
+              <div className="eyebrow" style={{ marginBottom: 4 }}>{c.resource.name}</div>
+              <PipTrack current={c.resource.current} max={c.resource.max} onChange={v => set("resource.current", v)}/>
+            </div>
+            <div>
+              <div className="eyebrow" style={{ marginBottom: 4 }}>Surges</div>
+              <div className="serif" style={{ fontSize: 18, color: "var(--ember)", fontWeight: 600 }}>{c.surges ?? 0}</div>
+            </div>
+          </div>
+          <div className="rule"></div>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+            <CounterTile compact label="Wealth" value={c.wealth ?? 0} icon="◆" tone="gold" onChange={v => set("wealth", Math.max(0, v))}/>
+            <CounterTile compact label="Renown" value={c.renown ?? 0} icon="✦" tone="gold" onChange={v => set("renown", Math.max(0, v))}/>
+            <CounterTile compact label="Hero" value={c.heroTokens ?? 0} icon="●" tone="ember" onChange={v => set("heroTokens", Math.max(0, v))}/>
+            <TurnTakenTile compact taken={c.turnTaken ?? false} onToggle={() => set("turnTaken", !c.turnTaken)}/>
+          </div>
+          <div className="rule"></div>
+          <XPBar c={c} set={set} compact/>
+          <div style={{ marginTop: 10 }}>
+            <VictoriesTrack c={c} set={set} compact/>
+          </div>
+          <div className="rule"></div>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 6 }}>
+            {Object.entries(c.characteristics).map(([k, v]) => (
+              <div key={k} style={{ textAlign: "center" }}>
+                <div className="dim" style={{ fontSize: 9, letterSpacing: "0.04em", textTransform: "uppercase" }}>{k.slice(0,3)}</div>
+                <div className="serif" style={{ fontSize: 20, fontWeight: 600, color: "var(--ink-0)" }}>{v >= 0 ? `+${v}` : v}</div>
+              </div>
+            ))}
+          </div>
+        </Card>
+      </div>
+      <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+        <Card><AbilitiesPanel c={c} set={set}/></Card>
+        <Card><FeaturesPanel c={c} set={set}/></Card>
+        <Card><SkillsPerksPanel c={c} set={set}/></Card>
+        <Card><OriginPanel c={c} set={set}/></Card>
+        <Card><ProjectsPanel c={c} set={set}/></Card>
+        <Card><InventoryPanel c={c} set={set}/></Card>
+        <Card><TiesPanel c={c} set={set}/></Card>
+        <Card><ConditionsPanel c={c} set={set}/></Card>
+        <Card><DicePanel/></Card>
+      </div>
+    </div>
+  );
+}
+
+// ----- XP + Victories trackers -----
+
+function XPBar({ c, set, compact = false }) {
+  const xp = c.xp || { current: 0, next: 24 };
+  const pct = Math.max(0, Math.min(100, (xp.current / xp.next) * 100));
+  const adjust = (delta) => {
+    const v = Math.max(0, xp.current + delta);
+    set("xp", { ...xp, current: v });
+  };
+
+  return (
+    <div className="card" style={{ padding: compact ? "8px 12px" : "10px 14px", background: "var(--bg-0)" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 6 }}>
+        <span className="eyebrow">Experience</span>
+        <div style={{ display: "flex", gap: 6, alignItems: "baseline" }}>
+          {!compact && (
+            <>
+              <button className="btn ghost sm" style={{ padding: "1px 7px", borderRadius: 3, fontSize: 11 }} onClick={() => adjust(-1)}>−</button>
+              <button className="btn ghost sm" style={{ padding: "1px 7px", borderRadius: 3, fontSize: 11 }} onClick={() => adjust(+1)}>+</button>
+            </>
+          )}
+          <span className="serif" style={{ fontSize: compact ? 14 : 17, fontWeight: 600, color: "var(--ink-0)", fontVariantNumeric: "tabular-nums" }}>
+            {xp.current}<span className="dim" style={{ fontSize: compact ? 11 : 13 }}> / {xp.next}</span>
+          </span>
+        </div>
+      </div>
+      <div className="bar" style={{ height: compact ? 6 : 8 }}>
+        <div className="fill" style={{
+          width: `${pct}%`,
+          background: "linear-gradient(90deg, oklch(0.55 0.12 45), var(--gold))",
+        }}/>
+      </div>
+      {!compact && (
+        <div className="dim mono" style={{ fontSize: 10, marginTop: 6 }}>
+          {xp.next - xp.current} XP to level {c.level + 1}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function VictoriesTrack({ c, set, compact = false }) {
+  const v = c.victories ?? 0;
+  const max = 30;
+  const milestones = [15, 30];
+  const adjust = (delta) => set("victories", Math.max(0, Math.min(max, v + delta)));
+  const setTo = (n) => set("victories", n);
+
+  return (
+    <div className="card" style={{ padding: compact ? "8px 12px" : "10px 14px", background: "var(--bg-0)" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 6 }}>
+        <span className="eyebrow">Victories</span>
+        <div style={{ display: "flex", gap: 6, alignItems: "baseline" }}>
+          {!compact && (
+            <>
+              <button className="btn ghost sm" style={{ padding: "1px 7px", borderRadius: 3, fontSize: 11 }} onClick={() => adjust(-1)}>−</button>
+              <button className="btn ghost sm" style={{ padding: "1px 7px", borderRadius: 3, fontSize: 11 }} onClick={() => adjust(+1)}>+</button>
+            </>
+          )}
+          <span className="serif" style={{ fontSize: compact ? 14 : 17, fontWeight: 600, color: "var(--ink-0)", fontVariantNumeric: "tabular-nums" }}>
+            {v}<span className="dim" style={{ fontSize: compact ? 11 : 13 }}> / {max}</span>
+          </span>
+        </div>
+      </div>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(15, 1fr)", gap: 3 }}>
+        {Array.from({ length: max }).map((_, i) => {
+          const filled = i < v;
+          const isMilestone = milestones.includes(i + 1);
+          return (
+            <button
+              key={i}
+              onClick={() => setTo(i + 1 === v ? i : i + 1)}
+              title={`Set victories to ${i + 1 === v ? i : i + 1}${isMilestone ? " · milestone" : ""}`}
+              style={{
+                aspectRatio: "1 / 1",
+                border: `1px solid ${filled ? (isMilestone ? "var(--gold)" : "var(--ember-deep)") : (isMilestone ? "var(--gold-soft)" : "var(--line-strong)")}`,
+                background: filled ? (isMilestone ? "var(--gold)" : "var(--ember)") : "var(--bg-2)",
+                cursor: "pointer",
+                borderRadius: 2,
+                padding: 0,
+                transform: "rotate(45deg) scale(0.85)",
+                boxShadow: filled ? (isMilestone ? "0 0 8px oklch(0.80 0.11 85 / 0.5)" : "0 0 5px var(--ember-glow)") : "none",
+                transition: "all 0.12s",
+              }}
+            />
+          );
+        })}
+      </div>
+      {!compact && (
+        <div className="dim mono" style={{ fontSize: 10, marginTop: 8, display: "flex", justifyContent: "space-between" }}>
+          <span>Banked between sessions</span>
+          <span style={{ color: "var(--gold-soft)" }}>◆ milestone every 15</span>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function SurgesTile({ c, set }) {
+  const s = c.surges ?? 0;
+  const adjust = (delta) => set("surges", Math.max(0, s + delta));
+  return (
+    <div className="card" style={{ padding: "10px 14px", background: "var(--bg-0)" }}>
+      <div className="eyebrow" style={{ marginBottom: 6 }}>Surges</div>
+      <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 8 }}>
+        <span className="serif" style={{ fontSize: 28, fontWeight: 600, color: "var(--ember)", lineHeight: 1, textShadow: s > 0 ? "0 0 12px oklch(0.70 0.17 45 / 0.5)" : "none", fontVariantNumeric: "tabular-nums" }}>
+          {s}
+        </span>
+        <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+          <button className="btn ghost sm" style={{ padding: "1px 8px", borderRadius: 3, fontSize: 11, lineHeight: 1 }} onClick={() => adjust(+1)}>+</button>
+          <button className="btn ghost sm" style={{ padding: "1px 8px", borderRadius: 3, fontSize: 11, lineHeight: 1 }} onClick={() => adjust(-1)}>−</button>
+        </div>
+      </div>
+      <div className="dim mono" style={{ fontSize: 10, marginTop: 4 }}>+1 tier of damage</div>
+    </div>
+  );
+}
+
+// ----- Section Panels -----
+
+function AbilitiesPanel({ c, set }) {
+  const tiers = ["Signature", "Heroic", "Triggered"];
+  return (
+    <div>
+      <SectionH eyebrow="The Arsenal" title="Abilities & Powers"/>
+      <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
+        {tiers.map(tier => {
+          const list = c.abilities.filter(a => a.tier === tier);
+          if (!list.length) return null;
+          return (
+            <div key={tier}>
+              <div className="flourish" style={{ justifyContent: "flex-start", marginBottom: 10 }}>{tier}</div>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(360px, 1fr))", gap: 12 }}>
+                {list.map((a, i) => <AbilityCard key={i} ability={a}/>)}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function AbilityCard({ ability: a }) {
+  return (
+    <div className="card" style={{ padding: "14px 16px", background: "var(--bg-2)" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 4 }}>
+        <div className="serif" style={{ fontSize: 17, fontWeight: 600, color: "var(--ink-0)" }}>{a.name}</div>
+        <div className="dim mono" style={{ fontSize: 10 }}>{a.type}</div>
+      </div>
+      <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 8 }}>
+        {a.cost && <Pill tone="ember">{a.cost}</Pill>}
+        {a.keywords && <span className="dim mono" style={{ fontSize: 10 }}>{a.keywords}</span>}
+      </div>
+      {a.trigger && (
+        <div style={{ fontSize: 12, color: "var(--ink-2)", fontStyle: "italic", marginBottom: 6 }}>
+          <span className="eyebrow" style={{ marginRight: 6 }}>Trigger</span>{a.trigger}
+        </div>
+      )}
+      {a.potency && <PotencyStrip potency={a.potency}/>}
+      <div style={{ fontSize: 13, color: "var(--ink-1)", lineHeight: 1.55 }}>{a.text}</div>
+    </div>
+  );
+}
+
+function PotencyStrip({ potency }) {
+  const tiers = [
+    { key: "weak", label: "Weak", color: "var(--ink-2)" },
+    { key: "average", label: "Avg", color: "var(--ember)" },
+    { key: "strong", label: "Strong", color: "var(--gold)" },
+  ];
+  return (
+    <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8, padding: "6px 8px", background: "var(--bg-0)", border: "1px solid var(--line)", borderRadius: 4 }}>
+      <span className="mono" style={{ fontSize: 9, letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--ink-2)" }}>Potency</span>
+      <span className="dim mono" style={{ fontSize: 10 }}>{potency.stat ?? "—"} &lt;</span>
+      <div style={{ display: "flex", gap: 4, flex: 1 }}>
+        {tiers.map(t => (
+          <div key={t.key} style={{ flex: 1, display: "flex", alignItems: "baseline", gap: 4 }}>
+            <span className="mono" style={{ fontSize: 9, color: "var(--ink-2)", textTransform: "uppercase" }}>{t.label}</span>
+            <span className="serif" style={{ fontSize: 14, fontWeight: 600, color: t.color, fontVariantNumeric: "tabular-nums" }}>{potency[t.key]}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ----- Counter tiles (wealth, renown, hero tokens) -----
+function CounterTile({ label, value, icon, tone = "ember", onChange, compact = false }) {
+  const color = tone === "gold" ? "var(--gold)" : "var(--ember)";
+  return (
+    <div className="card" style={{ padding: compact ? "8px 10px" : "12px 14px", background: "var(--bg-0)" }}>
+      <div className="eyebrow" style={{ marginBottom: compact ? 2 : 6 }}>{label}</div>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 6 }}>
+        <span className="serif" style={{ fontSize: compact ? 20 : 26, fontWeight: 600, color, lineHeight: 1, fontVariantNumeric: "tabular-nums" }}>
+          <span style={{ fontSize: compact ? 12 : 14, marginRight: 4, opacity: 0.7 }}>{icon}</span>{value}
+        </span>
+        <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+          <button className="btn ghost sm" style={{ padding: "1px 7px", borderRadius: 3, fontSize: 11, lineHeight: 1 }} onClick={() => onChange(value + 1)}>+</button>
+          <button className="btn ghost sm" style={{ padding: "1px 7px", borderRadius: 3, fontSize: 11, lineHeight: 1 }} onClick={() => onChange(value - 1)}>−</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function TurnTakenTile({ taken, onToggle, compact = false }) {
+  return (
+    <button onClick={onToggle} className="card" style={{
+      padding: compact ? "8px 10px" : "12px 14px",
+      background: taken ? "oklch(0.30 0.05 140 / 0.30)" : "var(--bg-0)",
+      border: taken ? "1px solid var(--moss)" : "1px solid var(--line)",
+      cursor: "pointer", textAlign: "left", width: "100%",
+      transition: "all 0.15s",
+    }}>
+      <div className="eyebrow" style={{ marginBottom: compact ? 2 : 6 }}>Turn</div>
+      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+        <div style={{
+          width: compact ? 16 : 20, height: compact ? 16 : 20,
+          border: `2px solid ${taken ? "var(--moss)" : "var(--line-strong)"}`,
+          borderRadius: "50%",
+          background: taken ? "var(--moss)" : "transparent",
+          display: "flex", alignItems: "center", justifyContent: "center",
+          color: "var(--bg-0)", fontSize: compact ? 10 : 12, fontWeight: 700,
+        }}>{taken ? "✓" : ""}</div>
+        <span className="serif" style={{ fontSize: compact ? 13 : 15, color: taken ? "var(--moss)" : "var(--ink-1)", fontWeight: 600 }}>
+          {taken ? "Taken" : "Ready"}
+        </span>
+      </div>
+    </button>
+  );
+}
+
+// ----- Skills & Perks panel -----
+function SkillsPerksPanel({ c, set }) {
+  const skills = c.skills || [];
+  const perks = c.perks || [];
+  const groups = ["Crafting", "Exploration", "Interpersonal", "Intrigue", "Lore"];
+  const toggleEdge = (i) => {
+    const next = [...skills];
+    next[i] = { ...next[i], edge: !next[i].edge };
+    set("skills", next);
+  };
+  return (
+    <div>
+      <SectionH eyebrow="Trained & Honed" title="Skills & Perks"/>
+      <div style={{ display: "grid", gridTemplateColumns: "1.4fr 1fr", gap: 24 }}>
+        <div>
+          <div className="flourish" style={{ justifyContent: "flex-start", marginBottom: 10 }}>Skills</div>
+          {skills.length === 0 ? (
+            <div className="muted italic serif" style={{ fontSize: 14, padding: "12px 0" }}>No trained skills.</div>
+          ) : (
+            <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+              {groups.map(g => {
+                const list = skills.map((s, i) => ({ ...s, _i: i })).filter(s => s.group === g);
+                if (!list.length) return null;
+                return (
+                  <div key={g} style={{ marginBottom: 8 }}>
+                    <div className="dim mono" style={{ fontSize: 10, letterSpacing: "0.06em", textTransform: "uppercase", marginBottom: 4 }}>{g}</div>
+                    {list.map(s => (
+                      <div key={s._i} style={{ display: "grid", gridTemplateColumns: "auto 1fr auto", gap: 10, alignItems: "center", padding: "6px 8px", borderBottom: "1px solid var(--line)" }}>
+                        <button onClick={() => toggleEdge(s._i)} title="Edge" style={{
+                          width: 18, height: 18, padding: 0,
+                          border: `1.5px solid ${s.edge ? "var(--ember)" : "var(--line-strong)"}`,
+                          background: s.edge ? "var(--ember)" : "transparent",
+                          borderRadius: 3, cursor: "pointer",
+                          color: "var(--bg-0)", fontSize: 11, fontWeight: 700, lineHeight: 1,
+                          boxShadow: s.edge ? "0 0 6px var(--ember-glow)" : "none",
+                        }}>{s.edge ? "✓" : ""}</button>
+                        <span className="serif" style={{ fontSize: 14, color: "var(--ink-0)" }}>{s.name}</span>
+                        <span className="mono" style={{ fontSize: 9, color: s.edge ? "var(--ember)" : "var(--ink-2)", letterSpacing: "0.06em", textTransform: "uppercase" }}>{s.edge ? "Edge" : "Trained"}</span>
+                      </div>
+                    ))}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+        <div>
+          <div className="flourish" style={{ justifyContent: "flex-start", marginBottom: 10 }}>Perks</div>
+          {perks.length === 0 ? (
+            <div className="muted italic serif" style={{ fontSize: 14, padding: "12px 0" }}>No perks taken.</div>
+          ) : (
+            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              {perks.map((p, i) => (
+                <div key={i} style={{ padding: "10px 12px", border: "1px solid var(--line)", borderLeft: "2px solid var(--gold)", background: "var(--bg-2)", borderRadius: "0 6px 6px 0" }}>
+                  <div className="serif" style={{ fontSize: 14, color: "var(--ink-0)", fontWeight: 600, marginBottom: 3 }}>{p.name}</div>
+                  <div style={{ fontSize: 12, color: "var(--ink-1)", lineHeight: 1.5 }}>{p.text}</div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ----- Downtime projects -----
+function ProjectsPanel({ c, set }) {
+  const projects = c.projects || [];
+  const adjust = (i, delta) => {
+    const next = [...projects];
+    next[i] = { ...next[i], progress: Math.max(0, Math.min(next[i].goal, next[i].progress + delta)) };
+    set("projects", next);
+  };
+  return (
+    <div>
+      <SectionH eyebrow="Between sessions" title="Downtime Projects" action={
+        <button className="btn ghost sm">+ Project</button>
+      }/>
+      {projects.length === 0 ? (
+        <div className="muted italic serif" style={{ fontSize: 14, padding: "20px 0", textAlign: "center" }}>Nothing in the workshop.</div>
+      ) : (
+        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+          {projects.map((p, i) => {
+            const pct = Math.max(0, Math.min(100, (p.progress / p.goal) * 100));
+            const done = p.progress >= p.goal;
+            return (
+              <div key={i} style={{ padding: "12px 14px", border: "1px solid var(--line)", borderRadius: 6, background: "var(--bg-2)" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 6, gap: 12 }}>
+                  <div className="serif" style={{ fontSize: 15, color: "var(--ink-0)", fontWeight: 600 }}>{p.name}</div>
+                  <div style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
+                    {p.characteristic && <span className="dim mono" style={{ fontSize: 10 }}>{p.characteristic}</span>}
+                    <button className="btn ghost sm" style={{ padding: "1px 7px", borderRadius: 3, fontSize: 11 }} onClick={() => adjust(i, -1)}>−</button>
+                    <button className="btn ghost sm" style={{ padding: "1px 7px", borderRadius: 3, fontSize: 11 }} onClick={() => adjust(i, +1)}>+</button>
+                    <span className="serif" style={{ fontSize: 15, color: done ? "var(--moss)" : "var(--ink-0)", fontWeight: 600, fontVariantNumeric: "tabular-nums" }}>
+                      {p.progress}<span className="dim" style={{ fontSize: 12 }}> / {p.goal}</span>
+                    </span>
+                  </div>
+                </div>
+                <div className="bar" style={{ height: 6 }}>
+                  <div className="fill" style={{
+                    width: `${pct}%`,
+                    background: done ? "var(--moss)" : "linear-gradient(90deg, oklch(0.55 0.10 80), var(--gold))",
+                  }}/>
+                </div>
+                {done && <div className="mono" style={{ fontSize: 10, color: "var(--moss)", marginTop: 4, letterSpacing: "0.06em", textTransform: "uppercase" }}>● Complete</div>}
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function FeaturesPanel({ c, set }) {
+  return (
+    <div>
+      <SectionH eyebrow="Class & Kit" title="Features"/>
+      <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+        {c.features.map((f, i) => (
+          <div key={i} style={{ padding: "12px 14px", border: "1px solid var(--line)", borderRadius: 6, background: "var(--bg-2)" }}>
+            <div className="serif" style={{ fontSize: 16, fontWeight: 600, color: "var(--ink-0)", marginBottom: 4 }}>{f.name}</div>
+            <div style={{ fontSize: 13, color: "var(--ink-1)", lineHeight: 1.55 }}>{f.text}</div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function InventoryPanel({ c, set }) {
+  return (
+    <div>
+      <SectionH eyebrow="On their person" title="Inventory & Treasures" action={
+        <button className="btn ghost sm">+ Item</button>
+      }/>
+      <div style={{ borderTop: "1px solid var(--line)" }}>
+        {c.inventory.map((it, i) => (
+          <div key={i} style={{ display: "grid", gridTemplateColumns: "1fr 1.5fr", gap: 16, padding: "10px 4px", borderBottom: "1px solid var(--line)" }}>
+            <div className="serif" style={{ fontSize: 15, color: "var(--ink-0)" }}>{it.name}</div>
+            <div className="muted italic serif" style={{ fontSize: 13 }}>{it.note || "—"}</div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function TiesPanel({ c, set }) {
+  return (
+    <div>
+      <SectionH eyebrow="The Web" title="Ties & Backstory"/>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
+        <div>
+          <div className="flourish" style={{ justifyContent: "flex-start", marginBottom: 10 }}>Ties</div>
+          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+            {c.ties.map((t, i) => (
+              <div key={i} style={{ padding: "10px 12px", border: "1px solid var(--line)", borderLeft: "2px solid var(--ember)", background: "var(--bg-2)", borderRadius: "0 6px 6px 0" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 2 }}>
+                  <span className="serif" style={{ fontSize: 14, color: "var(--ink-0)", fontWeight: 600 }}>{t.who}</span>
+                  <span className="dim mono" style={{ fontSize: 10 }}>{t.how}</span>
+                </div>
+                <div className="muted italic" style={{ fontSize: 12 }}>{t.note}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div>
+          <div className="flourish" style={{ justifyContent: "flex-start", marginBottom: 10 }}>Story</div>
+          <div className="serif italic" style={{ fontSize: 14, color: "var(--ink-1)", lineHeight: 1.65, marginBottom: 16, padding: "0 4px" }}>
+            "<Editable multiline value={c.backstory} onChange={v => set("backstory", v)}/>"
+          </div>
+          <div className="flourish" style={{ justifyContent: "flex-start", marginBottom: 10 }}>Goals</div>
+          <ul style={{ margin: 0, padding: 0, listStyle: "none", display: "flex", flexDirection: "column", gap: 6 }}>
+            {c.goals.map((g, i) => (
+              <li key={i} style={{ display: "flex", gap: 10, fontSize: 13, color: "var(--ink-1)", padding: "6px 0", borderBottom: "1px solid var(--line)" }}>
+                <span style={{ color: "var(--ember)", fontFamily: "var(--font-display)" }}>✦</span> {g}
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ConditionsPanel({ c, set }) {
+  return (
+    <div>
+      <SectionH eyebrow="The State of Things" title="Conditions & Notes"/>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 20 }}>
+        <div>
+          <div className="flourish" style={{ justifyContent: "flex-start", marginBottom: 10 }}>Conditions</div>
+          {c.conditions.length === 0 ? (
+            <div className="muted italic serif" style={{ fontSize: 14, padding: "20px 0", textAlign: "center" }}>None — for now.</div>
+          ) : (
+            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              {c.conditions.map((cond, i) => (
+                <div key={i} style={{ padding: "10px 12px", border: "1px solid oklch(0.42 0.10 25)", background: "oklch(0.30 0.08 25 / 0.20)", borderRadius: 6 }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
+                    <span className="serif" style={{ color: "var(--ink-0)", fontWeight: 600 }}>{cond.name}</span>
+                    <span className="dim mono" style={{ fontSize: 10 }}>{cond.duration}</span>
+                  </div>
+                  <div className="muted" style={{ fontSize: 12, marginTop: 2 }}>{cond.source}</div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+        <div>
+          <DamageList
+            title="Weaknesses"
+            tone="blood"
+            items={c.weaknesses || []}
+            empty="No known weaknesses."
+            sign="+"
+            sub="extra damage taken"
+          />
+          <div style={{ height: 16 }}></div>
+          <DamageList
+            title="Immunities"
+            tone="moss"
+            items={c.immunities || []}
+            empty="Vulnerable to all."
+            sign="−"
+            sub="damage reduced"
+          />
+        </div>
+        <div>
+          <div className="flourish" style={{ justifyContent: "flex-start", marginBottom: 10 }}>Notes</div>
+          <div style={{ padding: "0 4px" }}>
+            <Editable multiline value={c.notes} onChange={v => set("notes", v)}
+              style={{ minHeight: 100, fontFamily: "var(--font-serif)", fontStyle: "italic", fontSize: 14, color: "var(--ink-1)", lineHeight: 1.6 }}/>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function DamageList({ title, tone, items, empty, sign, sub }) {
+  const colors = tone === "blood"
+    ? { border: "oklch(0.42 0.10 25)", bg: "oklch(0.30 0.08 25 / 0.20)", text: "var(--blood)" }
+    : { border: "oklch(0.40 0.06 140)", bg: "oklch(0.30 0.05 140 / 0.20)", text: "var(--moss)" };
+  return (
+    <div>
+      <div className="flourish" style={{ justifyContent: "flex-start", marginBottom: 10 }}>{title}</div>
+      {items.length === 0 ? (
+        <div className="muted italic serif" style={{ fontSize: 13, padding: "12px 0" }}>{empty}</div>
+      ) : (
+        <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+          {items.map((it, i) => (
+            <div key={i} style={{
+              display: "grid", gridTemplateColumns: "1fr auto", alignItems: "center", gap: 12,
+              padding: "8px 12px", border: `1px solid ${colors.border}`,
+              background: colors.bg, borderRadius: 6,
+            }}>
+              <div>
+                <div className="serif" style={{ fontSize: 14, color: "var(--ink-0)", fontWeight: 600 }}>{it.type}</div>
+                <div className="dim mono" style={{ fontSize: 10, marginTop: 1 }}>{sub}</div>
+              </div>
+              <div className="serif" style={{ fontSize: 22, fontWeight: 600, color: colors.text, fontVariantNumeric: "tabular-nums", lineHeight: 1 }}>
+                {sign}{it.value}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+window.CharactersTab = CharactersTab;
+
+// ----- Culture & Career panel -----
+function OriginPanel({ c, set }) {
+  const culture = c.culture || {};
+  const career = c.careerData || {};
+  return (
+    <div>
+      <SectionH eyebrow="Where they come from" title="Culture & Career"/>
+
+      {/* Career card */}
+      <div style={{
+        padding: "16px 18px", marginBottom: 24,
+        border: "1px solid var(--line)", borderLeft: "3px solid var(--gold)",
+        background: "linear-gradient(180deg, oklch(0.30 0.03 85 / 0.10), transparent)",
+        borderRadius: "0 6px 6px 0",
+      }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 12, gap: 12 }}>
+          <div>
+            <div className="eyebrow" style={{ marginBottom: 4 }}>Career</div>
+            <div className="serif" style={{ fontSize: 22, fontWeight: 600, color: "var(--ink-0)", letterSpacing: "0.005em" }}>{c.career}</div>
+          </div>
+          {career.skills && career.skills.length > 0 && (
+            <div style={{ display: "flex", gap: 6, flexWrap: "wrap", justifyContent: "flex-end" }}>
+              {career.skills.map(s => <Pill key={s} tone="gold">{s}</Pill>)}
+            </div>
+          )}
+        </div>
+        {career.benefits && (
+          <div style={{ marginBottom: 14 }}>
+            <div className="dim mono" style={{ fontSize: 10, letterSpacing: "0.06em", textTransform: "uppercase", marginBottom: 4 }}>Benefits</div>
+            <div style={{ fontSize: 13, color: "var(--ink-1)", lineHeight: 1.55 }}>{career.benefits}</div>
+          </div>
+        )}
+        {career.perk && (
+          <div style={{ marginBottom: 14, padding: "10px 12px", background: "var(--bg-2)", borderRadius: 4, border: "1px solid var(--line)" }}>
+            <div className="dim mono" style={{ fontSize: 10, letterSpacing: "0.06em", textTransform: "uppercase", marginBottom: 4, color: "var(--gold)" }}>Career Perk</div>
+            <div style={{ fontSize: 13, color: "var(--ink-1)", lineHeight: 1.55 }}>{career.perk}</div>
+          </div>
+        )}
+        {career.incident && (
+          <div className="serif italic" style={{ fontSize: 14, color: "var(--ink-2)", lineHeight: 1.6, paddingLeft: 12, borderLeft: "2px solid var(--ember-deep)" }}>
+            <span className="eyebrow" style={{ marginRight: 8, color: "var(--ember)" }}>Inciting Incident</span>
+            {career.incident}
+          </div>
+        )}
+      </div>
+
+      {/* Culture & Backgrounds */}
+      <div className="flourish" style={{ justifyContent: "flex-start", marginBottom: 14 }}>Culture & Backgrounds</div>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 16 }}>
+        <CultureField label="Environment" value={culture.environment} icon="◐"/>
+        <CultureField label="Organization" value={culture.organization} icon="◇"/>
+        <CultureField label="Upbringing" value={culture.upbringing} icon="✦"/>
+        <CultureField label="Languages" value={(culture.languages || []).join(" · ")} icon="❝"/>
+      </div>
+
+      {/* Complications */}
+      <div>
+        <div className="dim mono" style={{ fontSize: 10, letterSpacing: "0.06em", textTransform: "uppercase", marginBottom: 8, color: "var(--blood)" }}>Complications</div>
+        {(!culture.complications || culture.complications.length === 0) ? (
+          <div className="muted italic serif" style={{ fontSize: 13, padding: "8px 0" }}>No known complications.</div>
+        ) : (
+          <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+            {culture.complications.map((comp, i) => (
+              <div key={i} style={{
+                display: "flex", gap: 10, alignItems: "flex-start",
+                padding: "8px 12px",
+                background: "oklch(0.30 0.06 25 / 0.15)",
+                border: "1px solid oklch(0.40 0.08 25)",
+                borderRadius: 4,
+              }}>
+                <span style={{ color: "var(--blood)", fontFamily: "var(--font-display)", fontSize: 14, lineHeight: 1.4, flexShrink: 0 }}>※</span>
+                <span className="serif italic" style={{ fontSize: 13, color: "var(--ink-1)", lineHeight: 1.55 }}>{comp}</span>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function CultureField({ label, value, icon }) {
+  return (
+    <div style={{
+      padding: "10px 14px",
+      border: "1px solid var(--line)",
+      background: "var(--bg-2)",
+      borderRadius: 6,
+    }}>
+      <div className="eyebrow" style={{ marginBottom: 4, display: "flex", alignItems: "center", gap: 6 }}>
+        <span style={{ color: "var(--ember)", fontFamily: "var(--font-display)", fontSize: 11, opacity: 0.8 }}>{icon}</span>
+        {label}
+      </div>
+      <div className="serif" style={{ fontSize: 14, color: "var(--ink-0)", lineHeight: 1.4 }}>{value || <span className="muted italic">Unknown</span>}</div>
+    </div>
+  );
+}
+
+// ----- Inline dice panel (compact) for character-sheet section -----
+function DicePanel() {
+  return (
+    <div>
+      <SectionH eyebrow="The Bones" title="Dice"/>
+      <DiceTab/>
+    </div>
+  );
+}
+window.DicePanel = DicePanel;
+
+</script>
+
+<script type="text/babel" data-presets="react">
+// Media tab — folders, gallery, docs, links
+
+function MediaTab() {
+  const app = useApp();
+  const { media, players } = app;
+  const [folder, setFolder] = useState("All");
+  const [search, setSearch] = useState("");
+  const [view, setView] = useState("grid");
+
+  const folders = ["All", ...Array.from(new Set(media.map(m => m.folder)))];
+  const filtered = media.filter(m => {
+    if (folder !== "All" && m.folder !== folder) return false;
+    if (search && !(m.title.toLowerCase().includes(search.toLowerCase()) ||
+                    m.tags.some(t => t.toLowerCase().includes(search.toLowerCase())))) return false;
+    return true;
+  });
+
+  return (
+    <div className="page">
+      <SectionH eyebrow="The Vault" title="Media & references" action={
+        <div style={{ display: "flex", gap: 8 }}>
+          <button className={`btn ghost sm ${view === "grid" ? "ember" : ""}`} onClick={() => setView("grid")}>Grid</button>
+          <button className={`btn ghost sm ${view === "list" ? "ember" : ""}`} onClick={() => setView("list")}>List</button>
+          <button className="btn sm">+ Upload</button>
+        </div>
+      }/>
+
+      <div style={{ display: "grid", gridTemplateColumns: "220px 1fr", gap: 24 }}>
+        {/* Sidebar */}
+        <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+          <input
+            type="text"
+            placeholder="Search the vault…"
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            style={{
+              padding: "8px 12px", background: "var(--bg-1)",
+              border: "1px solid var(--line)", borderRadius: 6,
+              color: "var(--ink-0)", fontSize: 13, marginBottom: 8, outline: "none",
+            }}
+          />
+          <div className="eyebrow" style={{ padding: "8px 4px 4px" }}>Folders</div>
+          {folders.map(f => {
+            const count = f === "All" ? media.length : media.filter(m => m.folder === f).length;
+            const active = folder === f;
+            return (
+              <button key={f} onClick={() => setFolder(f)}
+                style={{
+                  display: "flex", justifyContent: "space-between", alignItems: "center",
+                  padding: "8px 12px", borderRadius: 4, border: 0,
+                  background: active ? "var(--bg-2)" : "transparent",
+                  color: active ? "var(--ember)" : "var(--ink-1)",
+                  textAlign: "left", fontSize: 13, fontFamily: "var(--font-serif)", fontWeight: active ? 600 : 400,
+                  borderLeft: active ? "2px solid var(--ember)" : "2px solid transparent",
+                }}>
+                {f}
+                <span className="dim mono" style={{ fontSize: 11 }}>{count}</span>
+              </button>
+            );
+          })}
+          <div className="eyebrow" style={{ padding: "16px 4px 4px" }}>Common Tags</div>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 4, padding: "0 4px" }}>
+            {["map", "portrait", "rules", "handout", "lore", "npc", "link"].map(t => (
+              <button key={t} onClick={() => setSearch(t)}
+                className="pill" style={{ cursor: "pointer", border: "1px solid var(--line)" }}>
+                {t}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Content */}
+        <div>
+          <div className="dim mono" style={{ fontSize: 11, marginBottom: 12 }}>
+            {filtered.length} item{filtered.length !== 1 ? "s" : ""} {folder !== "All" && `in ${folder}`}
+          </div>
+          {view === "grid" ? (
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))", gap: 16 }}>
+              {filtered.map(m => <MediaCard key={m.id} m={m} players={players}/>)}
+            </div>
+          ) : (
+            <div style={{ borderTop: "1px solid var(--line)" }}>
+              {filtered.map(m => <MediaRow key={m.id} m={m} players={players}/>)}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function MediaCard({ m, players }) {
+  const uploader = players.find(p => p.id === m.uploader);
+  return (
+    <div className="card" style={{ padding: 0, overflow: "hidden", cursor: "pointer", transition: "all 0.15s" }}
+      onMouseEnter={e => { e.currentTarget.style.borderColor = "var(--ember-soft)"; }}
+      onMouseLeave={e => { e.currentTarget.style.borderColor = "var(--line)"; }}>
+      {m.kind === "image" && <PortraitPlaceholder tint="ember" label={m.placeholder} ratio="4 / 3" style={{ borderRadius: 0, border: 0, borderBottom: "1px solid var(--line)" }}/>}
+      {m.kind === "doc" && (
+        <div style={{ aspectRatio: "4 / 3", background: "var(--bg-2)", borderBottom: "1px solid var(--line)", display: "grid", placeItems: "center", position: "relative" }}>
+          <div className="serif" style={{ fontSize: 64, color: "var(--ember)", opacity: 0.5, fontFamily: "var(--font-display)" }}>{m.ext?.toUpperCase()}</div>
+          <div className="dim mono" style={{ position: "absolute", bottom: 8, right: 12, fontSize: 10 }}>{m.size}</div>
+        </div>
+      )}
+      {m.kind === "link" && (
+        <div style={{ aspectRatio: "4 / 3", background: "linear-gradient(135deg, var(--bg-2), var(--bg-1))", borderBottom: "1px solid var(--line)", display: "grid", placeItems: "center", position: "relative" }}>
+          <div style={{ textAlign: "center" }}>
+            <div className="display" style={{ fontSize: 36, color: "var(--gold)", marginBottom: 4 }}>↗</div>
+            <div className="dim mono" style={{ fontSize: 11 }}>{m.url}</div>
+          </div>
+        </div>
+      )}
+      <div style={{ padding: "10px 14px 12px" }}>
+        <div className="serif" style={{ fontSize: 14, fontWeight: 600, color: "var(--ink-0)", marginBottom: 4, lineHeight: 1.2 }}>{m.title}</div>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <div className="dim" style={{ fontSize: 11 }}>{m.folder}</div>
+          <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+            {uploader && <Avatar player={uploader}/>}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function MediaRow({ m, players }) {
+  const uploader = players.find(p => p.id === m.uploader);
+  const icon = m.kind === "image" ? "▦" : m.kind === "doc" ? "▤" : "↗";
+  return (
+    <div style={{
+      display: "grid", gridTemplateColumns: "auto 1fr 100px 90px 100px auto", gap: 16,
+      alignItems: "center", padding: "12px 4px", borderBottom: "1px solid var(--line)",
+      cursor: "pointer", transition: "background 0.1s",
+    }}
+      onMouseEnter={e => e.currentTarget.style.background = "var(--bg-1)"}
+      onMouseLeave={e => e.currentTarget.style.background = "transparent"}
+    >
+      <div className="serif" style={{ fontSize: 18, color: "var(--ember)", width: 24, textAlign: "center" }}>{icon}</div>
+      <div>
+        <div className="serif" style={{ fontSize: 14, color: "var(--ink-0)", fontWeight: 500 }}>{m.title}</div>
+        <div style={{ display: "flex", gap: 4, marginTop: 4 }}>
+          {m.tags.map(t => <span key={t} className="dim mono" style={{ fontSize: 10 }}>#{t}</span>)}
+        </div>
+      </div>
+      <div className="dim" style={{ fontSize: 12 }}>{m.folder}</div>
+      <div className="dim mono" style={{ fontSize: 11 }}>{m.size || m.ext || "link"}</div>
+      <div className="dim" style={{ fontSize: 12 }}>{fmtDate(m.date)}</div>
+      {uploader && <Avatar player={uploader}/>}
+    </div>
+  );
+}
+
+window.MediaTab = MediaTab;
+
+</script>
+
+<script type="text/babel" data-presets="react">
+// Notes tab — shared timeline
+
+function NotesTab() {
+  const app = useApp();
+  const { notes, players, sessions, meId, addNote } = app;
+  const [filter, setFilter] = useState("all");
+  const [draft, setDraft] = useState("");
+  const [tagDraft, setTagDraft] = useState("");
+
+  const sorted = [...notes].sort((a, b) => new Date(b.posted) - new Date(a.posted));
+  const filtered = filter === "all" ? sorted : sorted.filter(n => n.tags.includes(filter));
+  const allTags = Array.from(new Set(notes.flatMap(n => n.tags)));
+
+  const post = () => {
+    if (!draft.trim()) return;
+    addNote({
+      authorId: meId,
+      body: draft.trim(),
+      tags: tagDraft.split(",").map(t => t.trim()).filter(Boolean),
+      sessionId: sessions.find(s => s.upcoming)?.id || null,
+    });
+    setDraft("");
+    setTagDraft("");
+  };
+
+  const me = players.find(p => p.id === meId);
+
+  return (
+    <div className="page" style={{ maxWidth: 880 }}>
+      <SectionH eyebrow="Memoria" title="The shared chronicle"/>
+
+      {/* Composer */}
+      <Card rail style={{ marginBottom: 28 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "auto 1fr", gap: 14 }}>
+          <Avatar player={me} size="lg"/>
+          <div>
+            <div style={{ marginBottom: 6 }}>
+              <span className="serif" style={{ color: "var(--ink-0)", fontWeight: 600, fontSize: 15 }}>{me.name}</span>
+              <span className="dim italic serif" style={{ fontSize: 13, marginLeft: 8 }}>posts to the table</span>
+            </div>
+            <textarea
+              value={draft}
+              onChange={e => setDraft(e.target.value)}
+              placeholder="Theory, recap, request, joke. Speak it into the page."
+              style={{
+                width: "100%", minHeight: 80, padding: "10px 12px",
+                background: "var(--bg-0)", border: "1px solid var(--line)", borderRadius: 6,
+                color: "var(--ink-0)", fontSize: 14, fontFamily: "var(--font-serif)", lineHeight: 1.55,
+                outline: "none", resize: "vertical",
+              }}
+            />
+            <div style={{ display: "flex", gap: 12, alignItems: "center", marginTop: 10 }}>
+              <input
+                value={tagDraft}
+                onChange={e => setTagDraft(e.target.value)}
+                placeholder="tags, comma, separated"
+                style={{
+                  flex: 1, padding: "6px 10px",
+                  background: "var(--bg-0)", border: "1px solid var(--line)", borderRadius: 4,
+                  color: "var(--ink-1)", fontSize: 12, fontFamily: "var(--font-mono)",
+                  outline: "none",
+                }}
+              />
+              <button className="btn ember" onClick={post}>Post to the chronicle</button>
+            </div>
+          </div>
+        </div>
+      </Card>
+
+      {/* Filter */}
+      <div style={{ display: "flex", gap: 6, marginBottom: 20, flexWrap: "wrap", alignItems: "center" }}>
+        <span className="eyebrow" style={{ marginRight: 6 }}>Filter</span>
+        <button className={`pill ${filter === "all" ? "ember" : ""}`} style={{ cursor: "pointer" }} onClick={() => setFilter("all")}>All · {notes.length}</button>
+        {allTags.map(t => (
+          <button key={t} className={`pill ${filter === t ? "ember" : ""}`} style={{ cursor: "pointer" }} onClick={() => setFilter(t)}>
+            #{t} · {notes.filter(n => n.tags.includes(t)).length}
+          </button>
+        ))}
+      </div>
+
+      {/* Timeline */}
+      <div style={{ position: "relative" }}>
+        <div style={{ position: "absolute", left: 27, top: 0, bottom: 0, width: 1, background: "linear-gradient(180deg, transparent, var(--line) 8%, var(--line) 92%, transparent)" }}/>
+        <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
+          {filtered.map(n => <NoteEntry key={n.id} note={n} players={players} sessions={sessions}/>)}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function NoteEntry({ note, players, sessions }) {
+  const author = players.find(p => p.id === note.authorId);
+  const session = sessions.find(s => s.id === note.sessionId);
+
+  return (
+    <div style={{ display: "grid", gridTemplateColumns: "56px 1fr", gap: 14 }}>
+      <div style={{ position: "relative", zIndex: 1 }}>
+        <Avatar player={author} size="lg"/>
+      </div>
+      <Card style={{ background: "var(--bg-1)" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 8, flexWrap: "wrap", gap: 8 }}>
+          <div>
+            <span className="serif" style={{ color: "var(--ink-0)", fontWeight: 600, fontSize: 15 }}>{author?.name}</span>
+            <span className="dim italic serif" style={{ fontSize: 12, marginLeft: 8 }}>· {fmtRelative(note.posted)}</span>
+          </div>
+          {session && (
+            <span className="dim mono" style={{ fontSize: 10, letterSpacing: "0.06em", textTransform: "uppercase" }}>
+              re: S{String(session.number).padStart(2, "0")} {session.title}
+            </span>
+          )}
+        </div>
+        <div className="serif" style={{ fontSize: 14.5, color: "var(--ink-1)", lineHeight: 1.65, whiteSpace: "pre-wrap" }}>
+          {note.body}
+        </div>
+        <div style={{ display: "flex", gap: 6, marginTop: 12, flexWrap: "wrap" }}>
+          {note.tags.map(t => (
+            <span key={t} className="dim mono" style={{ fontSize: 11 }}>#{t}</span>
+          ))}
+          <div style={{ marginLeft: "auto", display: "flex", gap: 8 }}>
+            <button className="dim" style={{ background: "transparent", border: 0, fontSize: 12, cursor: "pointer", padding: 0 }}>Reply</button>
+            <button className="dim" style={{ background: "transparent", border: 0, fontSize: 12, cursor: "pointer", padding: 0 }}>↻</button>
+          </div>
+        </div>
+      </Card>
+    </div>
+  );
+}
+
+window.NotesTab = NotesTab;
+
+</script>
+
+<script type="text/babel" data-presets="react">
+// Dice tab — d4/d6/d8/d10/d12/d20 roller with history
+
+function DiceTab() {
+  const app = useApp();
+  const { players, meId } = app;
+  const me = players.find(p => p.id === meId);
+  const [pool, setPool] = useState({ 4: 0, 6: 0, 8: 0, 10: 0, 12: 0, 20: 0 });
+  const [modifier, setModifier] = useState(0);
+  const [edge, setEdge] = useState("none"); // none | edge | bane | doubleEdge | doubleBane
+  const [label, setLabel] = useState("");
+  const [history, setHistory] = useState([]);
+  const [rolling, setRolling] = useState(false);
+  const [latest, setLatest] = useState(null);
+
+  const dice = [4, 6, 8, 10, 12, 20];
+  const total = Object.values(pool).reduce((a, b) => a + b, 0);
+
+  const adjust = (d, delta) => setPool(p => ({ ...p, [d]: Math.max(0, p[d] + delta) }));
+  const reset = () => { setPool({ 4: 0, 6: 0, 8: 0, 10: 0, 12: 0, 20: 0 }); setModifier(0); setEdge("none"); setLabel(""); };
+
+  const rollOne = (sides) => Math.floor(Math.random() * sides) + 1;
+
+  const roll = () => {
+    if (total === 0) return;
+    setRolling(true);
+
+    // Drawsteel-style: 2d10 power roll baseline (when only d10s present we treat as power roll)
+    const groups = dice.flatMap(d => Array.from({ length: pool[d] }).map(() => ({ sides: d, value: rollOne(d) })));
+
+    // edge/bane modifier
+    let edgeBonus = 0;
+    if (edge === "edge") edgeBonus = 2;
+    if (edge === "doubleEdge") edgeBonus = 4;
+    if (edge === "bane") edgeBonus = -2;
+    if (edge === "doubleBane") edgeBonus = -4;
+
+    const sum = groups.reduce((a, g) => a + g.value, 0) + Number(modifier) + edgeBonus;
+
+    // Power-roll tier interpretation if it's a 2d10 roll (Drawsteel canonical)
+    let tier = null;
+    if (pool[10] === 2 && Object.entries(pool).every(([k, v]) => k === "10" || v === 0)) {
+      const base = sum;
+      if (base <= 11) tier = 1;
+      else if (base <= 16) tier = 2;
+      else tier = 3;
+      // natural 19-20 bumps tier
+      const natSum = groups.reduce((a, g) => a + g.value, 0);
+      if (natSum >= 19) tier = Math.min(3, tier + 1);
+    }
+
+    const result = {
+      id: "r" + Date.now(),
+      who: me.id,
+      whoName: me.name,
+      label: label || (tier ? "Power roll" : "Dice roll"),
+      groups, modifier: Number(modifier), edge, edgeBonus,
+      total: sum,
+      tier,
+      ts: new Date().toISOString(),
+    };
+
+    setTimeout(() => {
+      setLatest(result);
+      setHistory(h => [result, ...h].slice(0, 30));
+      setRolling(false);
+    }, 600);
+  };
+
+  const presets = [
+    { name: "Power roll", desc: "2d10", apply: () => setPool({ 4: 0, 6: 0, 8: 0, 10: 2, 12: 0, 20: 0 }) },
+    { name: "Damage (light)", desc: "2d6", apply: () => setPool({ 4: 0, 6: 2, 8: 0, 10: 0, 12: 0, 20: 0 }) },
+    { name: "Damage (heavy)", desc: "2d8 + 1d6", apply: () => setPool({ 4: 0, 6: 1, 8: 2, 10: 0, 12: 0, 20: 0 }) },
+    { name: "Big hit", desc: "1d12", apply: () => setPool({ 4: 0, 6: 0, 8: 0, 10: 0, 12: 1, 20: 0 }) },
+    { name: "d20", desc: "1d20", apply: () => setPool({ 4: 0, 6: 0, 8: 0, 10: 0, 12: 0, 20: 1 }) },
+  ];
+
+  return (
+    <div className="page">
+      <SectionH eyebrow="The Bones" title="Dice" action={
+        <span className="dim mono" style={{ fontSize: 11 }}>Rolling as <span style={{ color: "var(--ember)" }}>{me.name}</span></span>
+      }/>
+
+      <div style={{ display: "grid", gridTemplateColumns: "1.4fr 1fr", gap: 24 }}>
+        {/* Builder */}
+        <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+          <Card rail>
+            <div className="flourish" style={{ justifyContent: "flex-start", marginBottom: 14 }}>The Pool</div>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12 }}>
+              {dice.map(d => (
+                <DieControl key={d} sides={d} count={pool[d]}
+                  onInc={() => adjust(d, +1)}
+                  onDec={() => adjust(d, -1)}
+                  onClear={() => setPool(p => ({ ...p, [d]: 0 }))}/>
+              ))}
+            </div>
+          </Card>
+
+          <Card>
+            <div className="flourish" style={{ justifyContent: "flex-start", marginBottom: 14 }}>Modifiers</div>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 2fr", gap: 16, alignItems: "start" }}>
+              <div>
+                <div className="eyebrow" style={{ marginBottom: 6 }}>Flat bonus</div>
+                <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                  <button className="btn ghost sm" onClick={() => setModifier(m => m - 1)}>−</button>
+                  <input type="number" value={modifier} onChange={e => setModifier(parseInt(e.target.value || 0))}
+                    style={{ width: 64, textAlign: "center", padding: "6px 8px", background: "var(--bg-0)", border: "1px solid var(--line)", borderRadius: 4, color: "var(--ink-0)", fontSize: 16, fontFamily: "var(--font-serif)", fontWeight: 600 }}/>
+                  <button className="btn ghost sm" onClick={() => setModifier(m => m + 1)}>+</button>
+                </div>
+              </div>
+              <div>
+                <div className="eyebrow" style={{ marginBottom: 6 }}>Edge / Bane</div>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 4 }}>
+                  {[
+                    { v: "doubleBane", label: "−−", color: "blood" },
+                    { v: "bane", label: "−", color: "blood" },
+                    { v: "none", label: "·", color: "" },
+                    { v: "edge", label: "+", color: "moss" },
+                    { v: "doubleEdge", label: "++", color: "moss" },
+                  ].map(o => (
+                    <button key={o.v} onClick={() => setEdge(o.v)}
+                      className={`btn sm ${edge === o.v ? "ember" : "ghost"}`}
+                      style={{ padding: "6px 4px", fontFamily: "var(--font-serif)", fontSize: 16, fontWeight: 600 }}>
+                      {o.label}
+                    </button>
+                  ))}
+                </div>
+                <div className="dim mono" style={{ fontSize: 10, marginTop: 6 }}>−− to ++ shifts result by ±2 / ±4</div>
+              </div>
+            </div>
+
+            <div className="rule"></div>
+
+            <div className="eyebrow" style={{ marginBottom: 6 }}>Label (optional)</div>
+            <input value={label} onChange={e => setLabel(e.target.value)} placeholder="e.g. Twin Fang vs Wakeknight"
+              style={{ width: "100%", padding: "8px 12px", background: "var(--bg-0)", border: "1px solid var(--line)", borderRadius: 4, color: "var(--ink-0)", fontSize: 13, fontFamily: "var(--font-serif)", fontStyle: "italic", outline: "none" }}/>
+          </Card>
+
+          <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+            <button className="btn ember" disabled={total === 0 || rolling} onClick={roll}
+              style={{ flex: 1, padding: "14px 20px", fontSize: 15, opacity: total === 0 ? 0.4 : 1, cursor: total === 0 ? "not-allowed" : "pointer" }}>
+              {rolling ? "Rolling…" : total === 0 ? "Pick at least one die" : `Cast ${total} ${total === 1 ? "die" : "dice"}`}
+            </button>
+            <button className="btn ghost" onClick={reset}>Reset</button>
+          </div>
+
+          <div>
+            <div className="eyebrow" style={{ marginBottom: 8 }}>Quick presets</div>
+            <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+              {presets.map(p => (
+                <button key={p.name} className="btn ghost sm" onClick={p.apply}
+                  style={{ display: "flex", flexDirection: "column", gap: 2, padding: "6px 12px", alignItems: "flex-start" }}>
+                  <span className="serif" style={{ fontSize: 13, color: "var(--ink-0)" }}>{p.name}</span>
+                  <span className="dim mono" style={{ fontSize: 10 }}>{p.desc}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Result + history */}
+        <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+          <ResultCard latest={latest} rolling={rolling}/>
+          <Card>
+            <SectionH eyebrow="Recent" title="At the table" action={history.length > 0 && (
+              <button className="btn ghost sm" onClick={() => setHistory([])}>Clear</button>
+            )}/>
+            {history.length === 0 ? (
+              <div className="muted serif italic" style={{ fontSize: 13, textAlign: "center", padding: "20px 0" }}>
+                No rolls yet. The bones are quiet.
+              </div>
+            ) : (
+              <div style={{ display: "flex", flexDirection: "column" }}>
+                {history.map(r => <HistoryRow key={r.id} r={r}/>)}
+              </div>
+            )}
+          </Card>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function DieControl({ sides, count, onInc, onDec, onClear }) {
+  const active = count > 0;
+  return (
+    <div className="card" style={{ padding: "14px 12px", background: active ? "var(--bg-2)" : "var(--bg-0)", border: active ? "1px solid var(--ember)" : "1px solid var(--line)", boxShadow: active ? "0 0 0 1px oklch(0.70 0.17 45 / 0.25), var(--shadow-glow)" : "none", transition: "all 0.15s" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+        <DieGlyph sides={sides} active={active}/>
+        <div className="serif" style={{ fontSize: 28, fontWeight: 600, color: active ? "var(--ember)" : "var(--ink-3)", fontVariantNumeric: "tabular-nums", lineHeight: 1, textShadow: active ? "0 0 12px oklch(0.70 0.17 45 / 0.5)" : "none" }}>
+          {count}
+        </div>
+      </div>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 4 }}>
+        <button className="btn ghost sm" onClick={onDec} style={{ padding: "5px 0" }}>−</button>
+        <button className="btn ghost sm" onClick={onInc} style={{ padding: "5px 0" }}>+</button>
+      </div>
+    </div>
+  );
+}
+
+function DieGlyph({ sides, active }) {
+  // Simple inline shape per die — square (d4 triangle), hex, octagon, etc.
+  const color = active ? "var(--ember)" : "var(--ink-2)";
+  const stroke = active ? "var(--ember)" : "var(--line-strong)";
+  const shapes = {
+    4: <polygon points="20,4 36,32 4,32" fill="none" stroke={stroke} strokeWidth="1.5"/>,
+    6: <rect x="6" y="6" width="28" height="28" fill="none" stroke={stroke} strokeWidth="1.5" transform="rotate(8 20 20)"/>,
+    8: <polygon points="20,4 32,12 32,28 20,36 8,28 8,12" fill="none" stroke={stroke} strokeWidth="1.5"/>,
+    10: <polygon points="20,4 36,16 28,34 12,34 4,16" fill="none" stroke={stroke} strokeWidth="1.5"/>,
+    12: <polygon points="20,3 32,9 36,22 28,33 12,33 4,22 8,9" fill="none" stroke={stroke} strokeWidth="1.5"/>,
+    20: <polygon points="20,2 36,12 36,28 20,38 4,28 4,12" fill="none" stroke={stroke} strokeWidth="1.5"/>,
+  };
+  return (
+    <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+      <svg width="36" height="36" viewBox="0 0 40 40" style={{ filter: active ? "drop-shadow(0 0 6px oklch(0.70 0.17 45 / 0.6))" : "none" }}>
+        {shapes[sides]}
+      </svg>
+      <div className="serif" style={{ fontSize: 18, fontWeight: 600, color, lineHeight: 1 }}>d{sides}</div>
+    </div>
+  );
+}
+
+function ResultCard({ latest, rolling }) {
+  if (rolling) {
+    return (
+      <Card style={{ background: "linear-gradient(135deg, var(--bg-1), var(--bg-2))", textAlign: "center", padding: "40px 20px" }}>
+        <div className="serif italic" style={{ color: "var(--ember)", fontSize: 22, animation: "ember-pulse 0.7s ease-in-out infinite" }}>The bones tumble…</div>
+      </Card>
+    );
+  }
+  if (!latest) {
+    return (
+      <Card style={{ textAlign: "center", padding: "40px 20px", background: "linear-gradient(135deg, var(--bg-1), var(--bg-2))" }}>
+        <div className="display" style={{ color: "var(--ember)", fontSize: 28, marginBottom: 8 }}>The Bones Wait</div>
+        <div className="muted serif italic" style={{ fontSize: 14 }}>Build a pool, then cast.</div>
+      </Card>
+    );
+  }
+  const tierLabel = latest.tier === 1 ? "Tier I" : latest.tier === 2 ? "Tier II" : latest.tier === 3 ? "Tier III" : null;
+  return (
+    <Card rail style={{ background: "linear-gradient(135deg, var(--bg-1), var(--bg-2))", padding: "24px 26px" }}>
+      <div className="eyebrow" style={{ marginBottom: 4 }}>{latest.label}</div>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", gap: 16, marginBottom: 16 }}>
+        <div className="serif" style={{ fontSize: 64, fontWeight: 600, color: "var(--ember)", lineHeight: 1, fontVariantNumeric: "tabular-nums", textShadow: "0 0 24px oklch(0.70 0.17 45 / 0.5)" }}>
+          {latest.total}
+        </div>
+        {tierLabel && (
+          <div style={{ textAlign: "right" }}>
+            <div className="display" style={{ color: latest.tier === 3 ? "var(--gold)" : "var(--ember)", fontSize: 22 }}>{tierLabel}</div>
+            <div className="dim mono" style={{ fontSize: 10 }}>power roll</div>
+          </div>
+        )}
+      </div>
+
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 12 }}>
+        {latest.groups.map((g, i) => (
+          <div key={i} style={{
+            display: "grid", placeItems: "center", minWidth: 36, padding: "4px 8px",
+            background: g.value === g.sides ? "oklch(0.55 0.10 140 / 0.25)" : g.value === 1 ? "oklch(0.40 0.10 25 / 0.25)" : "var(--bg-0)",
+            border: `1px solid ${g.value === g.sides ? "var(--moss)" : g.value === 1 ? "var(--blood)" : "var(--line-strong)"}`,
+            borderRadius: 4,
+          }}>
+            <div className="serif" style={{ fontSize: 18, fontWeight: 600, color: "var(--ink-0)", lineHeight: 1, fontVariantNumeric: "tabular-nums" }}>{g.value}</div>
+            <div className="dim mono" style={{ fontSize: 9, marginTop: 1 }}>d{g.sides}</div>
+          </div>
+        ))}
+        {latest.modifier !== 0 && (
+          <div style={{ display: "grid", placeItems: "center", padding: "4px 10px", background: "var(--bg-0)", border: "1px solid var(--line-strong)", borderRadius: 4 }}>
+            <div className="serif" style={{ fontSize: 18, fontWeight: 600, color: "var(--ink-1)", lineHeight: 1 }}>{latest.modifier > 0 ? `+${latest.modifier}` : latest.modifier}</div>
+            <div className="dim mono" style={{ fontSize: 9, marginTop: 1 }}>mod</div>
+          </div>
+        )}
+        {latest.edgeBonus !== 0 && (
+          <div style={{ display: "grid", placeItems: "center", padding: "4px 10px", background: latest.edgeBonus > 0 ? "oklch(0.55 0.10 140 / 0.20)" : "oklch(0.40 0.10 25 / 0.20)", border: `1px solid ${latest.edgeBonus > 0 ? "var(--moss)" : "var(--blood)"}`, borderRadius: 4 }}>
+            <div className="serif" style={{ fontSize: 18, fontWeight: 600, color: "var(--ink-0)", lineHeight: 1 }}>{latest.edgeBonus > 0 ? `+${latest.edgeBonus}` : latest.edgeBonus}</div>
+            <div className="dim mono" style={{ fontSize: 9, marginTop: 1 }}>{latest.edgeBonus > 0 ? "edge" : "bane"}</div>
+          </div>
+        )}
+      </div>
+
+      <div className="dim mono" style={{ fontSize: 10 }}>
+        {latest.whoName} · {fmtRelative(latest.ts)}
+      </div>
+    </Card>
+  );
+}
+
+function HistoryRow({ r }) {
+  const tierLabel = r.tier === 1 ? "I" : r.tier === 2 ? "II" : r.tier === 3 ? "III" : null;
+  return (
+    <div style={{ display: "grid", gridTemplateColumns: "auto 1fr auto", gap: 12, alignItems: "center", padding: "8px 0", borderBottom: "1px solid var(--line)" }}>
+      <div className="serif" style={{ fontSize: 22, fontWeight: 600, color: "var(--ember)", fontVariantNumeric: "tabular-nums", minWidth: 36, textAlign: "center" }}>{r.total}</div>
+      <div>
+        <div className="serif" style={{ fontSize: 13, color: "var(--ink-0)" }}>{r.label}</div>
+        <div className="dim mono" style={{ fontSize: 10, marginTop: 2 }}>
+          {r.groups.map((g, i) => `${i > 0 ? "+" : ""}${g.value}(d${g.sides})`).join("")}
+          {r.modifier !== 0 && (r.modifier > 0 ? `+${r.modifier}` : r.modifier)}
+          {r.edgeBonus !== 0 && (r.edgeBonus > 0 ? `+${r.edgeBonus}` : r.edgeBonus)}
+        </div>
+      </div>
+      <div style={{ textAlign: "right" }}>
+        {tierLabel && <div className="display" style={{ fontSize: 14, color: r.tier === 3 ? "var(--gold)" : "var(--ember)" }}>{tierLabel}</div>}
+        <div className="dim mono" style={{ fontSize: 9 }}>{r.whoName}</div>
+      </div>
+    </div>
+  );
+}
+
+window.DiceTab = DiceTab;
+
+</script>
+
+<script type="text/babel" data-presets="react">
+// useState/useEffect already pulled from React in ui.jsx (shared babel scope)
+
+const TWEAK_DEFAULTS = {
+  "theme": "obsidian",
+  "sheetLayout": "spread",
+  "showSigil": true
+};
+
+function App() {
+  const [tweaks, setTweak] = useTweaks(TWEAK_DEFAULTS);
+  const [tab, setTab] = useState("hub");
+  const [meId, setMeId] = useState("p1");
+  const [selectedPlayer, setSelectedPlayer] = useState("p1");
+  const [sessions, setSessions] = useState(window.SESSIONS);
+  const [characters, setCharacters] = useState(window.CHARACTERS);
+  const [media] = useState(window.MEDIA);
+  const [notes, setNotes] = useState(window.NOTES);
+
+  useEffect(() => {
+    document.documentElement.dataset.theme = tweaks.theme === "obsidian" ? "" : tweaks.theme;
+  }, [tweaks.theme]);
+
+  const setRsvp = (sessionId, playerId, value) => {
+    setSessions(s => s.map(ss => ss.id === sessionId
+      ? { ...ss, rsvps: { ...ss.rsvps, [playerId]: value } }
+      : ss
+    ));
+  };
+
+  const updateCharacter = (playerId, path, value) => {
+    setCharacters(prev => {
+      const next = { ...prev };
+      const c = { ...next[playerId] };
+      const parts = path.split(".");
+      if (parts.length === 1) {
+        c[parts[0]] = value;
+      } else {
+        const obj = { ...c[parts[0]] };
+        obj[parts[1]] = value;
+        c[parts[0]] = obj;
+      }
+      next[playerId] = c;
+      return next;
+    });
+  };
+
+  const addNote = (note) => {
+    setNotes(n => [
+      { ...note, id: "n" + Date.now(), posted: new Date().toISOString() },
+      ...n,
+    ]);
+  };
+
+  const ctx = {
+    players: window.PLAYERS,
+    characters, sessions, media, notes,
+    tab, setTab,
+    meId, setMeId,
+    selectedPlayer, setSelectedPlayer,
+    setRsvp, updateCharacter, addNote,
+    sheetLayout: tweaks.sheetLayout,
+  };
+
+  const me = window.PLAYERS.find(p => p.id === meId);
+
+  return (
+    <AppContext.Provider value={ctx}>
+      <header className="topnav">
+        <div className="topnav-inner">
+          <div className="brand">
+            {tweaks.showSigil && <div className="brand-sigil"></div>}
+            <div>
+              <div className="brand-name">The Respite</div>
+              <div className="brand-tag">— A place to recover for weary adventurers —</div>
+            </div>
+          </div>
+          <nav className="tabs">
+            {[
+              { id: "hub", label: "Hub" },
+              { id: "events", label: "Events" },
+              { id: "characters", label: "Characters" },
+              { id: "media", label: "Media" },
+              { id: "notes", label: "Notes" },
+              { id: "dice", label: "Dice" },
+            ].map(t => (
+              <button key={t.id}
+                className={`tab ${tab === t.id ? "active" : ""}`}
+                onClick={() => setTab(t.id)}>
+                {t.label}
+              </button>
+            ))}
+          </nav>
+          <div className="user-chip" title="Switch profile" onClick={() => {
+            const list = window.PLAYERS;
+            const idx = list.findIndex(p => p.id === meId);
+            setMeId(list[(idx + 1) % list.length].id);
+          }}>
+            <Avatar player={me}/>
+            <div style={{ fontSize: 12, lineHeight: 1.2 }}>
+              <div className="serif" style={{ color: "var(--ink-0)", fontWeight: 600 }}>{me.name}</div>
+              <div className="dim" style={{ fontSize: 10 }}>{me.role}</div>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <main>
+        {tab === "hub" && <Hub/>}
+        {tab === "events" && <EventsTab/>}
+        {tab === "characters" && <CharactersTab/>}
+        {tab === "media" && <MediaTab/>}
+        {tab === "notes" && <NotesTab/>}
+        {tab === "dice" && <DiceTab/>}
+      </main>
+
+      <footer style={{ textAlign: "center", padding: "40px 20px 60px", color: "var(--ink-3)" }}>
+        <div className="flourish" style={{ maxWidth: 380, margin: "0 auto" }}>The fire keeps</div>
+        <div className="dim mono" style={{ fontSize: 10, marginTop: 14 }}>
+          THE RESPITE · A DRAWSTEEL COMPANION · BUILT FOR THE PARTY OF FIVE
+        </div>
+      </footer>
+
+      <TweaksPanel title="Tweaks">
+        <TweakSection title="Theme">
+          <TweakSelect
+            label="Aesthetic"
+            value={tweaks.theme}
+            onChange={v => setTweak("theme", v)}
+            options={[
+              { value: "obsidian", label: "Obsidian & ember (default)" },
+              { value: "inn", label: "Inn at dusk" },
+              { value: "arcane", label: "Arcane tome" },
+              { value: "wild", label: "Wilderness camp" },
+            ]}
+          />
+          <TweakToggle
+            label="Show brand sigil"
+            value={tweaks.showSigil}
+            onChange={v => setTweak("showSigil", v)}
+          />
+        </TweakSection>
+        <TweakSection title="Character sheet">
+          <TweakRadio
+            label="Layout"
+            value={tweaks.sheetLayout}
+            onChange={v => setTweak("sheetLayout", v)}
+            options={[
+              { value: "spread", label: "Spread" },
+              { value: "stacked", label: "Stacked" },
+            ]}
+          />
+        </TweakSection>
+        <TweakSection title="Profile">
+          <TweakSelect
+            label="Viewing as"
+            value={meId}
+            onChange={setMeId}
+            options={window.PLAYERS.map(p => ({ value: p.id, label: `${p.name} (${p.role})` }))}
+          />
+        </TweakSection>
+      </TweaksPanel>
+    </AppContext.Provider>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+</script>
+</body>
+</html>
