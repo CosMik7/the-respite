@@ -467,9 +467,11 @@ input, textarea, select {
 
 /* Resource pip / track */
 .pip-track {
-  display: inline-flex;
+  display: flex;
+  flex-wrap: wrap;
   gap: 4px;
 }
+.pip-track .pip { flex: 0 0 auto; }
 .pip {
   width: 14px;
   height: 14px;
@@ -1281,7 +1283,7 @@ function EditPill({ tone, value, onChange, prefix = "", suffix = "", placeholder
 }
 
 // ----- Tiny inline +/- control (max/current adjusters; editor-only) -----
-function MaxControl({ value, onChange, label = "Max", min = 0, style = {} }) {
+function MaxControl({ value, onChange, label = "Max", min = 0, max = Infinity, style = {} }) {
   const canEdit = useCanEdit();
   if (!canEdit) return null;
   return (
@@ -1291,7 +1293,7 @@ function MaxControl({ value, onChange, label = "Max", min = 0, style = {} }) {
         onClick={() => onChange(Math.max(min, value - 1))}>−</button>
       <span style={{ color: "var(--ink-1)", minWidth: 14, textAlign: "center" }}>{value}</span>
       <button className="btn ghost sm" style={{ padding: "0 5px", borderRadius: 3 }}
-        onClick={() => onChange(value + 1)}>+</button>
+        onClick={() => onChange(Math.min(max, value + 1))}>+</button>
     </div>
   );
 }
@@ -2605,7 +2607,7 @@ function SheetSpread({ character: c, updateCharacter, player }) {
                 </div>
                 <PipTrack current={c.resource.current} max={c.resource.max}
                   onChange={v => set("resource.current", v)}/>
-                <MaxControl label="Max" value={c.resource.max} style={{ marginTop: 6 }}
+                <MaxControl label="Max" value={c.resource.max} max={30} style={{ marginTop: 6 }}
                   onChange={v => set("resource.max", v)}/>
               </div>
               <SurgesTile c={c} set={set}/>
@@ -2712,7 +2714,7 @@ function SheetStacked({ character: c, updateCharacter, player }) {
                 <Editable value={c.resource.name} onChange={v => set("resource.name", v)} placeholder="Resource"/>
               </div>
               <PipTrack current={c.resource.current} max={c.resource.max} onChange={v => set("resource.current", v)}/>
-              <MaxControl label="Max" value={c.resource.max} style={{ marginTop: 4 }}
+              <MaxControl label="Max" value={c.resource.max} max={30} style={{ marginTop: 4 }}
                 onChange={v => set("resource.max", v)}/>
             </div>
             <div>
