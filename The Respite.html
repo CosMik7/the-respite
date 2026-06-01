@@ -4784,6 +4784,13 @@ function App() {
   const [meId, setMeId] = useState(null);
   const [selectedPlayer, setSelectedPlayer] = useState(null);
 
+  // Refs mirror auth state so the auth listener can read current values without
+  // re-subscribing, and decide whether an event needs a full reload.
+  const authStateRef = useRef("booting");
+  useEffect(() => { authStateRef.current = authState; }, [authState]);
+  const authUserIdRef = useRef(null);
+  useEffect(() => { authUserIdRef.current = authUserId; }, [authUserId]);
+
   const [players, setPlayers] = useState(window.PLAYERS);
   const [sessions, setSessions] = useState(window.SESSIONS);
   const [characters, setCharacters] = useState(window.CHARACTERS);
@@ -4885,7 +4892,14 @@ function App() {
   }, [loadAllData]);
 
   useEffect(() => {
-    const { data: { subscription } } = window._db.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = window._db.auth.onAuthStateChange((event, session) => {
+      if (!session) { handleSession(null); return; }
+      // Supabase re-fires SIGNED_IN / TOKEN_REFRESHED when the tab regains focus
+      // or the token auto-refreshes. If it's the same user we've already loaded,
+      // ignore it so we don't drop back to "Loading your world…" every time.
+      const sameUser = session.user.id === authUserIdRef.current;
+      const alreadyUp = authStateRef.current === "ready" || authStateRef.current === "loading" || authStateRef.current === "claiming";
+      if (sameUser && alreadyUp) return;
       handleSession(session);
     });
     // Check current session immediately on mount
