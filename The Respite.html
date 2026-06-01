@@ -2687,12 +2687,14 @@ function SheetStacked({ character: c, updateCharacter, player }) {
 
 function XPBar({ c, set, compact = false }) {
   const canEdit = useCanEdit();
-  const xp = c.xp || { current: 0, next: 24 };
-  const pct = Math.max(0, Math.min(100, (xp.current / xp.next) * 100));
+  const xp = c.xp || { current: 0, next: 15 };
+  const next = xp.next || 15;
+  const pct = Math.max(0, Math.min(100, (xp.current / next) * 100));
   const adjust = (delta) => {
     const v = Math.max(0, xp.current + delta);
     set("xp", { ...xp, current: v });
   };
+  const setNext = (n) => set("xp", { ...xp, next: Math.max(1, n) });
 
   return (
     <div className="card" style={{ padding: compact ? "8px 12px" : "10px 14px", background: "var(--bg-0)" }}>
@@ -2706,7 +2708,7 @@ function XPBar({ c, set, compact = false }) {
             </>
           )}
           <span className="serif" style={{ fontSize: compact ? 14 : 17, fontWeight: 600, color: "var(--ink-0)", fontVariantNumeric: "tabular-nums" }}>
-            {xp.current}<span className="dim" style={{ fontSize: compact ? 11 : 13 }}> / {xp.next}</span>
+            {xp.current}<span className="dim" style={{ fontSize: compact ? 11 : 13 }}> / {next}</span>
           </span>
         </div>
       </div>
@@ -2717,8 +2719,11 @@ function XPBar({ c, set, compact = false }) {
         }}/>
       </div>
       {!compact && (
-        <div className="dim mono" style={{ fontSize: 10, marginTop: 6 }}>
-          {xp.next - xp.current} XP to level {c.level + 1}
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 6 }}>
+          <span className="dim mono" style={{ fontSize: 10 }}>
+            {Math.max(0, next - xp.current)} XP to level {c.level + 1}
+          </span>
+          <MaxControl label="Cap" value={next} min={1} onChange={setNext}/>
         </div>
       )}
     </div>
@@ -4292,7 +4297,7 @@ function blankCharacter({ ownerId, name, pronouns, cls, avatar, playerName, hand
     cls: cls || "",
     kit: "",
     level: 1,
-    xp: { current: 0, next: 16 },
+    xp: { current: 0, next: 15 },
     victories: 0,
     surges: 0,
     portrait: "",
