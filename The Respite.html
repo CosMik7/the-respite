@@ -3712,7 +3712,7 @@ function OriginPanel({ c, set }) {
         <CultureField label="Organization" value={culture.organization} icon="◇" onChange={v => setCulture({ organization: v })}/>
         <CultureField label="Upbringing" value={culture.upbringing} icon="✦" onChange={v => setCulture({ upbringing: v })}/>
         <CultureField label="Languages" value={(culture.languages || []).join(" · ")} icon="❝"
-          onChange={v => setCulture({ languages: v.split(/[·,]/).map(x => x.trim()).filter(Boolean) })}/>
+          onChange={v => setCulture({ languages: v.split(/[·,\n]/).map(x => x.trim()).filter(Boolean) })}/>
       </div>
 
       {/* Complications */}
@@ -3774,7 +3774,7 @@ function CultureField({ label, value, icon, onChange }) {
         {label}
       </div>
       <div className="serif" style={{ fontSize: 14, color: "var(--ink-0)", lineHeight: 1.4 }}>
-        <Editable value={value} onChange={onChange} placeholder="Unknown"/>
+        <Editable multiline value={value} onChange={onChange} placeholder="Unknown"/>
       </div>
     </div>
   );
