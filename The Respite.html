@@ -1177,30 +1177,43 @@ function Avatar({ player, size = "md" }) {
 }
 
 // ----- Editable text field (inline) -----
+// Always renders as a textarea that auto-grows to fit its content, so even
+// "single-line" fields wrap long text instead of scrolling sideways. For
+// single-line fields, Enter commits (no newline); multiline keeps newlines.
 function Editable({ value, onChange, multiline = false, placeholder = "", className = "", style = {} }) {
   const canEdit = useCanEdit();
   const [v, setV] = useState(value);
+  const ref = useRef(null);
   useEffect(() => { setV(value); }, [value]);
+
+  const autosize = () => {
+    const el = ref.current;
+    if (!el) return;
+    el.style.height = "auto";
+    el.style.height = el.scrollHeight + "px";
+  };
+  useEffect(() => { if (canEdit) autosize(); }, [v, canEdit]);
 
   if (!canEdit) {
     return (
-      <span className={className} style={{ display: "inline-block", ...style }}>
+      <span className={className} style={{ display: "inline-block", whiteSpace: "pre-wrap", overflowWrap: "anywhere", ...style }}>
         {value || <span className="dim italic">{placeholder}</span>}
       </span>
     );
   }
 
   const commit = () => { if (v !== value) onChange(v); };
-  const Tag = multiline ? "textarea" : "input";
 
   return (
-    <Tag
+    <textarea
+      ref={ref}
+      rows={1}
       className={`editable ${className}`}
       value={v}
       placeholder={placeholder}
-      style={style}
-      rows={multiline ? 3 : undefined}
-      onChange={(e) => setV(e.target.value)}
+      style={{ resize: "none", overflow: "hidden", whiteSpace: "pre-wrap", overflowWrap: "anywhere", boxSizing: "border-box", ...style }}
+      onChange={(e) => { setV(e.target.value); }}
+      onInput={autosize}
       onBlur={commit}
       onKeyDown={(e) => {
         if (!multiline && e.key === "Enter") { e.preventDefault(); e.target.blur(); }
@@ -1269,13 +1282,14 @@ function EditPill({ tone, value, onChange, prefix = "", suffix = "", placeholder
       <input
         value={v}
         placeholder={placeholder}
+        size={number ? undefined : Math.max((v || "").length, (placeholder || "").length, 3)}
         onChange={e => setV(e.target.value)}
         onBlur={commit}
         onKeyDown={e => {
           if (e.key === "Enter") e.target.blur();
           if (e.key === "Escape") { setV(value); e.target.blur(); }
         }}
-        style={{ width: number ? 30 : width, background: "transparent", border: "none", borderBottom: "1px dashed var(--line)", color: "inherit", font: "inherit", padding: "0 2px", textAlign: number ? "center" : "left" }}
+        style={{ width: number ? 30 : "auto", maxWidth: "100%", background: "transparent", border: "none", borderBottom: "1px dashed var(--line)", color: "inherit", font: "inherit", padding: "0 2px", textAlign: number ? "center" : "left" }}
       />
       {suffix && <span className="dim" style={{ fontSize: 11 }}>{suffix}</span>}
     </span>
