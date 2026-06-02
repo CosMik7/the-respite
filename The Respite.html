@@ -2626,6 +2626,11 @@ function SheetSpread({ character: c, updateCharacter, player }) {
               <CounterTile label="Hero Tokens" value={c.heroTokens ?? 0} icon="●" tone="ember" onChange={v => set("heroTokens", Math.max(0, v))}/>
               <TurnTakenTile taken={c.turnTaken ?? false} onToggle={() => set("turnTaken", !c.turnTaken)}/>
             </div>
+
+            {/* Speed */}
+            <div style={{ marginTop: 12 }}>
+              <SpeedTile c={c} set={set}/>
+            </div>
           </div>
         </div>
       </Card>
@@ -2754,6 +2759,8 @@ function SheetStacked({ character: c, updateCharacter, player }) {
               </div>
             ))}
           </div>
+          <div className="rule"></div>
+          <SpeedTile c={c} set={set} compact/>
         </Card>
       </div>
       <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
@@ -2899,6 +2906,39 @@ function SurgesTile({ c, set }) {
         )}
       </div>
       <div className="dim mono" style={{ fontSize: 10, marginTop: 4 }}>+{highest} damage per surge</div>
+    </div>
+  );
+}
+
+// ----- Speed (movement types) -----
+function SpeedTile({ c, set, compact = false }) {
+  const canEdit = useCanEdit();
+  const sp = c.speed || {};
+  const setSpeed = (k, v) => set("speed", { ...sp, [k]: Math.max(0, v) });
+  const fields = [
+    { k: "run", label: "Run" },
+    { k: "climb", label: "Climb" },
+    { k: "swim", label: "Swim" },
+    { k: "fly", label: "Fly" },
+  ];
+  return (
+    <div className="card" style={{ padding: compact ? "10px 12px" : "10px 14px", background: "var(--bg-0)" }}>
+      <div className="eyebrow" style={{ marginBottom: 8 }}>Speed</div>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 8 }}>
+        {fields.map(f => {
+          const val = sp[f.k] ?? 0;
+          return (
+            <div key={f.k} style={{ textAlign: "center" }}>
+              <div className="dim mono" style={{ fontSize: 9, letterSpacing: "0.04em", textTransform: "uppercase", marginBottom: 3 }}>{f.label}</div>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 3 }}>
+                {canEdit && <button className="btn ghost sm" style={{ padding: "0 5px", borderRadius: 3, fontSize: 11, lineHeight: 1 }} onClick={() => setSpeed(f.k, val - 1)}>−</button>}
+                <span className="serif" style={{ fontSize: compact ? 16 : 20, fontWeight: 600, color: "var(--ink-0)", fontVariantNumeric: "tabular-nums", minWidth: 16 }}>{val}</span>
+                {canEdit && <button className="btn ghost sm" style={{ padding: "0 5px", borderRadius: 3, fontSize: 11, lineHeight: 1 }} onClick={() => setSpeed(f.k, val + 1)}>+</button>}
+              </div>
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }
@@ -4516,6 +4556,7 @@ function blankCharacter({ ownerId, name, pronouns, cls, avatar, playerName, hand
     kitData: { armor: "", weapon: "", stamina: "", speed: "", stability: "", melee: "", ranged: "", disengage: "", benefit: "" },
     titleList: [],
     ancestryTraits: [],
+    speed: { run: 5, climb: 0, swim: 0, fly: 0 },
     level: 1,
     xp: { current: 0, next: 15 },
     victories: 0,
