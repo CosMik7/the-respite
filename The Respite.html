@@ -3141,12 +3141,13 @@ function SkillsPerksPanel({ c, set }) {
   const skills = c.skills || [];
   const perks = c.perks || [];
   const groups = ["Crafting", "Exploration", "Interpersonal", "Intrigue", "Lore"];
+  const [newGroup, setNewGroup] = useState(groups[0]);
   const toggleEdge = (i) => {
     const next = [...skills];
     next[i] = { ...next[i], edge: !next[i].edge };
     set("skills", next);
   };
-  const addSkill = () => set("skills", [...skills, { name: "New skill", group: "Lore", edge: false }]);
+  const addSkill = () => set("skills", [...skills, { name: "New skill", group: newGroup, edge: false }]);
   const setSkill = (i, patch) => set("skills", skills.map((s, j) => j === i ? { ...s, ...patch } : s));
   const removeSkill = (i) => set("skills", skills.filter((_, j) => j !== i));
   const addPerk = () => set("perks", [...perks, { name: "New perk", text: "" }]);
@@ -3157,19 +3158,26 @@ function SkillsPerksPanel({ c, set }) {
   const setTrait = (i, patch) => set("ancestryTraits", traits.map((t, j) => j === i ? { ...t, ...patch } : t));
   const removeTrait = (i) => set("ancestryTraits", traits.filter((_, j) => j !== i));
   const renderSkillRow = (s) => (
-    <div key={s._i} style={{ display: "grid", gridTemplateColumns: "auto 1fr auto auto", gap: 10, alignItems: "center", padding: "6px 8px", borderBottom: "1px solid var(--line)" }}>
+    <div key={s._i} style={{ display: "flex", alignItems: "center", gap: 10, padding: "6px 8px", borderBottom: "1px solid var(--line)" }}>
       <button onClick={canEdit ? () => toggleEdge(s._i) : undefined} title={canEdit ? "Edge" : undefined} style={{
-        width: 18, height: 18, padding: 0,
+        width: 18, height: 18, padding: 0, flexShrink: 0,
         border: `1.5px solid ${s.edge ? "var(--ember)" : "var(--line-strong)"}`,
         background: s.edge ? "var(--ember)" : "transparent",
         borderRadius: 3, cursor: canEdit ? "pointer" : "default",
         color: "var(--bg-0)", fontSize: 11, fontWeight: 700, lineHeight: 1,
         boxShadow: s.edge ? "0 0 6px var(--ember-glow)" : "none",
       }}>{s.edge ? "✓" : ""}</button>
-      <span className="serif" style={{ fontSize: 14, color: "var(--ink-0)" }}>
+      <span className="serif" style={{ fontSize: 14, color: "var(--ink-0)", flex: 1, minWidth: 0 }}>
         <Editable value={s.name} onChange={v => setSkill(s._i, { name: v })} placeholder="Skill"/>
       </span>
-      <span className="mono" style={{ fontSize: 9, color: s.edge ? "var(--ember)" : "var(--ink-2)", letterSpacing: "0.06em", textTransform: "uppercase" }}>{s.edge ? "Edge" : "Trained"}</span>
+      {canEdit && (
+        <select value={groups.includes(s.group) ? s.group : ""} onChange={e => setSkill(s._i, { group: e.target.value })}
+          className="btn ghost sm" style={{ fontSize: 11, padding: "2px 4px", flexShrink: 0 }}>
+          {!groups.includes(s.group) && <option value="">—</option>}
+          {groups.map(g => <option key={g} value={g}>{g}</option>)}
+        </select>
+      )}
+      <span className="mono" style={{ fontSize: 9, color: s.edge ? "var(--ember)" : "var(--ink-2)", letterSpacing: "0.06em", textTransform: "uppercase", flexShrink: 0 }}>{s.edge ? "Edge" : "Trained"}</span>
       <RemoveBtn onClick={() => removeSkill(s._i)}/>
     </div>
   );
@@ -3179,7 +3187,16 @@ function SkillsPerksPanel({ c, set }) {
       <div style={{ display: "grid", gridTemplateColumns: "1.4fr 1fr", gap: 24 }}>
         <div>
           <div className="flourish" style={{ justifyContent: "space-between", marginBottom: 10 }}>
-            <span>Skills</span><AddBtn label="+ Skill" onClick={addSkill}/>
+            <span>Skills</span>
+            {canEdit && (
+              <span style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                <select value={newGroup} onChange={e => setNewGroup(e.target.value)}
+                  className="btn ghost sm" style={{ fontSize: 11, padding: "2px 6px" }}>
+                  {groups.map(g => <option key={g} value={g}>{g}</option>)}
+                </select>
+                <button className="btn ghost sm" onClick={addSkill}>+ Skill</button>
+              </span>
+            )}
           </div>
           {skills.length === 0 ? (
             <div className="muted italic serif" style={{ fontSize: 14, padding: "12px 0" }}>No trained skills.</div>
