@@ -2627,6 +2627,15 @@ function SheetSpread({ character: c, updateCharacter, player }) {
               <SurgesTile c={c} set={set}/>
             </div>
 
+            {/* Resource rules */}
+            <div className="card" style={{ padding: "10px 14px", background: "var(--bg-0)", marginTop: 12 }}>
+              <div className="eyebrow" style={{ marginBottom: 6 }}>Resource Rules</div>
+              <div style={{ fontSize: 13, color: "var(--ink-1)", lineHeight: 1.5 }}>
+                <Editable multiline value={c.resource.rules} onChange={v => set("resource.rules", v)}
+                  placeholder="How this resource is gained and spent…"/>
+              </div>
+            </div>
+
             {/* XP + Victories strip */}
             <div style={{ display: "grid", gridTemplateColumns: "1.6fr 1fr", gap: 16, marginTop: 16 }}>
               <XPBar c={c} set={set}/>
@@ -2743,6 +2752,12 @@ function SheetStacked({ character: c, updateCharacter, player }) {
                 +{(() => { const v = Object.values(c.characteristics || {}); return v.length ? Math.max(...v) : 0; })()} dmg/surge
               </div>
             </div>
+          </div>
+          <div className="rule"></div>
+          <div className="eyebrow" style={{ marginBottom: 4 }}>Resource Rules</div>
+          <div style={{ fontSize: 12, color: "var(--ink-1)", lineHeight: 1.45 }}>
+            <Editable multiline value={c.resource.rules} onChange={v => set("resource.rules", v)}
+              placeholder="How this resource is gained and spent…"/>
           </div>
           <div className="rule"></div>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
@@ -4594,7 +4609,7 @@ function blankCharacter({ ownerId, name, pronouns, cls, avatar, playerName, hand
     portraitTint: av,
     titles: [""],
     stamina: { current: 20, max: 20, recoveries: { current: 8, max: 8, value: 6 } },
-    resource: { name: "Resource", current: 0, max: 0 },
+    resource: { name: "Resource", current: 0, max: 0, rules: "" },
     characteristics: { Might: 0, Agility: 0, Reason: 0, Intuition: 0, Presence: 0 },
     abilities: [],
     features: [],
