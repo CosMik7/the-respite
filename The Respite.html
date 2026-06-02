@@ -3351,7 +3351,7 @@ function TitlesPanel({ c, set }) {
       {titles.length === 0 ? (
         <div className="muted italic serif" style={{ fontSize: 14, padding: "20px 0", textAlign: "center" }}>No titles earned yet.</div>
       ) : (
-        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 10, alignItems: "start" }}>
           {titles.map((t, i) => (
             <div key={i} style={{ padding: "12px 14px", border: "1px solid var(--line)", borderLeft: "2px solid var(--gold)", background: "var(--bg-2)", borderRadius: "0 6px 6px 0" }}>
               <div style={{ display: "flex", justifyContent: "space-between", gap: 8, marginBottom: 4 }}>
