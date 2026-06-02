@@ -2601,6 +2601,7 @@ function SheetSpread({ character: c, updateCharacter, player }) {
                 <EditPill tone="ember" prefix="Level " value={c.level} onChange={v => set("level", v)} number/>
                 <EditPill tone="race" value={c.ancestry} onChange={v => set("ancestry", v)} placeholder="Ancestry"/>
                 <EditPill value={c.cls} onChange={v => set("cls", v)} placeholder="Class"/>
+                <EditPill value={c.subclass} onChange={v => set("subclass", v)} placeholder="Subclass"/>
                 <EditPill tone="gold" value={c.career} onChange={v => set("career", v)} placeholder="Career"/>
                 <EditPill tone="gold" suffix=" kit" value={c.kit} onChange={v => set("kit", v)} placeholder="Kit"/>
               </div>
@@ -2750,6 +2751,7 @@ function SheetStacked({ character: c, updateCharacter, player }) {
               <EditPill tone="ember" prefix="L" value={c.level} onChange={v => set("level", v)} number/>
               <EditPill tone="race" value={c.ancestry} onChange={v => set("ancestry", v)} placeholder="Ancestry"/>
               <EditPill value={c.cls} onChange={v => set("cls", v)} placeholder="Class"/>
+              <EditPill value={c.subclass} onChange={v => set("subclass", v)} placeholder="Subclass"/>
               <EditPill tone="gold" value={c.career} onChange={v => set("career", v)} placeholder="Career"/>
               <EditPill tone="gold" suffix=" kit" value={c.kit} onChange={v => set("kit", v)} placeholder="Kit"/>
             </div>
@@ -4668,6 +4670,7 @@ function blankCharacter({ ownerId, name, pronouns, cls, avatar, playerName, hand
     careerData: { benefits: "", skills: [], perk: "", incident: "" },
     culture: { languages: [], environment: "", environmentBenefit: "", organization: "", organizationBenefit: "", upbringing: "", upbringingBenefit: "", complications: [] },
     cls: cls || "",
+    subclass: "",
     kit: "",
     kitData: { armor: "", weapon: "", stamina: "", speed: "", stability: "", melee: "", ranged: "", disengage: "", benefit: "" },
     titleList: [],
