@@ -3708,9 +3708,15 @@ function OriginPanel({ c, set }) {
       {/* Culture & Backgrounds */}
       <div className="flourish" style={{ justifyContent: "flex-start", marginBottom: 14 }}>Culture & Backgrounds</div>
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 16 }}>
-        <CultureField label="Environment" value={culture.environment} icon="◐" onChange={v => setCulture({ environment: v })}/>
-        <CultureField label="Organization" value={culture.organization} icon="◇" onChange={v => setCulture({ organization: v })}/>
-        <CultureField label="Upbringing" value={culture.upbringing} icon="✦" onChange={v => setCulture({ upbringing: v })}/>
+        <CultureField label="Environment" value={culture.environment} icon="◐"
+          onChange={v => setCulture({ environment: v })}
+          benefit={culture.environmentBenefit} onBenefitChange={v => setCulture({ environmentBenefit: v })}/>
+        <CultureField label="Organization" value={culture.organization} icon="◇"
+          onChange={v => setCulture({ organization: v })}
+          benefit={culture.organizationBenefit} onBenefitChange={v => setCulture({ organizationBenefit: v })}/>
+        <CultureField label="Upbringing" value={culture.upbringing} icon="✦"
+          onChange={v => setCulture({ upbringing: v })}
+          benefit={culture.upbringingBenefit} onBenefitChange={v => setCulture({ upbringingBenefit: v })}/>
         <CultureField label="Languages" value={(culture.languages || []).join(" · ")} icon="❝"
           onChange={v => setCulture({ languages: v.split(/[·,\n]/).map(x => x.trim()).filter(Boolean) })}/>
       </div>
@@ -3761,7 +3767,7 @@ function OriginPanel({ c, set }) {
   );
 }
 
-function CultureField({ label, value, icon, onChange }) {
+function CultureField({ label, value, icon, onChange, benefit, onBenefitChange }) {
   return (
     <div style={{
       padding: "10px 14px",
@@ -3776,6 +3782,14 @@ function CultureField({ label, value, icon, onChange }) {
       <div className="serif" style={{ fontSize: 14, color: "var(--ink-0)", lineHeight: 1.4 }}>
         <Editable multiline value={value} onChange={onChange} placeholder="Unknown"/>
       </div>
+      {onBenefitChange && (
+        <div style={{ marginTop: 8, paddingTop: 8, borderTop: "1px solid var(--line)" }}>
+          <div className="dim mono" style={{ fontSize: 9, letterSpacing: "0.06em", textTransform: "uppercase", marginBottom: 3, color: "var(--moss)" }}>Benefit</div>
+          <div style={{ fontSize: 13, color: "var(--ink-1)", lineHeight: 1.45 }}>
+            <Editable multiline value={benefit} onChange={onBenefitChange} placeholder="What it grants…"/>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -4565,7 +4579,7 @@ function blankCharacter({ ownerId, name, pronouns, cls, avatar, playerName, hand
     ancestry: "",
     career: "",
     careerData: { benefits: "", skills: [], perk: "", incident: "" },
-    culture: { languages: [], environment: "", organization: "", upbringing: "", complications: [] },
+    culture: { languages: [], environment: "", environmentBenefit: "", organization: "", organizationBenefit: "", upbringing: "", upbringingBenefit: "", complications: [] },
     cls: cls || "",
     kit: "",
     kitData: { armor: "", weapon: "", stamina: "", speed: "", stability: "", melee: "", ranged: "", disengage: "", benefit: "" },
