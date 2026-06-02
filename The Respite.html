@@ -239,6 +239,10 @@ input, textarea, select {
 .pill.race::before { content: "⚜"; margin-right: 4px; opacity: 0.7; font-size: 0.85em; }
 .pill.dot::before { content: ""; width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
 
+/* Character-sheet identity pills (level / ancestry / class / subclass / career / kit) — larger */
+.id-pills .pill { font-size: 22px; padding: 5px 13px; }
+.id-pills .pill input { font-size: 22px; }
+
 /* Section heading */
 .section-h {
   display: flex;
@@ -1310,7 +1314,7 @@ function EditPill({ tone, value, onChange, prefix = "", suffix = "", placeholder
   };
   return (
     <span className="pill" style={{ display: "inline-flex", alignItems: "center", gap: 3, padding: "2px 8px" }}>
-      {prefix && <span className="dim" style={{ fontSize: 11 }}>{prefix}</span>}
+      {prefix && <span className="dim" style={{ fontSize: "0.8em" }}>{prefix}</span>}
       <input
         value={v}
         placeholder={placeholder}
@@ -1323,7 +1327,7 @@ function EditPill({ tone, value, onChange, prefix = "", suffix = "", placeholder
         }}
         style={{ width: number ? 30 : "auto", maxWidth: "100%", background: "transparent", border: "none", borderBottom: "1px dashed var(--line)", color: "inherit", font: "inherit", padding: "0 2px", textAlign: number ? "center" : "left" }}
       />
-      {suffix && <span className="dim" style={{ fontSize: 11 }}>{suffix}</span>}
+      {suffix && <span className="dim" style={{ fontSize: "0.8em" }}>{suffix}</span>}
     </span>
   );
 }
@@ -2597,7 +2601,7 @@ function SheetSpread({ character: c, updateCharacter, player }) {
                   <Editable value={c.pronouns} onChange={v => set("pronouns", v)} placeholder="pronouns"/> · played by {player.name}
                 </div>
               </div>
-              <div style={{ display: "flex", gap: 8, flexWrap: "wrap", justifyContent: "flex-end" }}>
+              <div className="id-pills" style={{ display: "flex", gap: 8, flexWrap: "wrap", justifyContent: "flex-end" }}>
                 <EditPill tone="ember" prefix="Level " value={c.level} onChange={v => set("level", v)} number/>
                 <EditPill tone="race" value={c.ancestry} onChange={v => set("ancestry", v)} placeholder="Ancestry"/>
                 <EditPill value={c.cls} onChange={v => set("cls", v)} placeholder="Class"/>
@@ -2747,7 +2751,7 @@ function SheetStacked({ character: c, updateCharacter, player }) {
             <div className="dim" style={{ fontSize: 12, marginBottom: 10 }}>
               <Editable value={c.pronouns} onChange={v => set("pronouns", v)} placeholder="pronouns"/> · {player.name}
             </div>
-            <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+            <div className="id-pills" style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
               <EditPill tone="ember" prefix="L" value={c.level} onChange={v => set("level", v)} number/>
               <EditPill tone="race" value={c.ancestry} onChange={v => set("ancestry", v)} placeholder="Ancestry"/>
               <EditPill value={c.cls} onChange={v => set("cls", v)} placeholder="Class"/>
